@@ -244,7 +244,7 @@ class CliVariants:
         ``CliVariants( ['new cli1', 'new cli2'], 'alt cli3', 'legacy cli4' )``
     """
     @staticmethod
-    def expand( cmds ):
+    def expand(cmds):
         """ Expands cmds argument into a list of all CLI variants
 
         The method returns a list of all full variant combinations present
@@ -260,22 +260,23 @@ class CliVariants:
         """
         assert isinstance(cmds, list), 'argument cmds must be list type'
         if not cmds:
-            return [ [] ]
+            return [[]]
         head = cmds[0]
         tail = cmds[1:]
-        if isinstance( head, CliVariants ):
-            return [ v + e for v in head.variants
-                for e in CliVariants.expand( tail ) ]
+        if isinstance(head, CliVariants):
+            return [v + e for v in head.variants
+                    for e in CliVariants.expand(tail)]
         else:
-            return [ [head] + e for e in CliVariants.expand(tail) ]
+            return [[head] + e for e in CliVariants.expand(tail)]
 
     def __init__(self, *cli):
-        assert len( cli ) >= 2, 'must be initialized with 2 or more arguments'
-        self.variants = [ v if not isinstance(v,
-            str) and isinstance(v, Iterable) else [v] for v in cli ]
+        assert len(cli) >= 2, 'must be initialized with 2 or more arguments'
+        self.variants = [v if not isinstance(v,
+                         str) and isinstance(v, Iterable) else [v] for v
+                         in cli]
 
 
-def _interpolate_docstr( *tkns ):
+def _interpolate_docstr(*tkns):
     """Docstring decorator.
     SYNOPSIS:
 
@@ -290,16 +291,16 @@ def _interpolate_docstr( *tkns ):
          print( mtu_check.__doc__ )
          check mtu against its min value (68) and max value (65535)
     """
-    def docstr_decorator( user_fn ):
+    def docstr_decorator(user_fn):
         """update user_fn_wrapper doc string with the interpolated user_fn's
         """
-        def user_fn_wrapper( *args, **kwargs ):
-            return user_fn( *args, **kwargs )
-        module = sys.modules[ user_fn.__module__ ]
+        def user_fn_wrapper(*args, **kwargs):
+            return user_fn(*args, **kwargs)
+        module = sys.modules[user_fn.__module__]
         docstr = user_fn.__doc__
         for tkn in tkns:
-            sval = str( getattr(module, tkn) )
-            docstr = docstr.replace( tkn, sval )
+            sval = str(getattr(module, tkn))
+            docstr = docstr.replace(tkn, sval)
         user_fn_wrapper.__doc__ = docstr
         return user_fn_wrapper
     return docstr_decorator

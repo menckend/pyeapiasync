@@ -31,8 +31,9 @@
 #
 """Module for working with EOS routemap resources asynchronously
 
-The RoutemapAsync resource provides configuration management of global route-map
-resources on an EOS node asynchronously. It provides the following class implementations:
+The RoutemapAsync resource provides configuration management of global
+route-map resources on an EOS node asynchronously. It provides
+the following class implementations:
 
     * RoutemapsAsync - Configures routemaps in EOS asynchronously
 
@@ -48,10 +49,12 @@ from pyeapi.api import EntityCollectionAsync
 
 
 class RoutemapsAsync(EntityCollectionAsync):
-    """The RoutemapsAsync class provides management of the routemaps configuration asynchronously
+    """The RoutemapsAsync class provides management of routemaps
+    configuration asynchronously
 
-    The RoutemapsAsync class is derived from EntityCollectionAsync and provides an API for working
-    with the nodes routemaps configuraiton asynchronously.
+    The RoutemapsAsync class is derived from EntityCollectionAsync and
+    provides an API for working with the nodes routemaps configuraiton
+    asynchronously.
     """
 
     async def get(self, name):
@@ -120,7 +123,7 @@ class RoutemapsAsync(EntityCollectionAsync):
             resource = dict()
             action, seqno = entry
             routemap = await self.get_block(r'route-map\s%s\s%s\s%s'
-                                           % (name, action, seqno))
+                                            % (name, action, seqno))
 
             resource = dict(name=name, action=action, seqno=seqno, attr=dict())
             resource['attr'].update(self._parse_match_statements(routemap))
@@ -184,7 +187,8 @@ class RoutemapsAsync(EntityCollectionAsync):
             True if the routemap could be created otherwise False (see Note)
 
         """
-        return await self.configure('route-map %s %s %s' % (name, action, seqno))
+        return await self.configure('route-map %s %s %s' % (name, action,
+                                                            seqno))
 
     async def delete(self, name, action, seqno):
         """Deletes the routemap from the node asynchronously
@@ -203,7 +207,8 @@ class RoutemapsAsync(EntityCollectionAsync):
             True if the routemap could be deleted otherwise False (see Node)
 
         """
-        return await self.configure('no route-map %s %s %s' % (name, action, seqno))
+        return await self.configure('no route-map %s %s %s' % (name, action,
+                                                               seqno))
 
     async def default(self, name, action, seqno):
         """Defaults the routemap on the node asynchronously
@@ -226,14 +231,14 @@ class RoutemapsAsync(EntityCollectionAsync):
 
         """
         return await self.configure('default route-map %s %s %s'
-                              % (name, action, seqno))
+                                    % (name, action, seqno))
 
     async def set_match_statements(self, name, action, seqno, statements):
-        """Configures the match statements within the routemap clause asynchronously.
-        The final configuration of match statements will reflect the list
-        of statements passed into the statements attribute. This implies
-        match statements found in the routemap that are not specified in the
-        statements attribute will be removed.
+        """Configures the match statements within the routemap clause
+        asynchronously. The final configuration of match statements will
+        reflect the list of statements passed into the statements attribute.
+        This implies match statements found in the routemap that are not
+        specified in the statements attribute will be removed.
 
         Args:
             name (string): The full name of the routemap.
@@ -267,11 +272,12 @@ class RoutemapsAsync(EntityCollectionAsync):
         return await self.configure(commands) if commands else True
 
     async def set_set_statements(self, name, action, seqno, statements):
-        """Configures the set statements within the routemap clause asynchronously.
-        The final configuration of set statements will reflect the list
-        of statements passed into the statements attribute. This implies
-        set statements found in the routemap that are not specified in the
-        statements attribute will be removed.
+        """Configures the set statements within the routemap clause
+        asynchronously. The final configuration of set statements will
+        reflect the list of statements passed into the statements
+        attribute. This implies set statements found in the routemap
+        that are not specified in the statements attribute will be
+        removed.
 
         Args:
             name (string): The full name of the routemap.
@@ -303,8 +309,8 @@ class RoutemapsAsync(EntityCollectionAsync):
 
         return await self.configure(commands) if commands else True
 
-    async def set_continue(self, name, action, seqno, value=None, default=False,
-                          disable=False):
+    async def set_continue(self, name, action, seqno, value=None,
+                           default=False, disable=False):
         """Configures the routemap continue value asynchronously
 
         Args:
@@ -331,8 +337,8 @@ class RoutemapsAsync(EntityCollectionAsync):
 
         return await self.configure(commands)
 
-    async def set_description(self, name, action, seqno, value=None, default=False,
-                             disable=False):
+    async def set_description(self, name, action, seqno, value=None,
+                              default=False, disable=False):
         """Configures the routemap description asynchronously
 
         Args:

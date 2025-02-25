@@ -65,6 +65,7 @@ class BaseEntityAsync(object):
     Args:
         node (AsyncNode): An instance of AsyncNode
     """
+
     def __init__(self, node):
         self.node = node
         self._running_config = None

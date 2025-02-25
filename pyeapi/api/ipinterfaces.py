@@ -57,9 +57,9 @@ IP_MTU_MAX = 65535
 SWITCHPORT_RE = re.compile(r'no switchport$', re.M)
 
 
-class Ipinterfaces( EntityCollection ):
+class Ipinterfaces(EntityCollection):
 
-    def get( self, name ):
+    def get(self, name):
         """Returns the specific IP interface properties
 
         The Ipinterface resource returns the following:
@@ -81,17 +81,16 @@ class Ipinterfaces( EntityCollection ):
                 the current configuration of the node.  If the specified
                 interface does not exist then None is returned.
         """
-        config = self.get_block( 'interface %s' % name )
-        if name[ 0:2 ] in [
-                'Et', 'Po' ] and not SWITCHPORT_RE.search( config, re.M ):
+        config = self.get_block('interface %s' % name)
+        if name[0:2] in ['Et', 'Po'] and not SWITCHPORT_RE.search(config, re.M):
             return None
 
-        resource = dict( name=name )
-        resource.update( self._parse_address(config) )
-        resource.update( self._parse_mtu(config) )
+        resource = dict(name=name)
+        resource.update(self._parse_address(config))
+        resource.update(self._parse_mtu(config))
         return resource
 
-    def _parse_address( self, config ):
+    def _parse_address(self, config):
         """Parses the config block and returns the ip address value
 
         The provided configuration block is scanned and the configured value
@@ -104,11 +103,11 @@ class Ipinterfaces( EntityCollection ):
         Return:
             dict: A dict object intended to be merged into the resource dict
         """
-        match = re.findall( r'ip address ([^\s]+)', config, re.M )
-        primary, secondary = ( match[0],
-                match[1:] ) if match else ( None, None )
-        return dict( address=primary,
-         secondary=secondary ) if secondary else dict( address=primary )
+        match = re.findall(r'ip address ([^\s]+)', config, re.M)
+        primary, secondary = (match[0],
+                               match[1:]) if match else (None, None)
+        return dict(address=primary,
+                    secondary=secondary) if secondary else dict(address=primary)
 
     def _parse_mtu(self, config):
         """Parses the config block and returns the configured IP MTU value
@@ -124,7 +123,7 @@ class Ipinterfaces( EntityCollection ):
             dict: A dict object intended to be merged into the resource dict
         """
         match = re.search(r'mtu (\d+)', config)
-        return dict( mtu=int(match.group( 1 )) if match else None )
+        return dict(mtu=int(match.group(1)) if match else None)
 
     def getall(self):
         """ Returns all of the IP interfaces found in the running-config
@@ -218,7 +217,7 @@ class Ipinterfaces( EntityCollection ):
                                              default=default, disable=disable))
         return self.configure(commands)
 
-    @_interpolate_docstr( 'IP_MTU_MIN', 'IP_MTU_MAX' )
+    @_interpolate_docstr('IP_MTU_MIN', 'IP_MTU_MAX')
     def set_mtu(self, name, value=None, default=False, disable=False):
         """ Configures the interface IP MTU
 

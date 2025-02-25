@@ -44,25 +44,26 @@ from pyeapi.utils import make_iterable
 
 
 class SwitchportsAsync(EntityCollectionAsync):
-    """The SwitchportsAsync class provides a configuration resource for swichports asynchronously
+    """The SwitchportsAsync class provides configuration
+    resources for switchports asynchronously
 
     Logical layer 2 interfaces built on top of physical Ethernet and bundled
     Port-Channel interfaces can be configured and managed with an instance
-    of SwitchportsAsync. The SwitchportsAsync class is a resource collection and
-    supports get and getall methods. The SwitchportsAsync class is derived from
-    the EntityCollectionAsync class
+    of SwitchportsAsync. The SwitchportsAsync class is a resource collection
+    and supports get and getall methods. The SwitchportsAsync class is
+    derived from the EntityCollectionAsync class
 
     """
 
     async def get(self, name):
-        """Returns a dictionary object that represents a switchport asynchronously
+        """Returns a dictionary object that represents a switchport async
 
         The Switchport resource returns the following:
 
             * name (str): The name of the interface
             * mode (str): The switchport mode value
             * access_vlan (str): The switchport access vlan value
-            * trunk_native_vlan (str): The switchport trunk native vlan vlaue
+            * trunk_native_vlan (str): The switchport trunk native vlan value
             * trunk_allowed_vlans (str): The trunk allowed vlans value
             * trunk_groups (list): The list of trunk groups configured
 
@@ -72,7 +73,7 @@ class SwitchportsAsync(EntityCollectionAsync):
 
         Returns:
             dict: A Python dictionary object of key/value pairs that represent
-                the switchport configuration for the interface specified  If
+                the switchport configuration for the interface specified. If
                 the specified argument is not a switchport then None
                 is returned
         """
@@ -166,7 +167,10 @@ class SwitchportsAsync(EntityCollectionAsync):
             A Python dictionary object that represents all configured
                 switchports in the current running configuration
         """
-        interfaces_re = re.compile(r'(?<=^interface\s)([Et|Po][^.\s]+)$', re.M)
+        interfaces_re = re.compile(
+            r'(?<=^interface\s)'
+            r'((?:Et|Po)[^.\s]+)$',
+            re.M)
         config = await self.config
 
         response = dict()
@@ -190,7 +194,7 @@ class SwitchportsAsync(EntityCollectionAsync):
                 Et1)
 
         Returns:
-            True if the create operation succeeds otherwise False.  If the
+            True if the create op succeeds otherwise False. If the
                 interface specified in args is already a switchport then this
                 method will have no effect but will still return True
         """
@@ -202,7 +206,7 @@ class SwitchportsAsync(EntityCollectionAsync):
         """Deletes the logical layer 2 interface asynchronously
 
         This method will delete the logical switchport for the interface
-        specified in the arguments.  If the interface doe not have a logical
+        specified in the arguments. If the interface does not have a logical
         layer 2 interface defined, then this method will have no effect.
 
         Args:
@@ -220,7 +224,8 @@ class SwitchportsAsync(EntityCollectionAsync):
         return await self.configure(commands)
 
     async def default(self, name):
-        """Defaults the configuration of the switchport interface asynchronously
+        """Defaults the configuration of the switchport interface
+         asynchronously
 
         This method will default the configuration state of the logical
         layer 2 interface.
@@ -261,11 +266,13 @@ class SwitchportsAsync(EntityCollectionAsync):
             True if the create operation succeeds otherwise False.
         """
         string = 'switchport mode'
-        command = self.command_builder(string, value=value, default=default,
-                                       disable=disable)
+        command = self.command_builder(
+            string, value=value,
+            default=default, disable=disable)
         return await self.configure_interface(name, command)
 
-    async def set_access_vlan(self, name, value=None, default=False, disable=False):
+    async def set_access_vlan(self, name, value=None, default=False,
+                              disable=False):
         """Configures the switchport access vlan asynchronously
 
         Args:
@@ -286,12 +293,13 @@ class SwitchportsAsync(EntityCollectionAsync):
             True if the create operation succeeds otherwise False.
         """
         string = 'switchport access vlan'
-        command = self.command_builder(string, value=value, default=default,
-                                       disable=disable)
+        command = self.command_builder(
+            string, value=value,
+            default=default, disable=disable)
         return await self.configure_interface(name, command)
 
-    async def set_trunk_native_vlan(self, name, value=None, default=False,
-                                   disable=False):
+    async def set_trunk_native_vlan(self, name, value=None,
+                                    default=False, disable=False):
         """Configures the switchport trunk native vlan value asynchronously
 
         Args:
@@ -300,7 +308,7 @@ class SwitchportsAsync(EntityCollectionAsync):
                 name and not an abbreviated interface name (eg Ethernet1, not
                 Et1)
 
-            value (string): The value to set the trunk nativevlan to.  The
+            value (string): The value to set the trunk native vlan to. The
                 value must be a valid VLAN ID in the range of 1 to 4094.
 
             default (bool): Configures the access vlan parameter to its default
@@ -316,8 +324,9 @@ class SwitchportsAsync(EntityCollectionAsync):
                                        disable=disable)
         return await self.configure_interface(name, command)
 
-    async def set_trunk_allowed_vlans(self, name, value=None, default=False,
-                                     disable=False):
+    async def set_trunk_allowed_vlans(
+            self, name, value=None,
+            default=False, disable=False):
         """Configures the switchport trunk allowed vlans value asynchronously
 
         Args:
@@ -338,11 +347,12 @@ class SwitchportsAsync(EntityCollectionAsync):
             True if the create operation succeeds otherwise False.
         """
         string = 'switchport trunk allowed vlan'
-        command = self.command_builder(string, value=value, default=default,
-                                       disable=disable)
+        command = self.command_builder(
+            string, value=value, default=default, disable=disable)
         return await self.configure_interface(name, command)
 
-    async def set_trunk_groups(self, intf, value=None, default=False, disable=False):
+    async def set_trunk_groups(self, intf, value=None, default=False,
+                               disable=False):
         """Configures the switchport trunk group value asynchronously
 
         Args:
@@ -407,8 +417,8 @@ class SwitchportsAsync(EntityCollectionAsync):
 def instance(node):
     """Returns an instance of SwitchportsAsync
 
-    This method will create and return an instance of the SwitchportsAsync object
-    passing the value of node to the instance.  The module method is
+    This method will create and return an instance of the SwitchportsAsync
+    object passing the value of node to the instance. The module method is
     required for the resource to be autoloaded by the Node object
 
     Args:

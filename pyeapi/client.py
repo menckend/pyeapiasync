@@ -110,8 +110,8 @@ from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
 from pyeapi.eapilib import CommandError
 
 # Import async versions for async support
-import asyncio
-from pyeapi.clientasync import connect_async, connect_to_async
+#import asyncio
+#from pyeapi.clientasync import connect_async, connect_to_async
 
 CONFIG_SEARCH_PATH = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
 
@@ -156,7 +156,8 @@ class Config(SafeConfigParser):
         """
         Returns all of the loaded connections names as a list
         """
-        conn = lambda x: str(x).replace('connection:', '')
+        def conn(x):
+            return str(x).replace('connection:', '')
         return [conn(name) for name in self.sections()]
 
     def autoload(self):
@@ -629,32 +630,31 @@ class Node(object):
                 output from each command.  The function will strip the
                 response from any commands it prepends.
         """
-        def variant_cli_idx( cmds ):
+        def variant_cli_idx(cmds):
             # return index of first occurrence of CliVariants type in cmds
             try:
-                return [ type(v) for v in cmds ].index( CliVariants )
+                return [type(v) for v in cmds].index(CliVariants)
             except (ValueError):
                 return -1
 
         cfg_call = self._configure_session if self._session_name \
             else self._configure_terminal
 
-        if isinstance( commands, CliVariants ):
-            commands = [ commands ]
-        idx = variant_cli_idx( commands )
+        if isinstance(commands, CliVariants):
+            commands = [commands]
+        idx = variant_cli_idx(commands)
         if idx == -1:
-            return cfg_call( commands, **kwargs )
+            return cfg_call(commands, **kwargs)
 
         # commands contain CliVariants obj, e.g.: [ '...', CliVariants, ... ]
         err = None
-        for variant in commands[ idx ].variants:
-            cmd = commands[ :idx ] + variant + commands[ idx + 1: ]
+        for variant in commands[idx].variants:
+            cmd = commands[:idx] + variant + commands[idx + 1:]
             try:
-                return cfg_call( cmd, **kwargs )
+                return cfg_call(cmd, **kwargs)
             except (CommandError) as exp:
                 err = exp
         raise err  # re-raising last occurred CommandError
-
 
     def _configure_terminal(self, commands, **kwargs):
         """Configures the node with the specified commands with leading
@@ -699,7 +699,7 @@ class Node(object):
         return response
 
     @lru_cache(maxsize=None)
-    def _chunkify( self, config, indent=0 ):
+    def _chunkify(self, config, indent=0):
         """parse device config and return a dict holding sections and
         sub-sections:
         - a section always begins with a line with zero indents,
@@ -715,46 +715,45 @@ class Node(object):
           'mac security': 'mac security\n  profile PR\n    cipher aes256-gcm',
           '   profile PR': '  profile PR\n    cipher aes256-gcm'
           ... }
-
         it's imperative that the most outer call is made with indent=0, as the
         indent parameter defines processing of nested sub-sections, i.e., if
         indent > 0, then it's a recursive call and `config` argument contains
         last parsed (sub)section, which in turn may contain sub-sections
         """
-        def is_subsection_present( section, indent ):
-            return any( line[ indent ] == ' ' for line in section )
+        def is_subsection_present(section, indent):
+            return any(line[indent] == ' ' for line in section)
 
-        def get_indent( line ):
-            return len( line ) - len( line.lstrip() )
+        def get_indent(line):
+            return len(line) - len(line.lstrip())
 
         sections = {}
         key = None
         banner = None
-        for line in config.splitlines( keepends=True )[ indent > 0: ]:
+        for line in config.splitlines(keepends=True)[indent > 0:]:
             line_rs = line.rstrip()
             if indent == 0:
                 if banner:
-                    sections[ banner ] += line
+                    sections[banner] += line
                     if line_rs == 'EOF':
                         banner = None
                     continue
-                if line.startswith( 'banner ' ):
+                if line.startswith('banner '):
                     banner = line_rs
-                    sections[ banner ] = line
+                    sections[banner] = line
                     continue
-            if get_indent( line_rs ) > indent:  # i.e. subsection line
+            if get_indent(line_rs) > indent:  # i.e. subsection line
                 # key is always expected to be set by now
-                sections[ key ] += line
+                sections[key] += line
                 continue
-            subsection = sections.get( key, '' ).splitlines()[ 1: ]
+            subsection = sections.get(key, '').splitlines()[1:]
             if subsection:
-                sub_indent = get_indent( subsection[0] )
-                if is_subsection_present( subsection, sub_indent ):
-                    parsed = self._chunkify( sections[key], indent=sub_indent )
-                    parsed.update( sections )
+                sub_indent = get_indent(subsection[0])
+                if is_subsection_present(subsection, sub_indent):
+                    parsed = self._chunkify(sections[key], indent=sub_indent)
+                    parsed.update(sections)
                     sections = parsed
             key = line_rs
-            sections[ key ] = line
+            sections[key] = line
         return sections
 
     def section(self, regex, config='running_config'):
@@ -995,7 +994,7 @@ class Node(object):
         Note: "show session-config diffs" doesn't support json encoding
         """
         response = self._configure_session(
-            ['show session-config diffs'], encoding='text' )
+            ['show session-config diffs'], encoding='text')
 
         return response[0]['output']
 

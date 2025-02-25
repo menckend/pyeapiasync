@@ -57,10 +57,12 @@ DESCRIPTION_RE = re.compile(r'(?:description\s)(?P<value>.*)$', re.M)
 
 
 class VrfsAsync(EntityCollectionAsync):
-    """The VrfsAsync class provides a configuration resource for VRFs asynchronously
+    """The VrfsAsync class provides a configuration resource for VRFs
+        asynchronously
 
-    The VrfsAsync class is derived from EntityCollectionAsync a standard set of methods
-    for working with VRF configurations on an EOS node asynchronously.
+    The VrfsAsync class is derived from EntityCollectionAsync a standard set
+        of methods for working with VRF configurations on an EOS node
+        asynchronously.
 
     """
 
@@ -133,14 +135,15 @@ class VrfsAsync(EntityCollectionAsync):
         return dict(description=value)
 
     async def getall(self):
-        """Returns a dict object of all VRFs in the running-config asynchronously
+        """Returns a dict object of all VRFs in the running-config
+            asynchronously
 
         Returns:
             A dict object of VRF attributes
 
         """
         config = await self.config
-        
+
         if self.version_number >= '4.23':
             vrfs_re = re.compile(r'(?<=^vrf instance\s)(\w+)', re.M)
         else:
@@ -245,7 +248,7 @@ class VrfsAsync(EntityCollectionAsync):
         return await self.configure_vrf(vrf_name, cmds)
 
     async def set_description(self, vrf_name, description=None, default=False,
-                             disable=False):
+                              disable=False):
         """ Configures the VRF description asynchronously
 
         Args:
@@ -304,7 +307,8 @@ class VrfsAsync(EntityCollectionAsync):
         cmd = make_iterable(cmd)
         return await self.configure(cmd)
 
-    async def set_interface(self, vrf_name, interface, default=False, disable=False):
+    async def set_interface(self, vrf_name, interface, default=False,
+                            disable=False):
         """ Adds a VRF to an interface asynchronously
 
         Notes:
@@ -334,9 +338,9 @@ class VrfsAsync(EntityCollectionAsync):
 def instance(node):
     """Returns an instance of VrfsAsync
 
-    This method will create and return an instance of the VrfsAsync object passing
-    the value of API to the object.  The instance method is required for the
-    resource to be autoloaded by the Node object
+    This method will create and return an instance of the VrfsAsync object
+    passing the value of API to the object.  The instance method is
+    required for the resource to be autoloaded by the Node object
 
     Args:
         node (Node): The node argument passes an instance of Node to the

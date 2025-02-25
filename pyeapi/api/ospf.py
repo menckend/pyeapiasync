@@ -40,6 +40,7 @@ import re
 from pyeapi.api import Entity
 from pyeapi.utils import make_iterable
 
+
 class Ospf(Entity):
     """ The Ospf class implements global Ospf router configuration
     """
@@ -203,7 +204,6 @@ class Ospf(Entity):
               bool: True if the commands are completed successfully
         """
 
-
         cmd = 'no shutdown'
         return self.configure_ospf(cmd)
 
@@ -355,6 +355,7 @@ class Ospf(Entity):
                              'bgp, connected, rip or static')
         cmd = 'no redistribute {}'.format(protocol)
         return self.configure_ospf(cmd)
+
 
 def instance(api):
     """Returns an instance of Ospf

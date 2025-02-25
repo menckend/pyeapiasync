@@ -30,17 +30,17 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 import os
-import unittest
-
 import sys
+import unittest
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
-
-from systestlib import DutSystemTest
+from systestlib import DutSystemTest  # noqa: E402
 
 
 class TestApiStandardAcls(DutSystemTest):
+    """Test cases for standard ACL configurations"""
 
     def test_get(self):
+        """Verify get() returns standard ACL configuration"""
         for dut in self.duts:
             dut.config(['no ip access-list standard test',
                         'ip access-list standard test'])
@@ -48,12 +48,14 @@ class TestApiStandardAcls(DutSystemTest):
             self.assertIsNotNone(response)
 
     def test_get_none(self):
+        """Verify get() returns None for non-existent ACL"""
         for dut in self.duts:
             dut.config('no ip access-list standard test')
             result = dut.api('acl').get('test')
             self.assertIsNone(result)
 
     def test_getall(self):
+        """Verify getall() returns all standard ACL configs"""
         for dut in self.duts:
             dut.config(['no ip access-list standard test',
                         'ip access-list standard test'])
@@ -61,6 +63,7 @@ class TestApiStandardAcls(DutSystemTest):
             self.assertIn('test', result['standard'])
 
     def test_create(self):
+        """Verify create() creates a new standard ACL"""
         for dut in self.duts:
             dut.config('no ip access-list standard test')
             api = dut.api('acl')
@@ -70,6 +73,7 @@ class TestApiStandardAcls(DutSystemTest):
             self.assertIsNotNone(api.get('test'))
 
     def test_delete(self):
+        """Verify delete() removes a standard ACL"""
         for dut in self.duts:
             dut.config('ip access-list standard test')
             api = dut.api('acl')
@@ -79,6 +83,7 @@ class TestApiStandardAcls(DutSystemTest):
             self.assertIsNone(api.get('test'))
 
     def test_default(self):
+        """Verify default() defaults a standard ACL"""
         for dut in self.duts:
             dut.config('ip access-list standard test')
             api = dut.api('acl')
@@ -88,6 +93,7 @@ class TestApiStandardAcls(DutSystemTest):
             self.assertIsNone(api.get('test'))
 
     def test_update_entry(self):
+        """Verify update_entry() for standard ACL entries"""
         for dut in self.duts:
             dut.config(['no ip access-list standard test',
                         'ip access-list standard test'])
@@ -101,6 +107,7 @@ class TestApiStandardAcls(DutSystemTest):
                           api.get_block('ip access-list standard test'))
 
     def test_update_entry_existing(self):
+        """Verify update_entry() modifies an existing standard ACL entry"""
         for dut in self.duts:
             dut.config(['no ip access-list standard test',
                         'ip access-list standard test', '10 permit any log'])
@@ -114,6 +121,7 @@ class TestApiStandardAcls(DutSystemTest):
                           api.get_block('ip access-list standard test'))
 
     def test_add_entry(self):
+        """Verify add_entry() adds a new entry to a standard ACL"""
         for dut in self.duts:
             dut.config(['no ip access-list standard test',
                         'ip access-list standard test'])
@@ -126,6 +134,7 @@ class TestApiStandardAcls(DutSystemTest):
                           api.get_block('ip access-list standard test'))
 
     def test_remove_entry(self):
+        """Verify remove_entry() removes an entry from a standard ACL"""
         for dut in self.duts:
             dut.config(['no ip access-list standard test',
                         'ip access-list standard test', '10 permit any log'])
@@ -139,8 +148,10 @@ class TestApiStandardAcls(DutSystemTest):
 
 
 class TestApiExtendedAcls(DutSystemTest):
+    """Test cases for extended ACL configurations"""
 
     def test_get(self):
+        """Verify get() returns extended ACL configuration"""
         for dut in self.duts:
             dut.config(['no ip access-list exttest',
                         'ip access-list exttest'])
@@ -148,12 +159,14 @@ class TestApiExtendedAcls(DutSystemTest):
             self.assertIsNotNone(response)
 
     def test_get_none(self):
+        """Verify get() returns None for non-existent ACL"""
         for dut in self.duts:
             dut.config('no ip access-list exttest')
             result = dut.api('acl').get('exttest')
             self.assertIsNone(result)
 
     def test_getall(self):
+        """Verify getall() returns all extended ACL configs"""
         for dut in self.duts:
             dut.config(['no ip access-list exttest',
                         'ip access-list exttest'])
@@ -161,6 +174,7 @@ class TestApiExtendedAcls(DutSystemTest):
             self.assertIn('exttest', result['extended'])
 
     def test_create(self):
+        """Verify create() creates a new extended ACL"""
         for dut in self.duts:
             dut.config('no ip access-list exttest')
             api = dut.api('acl')
@@ -170,6 +184,7 @@ class TestApiExtendedAcls(DutSystemTest):
             self.assertIsNotNone(api.get('exttest'))
 
     def test_delete(self):
+        """Verify delete() removes an extended ACL"""
         for dut in self.duts:
             dut.config('ip access-list exttest')
             api = dut.api('acl')
@@ -179,6 +194,7 @@ class TestApiExtendedAcls(DutSystemTest):
             self.assertIsNone(api.get('exttest'))
 
     def test_default(self):
+        """Verify default() defaults an extended ACL"""
         for dut in self.duts:
             dut.config('ip access-list exttest')
             api = dut.api('acl')
@@ -188,6 +204,7 @@ class TestApiExtendedAcls(DutSystemTest):
             self.assertIsNone(api.get('exttest'))
 
     def test_update_entry(self):
+        """Verify update_entry() for extended ACL entries"""
         for dut in self.duts:
             dut.config(['no ip access-list exttest',
                         'ip access-list exttest'])
@@ -202,6 +219,7 @@ class TestApiExtendedAcls(DutSystemTest):
                           api.get_block('ip access-list exttest'))
 
     def test_update_entry_existing(self):
+        """Verify update_entry() modifies an existing extended ACL entry"""
         for dut in self.duts:
             dut.config(['no ip access-list exttest',
                         'ip access-list exttest', '10 permit ip any any log'])
@@ -216,6 +234,7 @@ class TestApiExtendedAcls(DutSystemTest):
                           api.get_block('ip access-list exttest'))
 
     def test_add_entry(self):
+        """Verify add_entry() adds a new entry to an extended ACL"""
         for dut in self.duts:
             dut.config(['no ip access-list exttest',
                         'ip access-list exttest'])
@@ -229,6 +248,7 @@ class TestApiExtendedAcls(DutSystemTest):
                           api.get_block('ip access-list exttest'))
 
     def test_remove_entry(self):
+        """Verify remove_entry() removes an entry from an extended ACL"""
         for dut in self.duts:
             dut.config(['no ip access-list exttest',
                         'ip access-list exttest', '10 permit ip any any log'])

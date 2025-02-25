@@ -32,8 +32,8 @@
 """Module for working with spanning-tree in EOS asynchronously
 
 This module provides an API for working with spanning-tree configuration
-in EOS asynchronously. This includes both global spanning-tree configuration as well as
-interface config.
+in EOS asynchronously. This includes both global spanning-tree configuration
+ as well as interface config.
 
 Global Parameters:
     mode (string): The spanning-tree operational mode.  Accepted values
@@ -59,7 +59,8 @@ from pyeapi.api import EntityAsync, EntityCollectionAsync
 
 
 class StpAsync(EntityAsync):
-    """The StpAsync class implements global configuration for spanning-tree asynchronously
+    """The StpAsync class implements global configuration for spanning-tree
+     asynchronously
 
     The spanning-tree protocol provides both global and interface
     configuration options.  This class is the top-level class that provides
@@ -77,8 +78,8 @@ class StpAsync(EntityAsync):
         True
 
     Attributes:
-        interfaces (StpInterfacesAsync): An instance for configuration spanning-tree
-            configuration interfaces
+        interfaces (StpInterfacesAsync): An instance for configuration
+         spanning-tree configuration interfaces
 
         instances (StpInstancesAsync): An instance object for working with
             spanning-tree global instances
@@ -91,13 +92,14 @@ class StpAsync(EntityAsync):
         self._instances = None
 
     async def get(self):
-        """Returns the spanning-tree configuration as a dict object asynchronously
+        """Returns the spanning-tree configuration as a dict object
+         asynchronously
 
         The dictionary object represents the entire spanning-tree
         configuration derived from the nodes running config.  This
         includes both globally configuration attributes as well as
-        interfaces and instances.  See the StpInterfacesAsync and StpInstancesAsync
-        classes for the key/value pair definitions.
+        interfaces and instances.  See the StpInterfacesAsync and
+         StpInstances Async classes for the key/value pair definitions.
 
         Note:
             See the individual classes for detailed message structures
@@ -157,7 +159,8 @@ class StpAsync(EntityAsync):
 
 
 class StpInstancesAsync(EntityCollectionAsync):
-    """Provides a configuration resource for spanning-tree instances asynchronously
+    """Provides a configuration resource for spanning-tree instances
+     asynchronously
 
     This class provides an API for working with spanning-tree instances from
     the global configuration.  Spanning tree instances work with MST
@@ -170,7 +173,8 @@ class StpInstancesAsync(EntityCollectionAsync):
 
 
 class StpInterfacesAsync(EntityCollectionAsync):
-    """Provides a configuration resource for spanning-tree interfaces asynchronously
+    """Provides a configuration resource for spanning-tree interfaces
+     asynchronously
 
     This class provides an API for working with spanning-tree interface
     configurations.  It provides access to managing specific interface
@@ -179,7 +183,8 @@ class StpInterfacesAsync(EntityCollectionAsync):
     """
 
     async def get(self, name):
-        """Returns the specified interfaces STP configuration resource asynchronously
+        """Returns the specified interfaces STP configuration resource
+         asynchronously
 
         The STP interface resource contains the following
 
@@ -251,10 +256,12 @@ class StpInterfacesAsync(EntityCollectionAsync):
     async def configure_interface(self, name, cmds):
         if not isvalidinterface(name):
             raise ValueError('invalid interface value specified')
-        return await super(StpInterfacesAsync, self).configure_interface(name, cmds)
+        return await super(StpInterfacesAsync, self).configure_interface(name,
+                                                                         cmds)
 
     async def set_portfast_type(self, name, value='normal'):
-        """Configures the portfast value for the specified interface asynchronously
+        """Configures the portfast value for the specified interface
+         asynchronously
 
         Args:
             name (string): The interface identifier to configure.  The name
@@ -280,8 +287,10 @@ class StpInterfacesAsync(EntityCollectionAsync):
             cmds.append('spanning-tree portfast auto')
         return await self.configure_interface(name, cmds)
 
-    async def set_portfast(self, name, value=None, default=False, disable=False):
-        """Configures the portfast value for the specified interface asynchronously
+    async def set_portfast(self, name, value=None, default=False,
+                           disable=False):
+        """Configures the portfast value for the specified interface
+         asynchronously
 
         Args:
             name (string): The interface identifier to configure.  The name
@@ -312,8 +321,10 @@ class StpInterfacesAsync(EntityCollectionAsync):
                                     disable=disable)
         return await self.configure_interface(name, cmds)
 
-    async def set_bpduguard(self, name, value=False, default=False, disable=False):
-        """Configures the bpduguard value for the specified interface asynchronously
+    async def set_bpduguard(self, name, value=False, default=False,
+                            disable=False):
+        """Configures the bpduguard value for the specified interface
+         asynchronously
 
         Args:
             name (string): The interface identifier to configure.  The name

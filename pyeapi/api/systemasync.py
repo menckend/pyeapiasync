@@ -48,7 +48,8 @@ from pyeapi.api import EntityAsync
 
 
 class SystemAsync(EntityAsync):
-    """The SystemAsync class implements global config for the node asynchronously
+    """The SystemAsync class implements global config for the node
+     asynchronously
 
     Global configuration settings include those thaat identify the node
     and provide node level configuration such as hostname
@@ -165,7 +166,7 @@ class SystemAsync(EntityAsync):
         return await self.configure(cmd)
 
     async def set_banner(self, banner_type, value=None, default=False,
-                        disable=False):
+                         disable=False):
         """Configures system banners asynchronously
 
         Args:

@@ -178,7 +178,8 @@ class StandardAclsAsync(EntityCollectionAsync):
         return await self.configure('no ip access-list standard %s' % name)
 
     async def default(self, name):
-        return await self.configure('default ip access-list standard %s' % name)
+        return await self.configure('default ip access-list standard %s'
+                                    % name)
 
     async def update_entry(self, name, seqno, action, addr, prefixlen,
                            log=False):

@@ -32,7 +32,7 @@
 """Module for working with interfaces in EOS asynchronously
 
 This module provides an API for pragmatically working with EOS interface
-configurations asynchronously. Interfaces include any data or management plane 
+configurations asynchronously. Interfaces include any data or management plane
 interface available in EOS.
 
 Parameters:
@@ -146,7 +146,8 @@ class BaseInterfaceAsync(EntityCollectionAsync):
         return 'Interface'
 
     async def get(self, name):
-        """Returns a generic interface as a set of key/value pairs asynchronously
+        """Returns a generic interface as a set of key/value pairs
+        asynchronously
 
         This class is should normally serve as a  base class for building more
         specific interface resources.  The attributes of this resource are
@@ -282,7 +283,8 @@ class BaseInterfaceAsync(EntityCollectionAsync):
                                              disable=disable))
         return await self.configure(commands)
 
-    async def set_description(self, name, value=None, default=False, disable=False):
+    async def set_description(self, name, value=None, default=False,
+                              disable=False):
         """Configures the interface description asynchronously
 
         EosVersion:
@@ -446,7 +448,7 @@ class EthernetInterfaceAsync(BaseInterfaceAsync):
         return await self.configure(['no interface %s' % name])
 
     async def set_flowcontrol_send(self, name, value=None, default=False,
-                                  disable=False):
+                                   disable=False):
         """Configures the interface flowcontrol send value asynchronously
 
         Args:
@@ -465,10 +467,11 @@ class EthernetInterfaceAsync(BaseInterfaceAsync):
         Returns:
             True if the operation succeeds otherwise False is returned
         """
-        return await self.set_flowcontrol(name, 'send', value, default, disable)
+        return await self.set_flowcontrol(name, 'send', value,
+                                          default, disable)
 
     async def set_flowcontrol_receive(self, name, value=None, default=False,
-                                     disable=False):
+                                      disable=False):
         """Configures the interface flowcontrol receive value asynchronously
 
         Args:
@@ -487,10 +490,11 @@ class EthernetInterfaceAsync(BaseInterfaceAsync):
         Returns:
             True if the operation succeeds otherwise False is returned
         """
-        return await self.set_flowcontrol(name, 'receive', value, default, disable)
+        return await self.set_flowcontrol(name, 'receive', value,
+                                          default, disable)
 
     async def set_flowcontrol(self, name, direction, value=None, default=False,
-                             disable=False):
+                              disable=False):
         """Configures the interface flowcontrol value asynchronously
 
         Args:
@@ -576,13 +580,15 @@ class EthernetInterfaceAsync(BaseInterfaceAsync):
                                                  disable=disable))
         return await self.configure(commands)
 
+
 class PortchannelInterfaceAsync(BaseInterfaceAsync):
 
     def __str__(self):
         return 'PortchannelInterface'
 
     async def get(self, name):
-        """Returns a Port-Channel interface as a set of key/value pairs asynchronously
+        """Returns a Port-Channel interface as a set of key/value pairs
+         asynchronously
 
         Args:
             name (str): The interface identifier to retrieve from the
@@ -638,7 +644,8 @@ class PortchannelInterfaceAsync(BaseInterfaceAsync):
         return dict(lacp_timeout=value)
 
     async def get_lacp_mode(self, name):
-        """Returns the LACP mode for the specified Port-Channel interface asynchronously
+        """Returns the LACP mode for the specified Port-Channel interface
+        asynchronously
 
         Args:
             name(str): The Port-Channel interface name to return the LACP
@@ -660,7 +667,8 @@ class PortchannelInterfaceAsync(BaseInterfaceAsync):
             return match.group('value')
 
     async def get_members(self, name):
-        """Returns the member interfaces for the specified Port-Channel asynchronously
+        """Returns the member interfaces for the specified Port-Channel
+        asynchronously
 
         Args:
             name(str): The Port-channel interface name to return the member
@@ -677,7 +685,8 @@ class PortchannelInterfaceAsync(BaseInterfaceAsync):
                           config[0]['result']['output'])
 
     async def set_members(self, name, members, mode=None):
-        """Configures the array of member interfaces for the Port-Channel asynchronously
+        """Configures the array of member interfaces for the Port-Channel
+        asynchronously
 
         Args:
             name(str): The Port-Channel interface name to configure the member
@@ -747,7 +756,7 @@ class PortchannelInterfaceAsync(BaseInterfaceAsync):
         return await self.configure(remove_commands + add_commands)
 
     async def set_minimum_links(self, name, value=None, default=False,
-                               disable=False):
+                                disable=False):
         """Configures the Port-Channel min-links value asynchronously
 
         Args:
@@ -921,7 +930,7 @@ class VxlanInterfaceAsync(BaseInterfaceAsync):
         return dict(flood_list=values)
 
     async def set_source_interface(self, name, value=None, default=False,
-                                  disable=False):
+                                   disable=False):
         """Configures the Vxlan source-interface value asynchronously
 
         EosVersion:
@@ -943,7 +952,7 @@ class VxlanInterfaceAsync(BaseInterfaceAsync):
         return await self.configure_interface(name, cmds)
 
     async def set_multicast_group(self, name, value=None, default=False,
-                                 disable=False):
+                                  disable=False):
         """Configures the Vxlan multicast-group value asynchronously
 
         EosVersion:
@@ -961,15 +970,17 @@ class VxlanInterfaceAsync(BaseInterfaceAsync):
         """
         string_dpr = 'vxlan multicast-group'
         cmds_dpr = self.command_builder(string_dpr,
-            value=value, default=default, disable=disable)
+                                        value=value, default=default,
+                                        disable=disable)
         string_new = 'vxlan multicast-group decap'
         cmds_new = self.command_builder(string_new,
-            value=value, default=default, disable=disable)
+                                        value=value, default=default,
+                                        disable=disable)
         return await self.configure_interface(name,
-            CliVariants(cmds_new, cmds_dpr))
+                                              CliVariants(cmds_new, cmds_dpr))
 
     async def set_multicast_decap(self, name, default=False,
-                                 disable=False):
+                                  disable=False):
         """Configures the Vxlan multicast-group decap feature asynchronously
 
         EosVersion:
@@ -992,8 +1003,8 @@ class VxlanInterfaceAsync(BaseInterfaceAsync):
             cmds = [string]
         return await self.configure_interface(name, cmds)
 
-
-    async def set_udp_port(self, name, value=None, default=False, disable=False):
+    async def set_udp_port(self, name, value=None, default=False,
+                           disable=False):
         """Configures vxlan udp-port value asynchronously
 
         EosVersion:
@@ -1014,7 +1025,8 @@ class VxlanInterfaceAsync(BaseInterfaceAsync):
         return await self.configure_interface(name, cmds)
 
     async def add_vtep(self, name, vtep, vlan=None):
-        """Adds a new VTEP endpoint to the global or local flood list asynchronously
+        """Adds a new VTEP endpoint to the global or local flood list
+        asynchronously
 
         EosVersion:
             4.13.7M
@@ -1036,7 +1048,8 @@ class VxlanInterfaceAsync(BaseInterfaceAsync):
         return await self.configure_interface(name, cmd)
 
     async def remove_vtep(self, name, vtep, vlan=None):
-        """Removes a VTEP endpoint from the global or local flood list asynchronously
+        """Removes a VTEP endpoint from the global or local flood list
+        asynchronously
 
         EosVersion:
             4.13.7M
@@ -1087,9 +1100,7 @@ class VxlanInterfaceAsync(BaseInterfaceAsync):
             True if the command completes successfully
 
         """
-        return await self.configure_interface(name,
-            CliVariants(f'vxlan vlan remove {vid} vni $',
-                f'vxlan vlan remove {vid} vni'))
+        return await self.configure_interface(name, CliVariants(f'vxlan vlan remove {vid} vni $', f'vxlan vlan remove {vid} vni'))
 
 
 INTERFACE_CLASS_MAP = {

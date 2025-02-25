@@ -79,7 +79,7 @@ class Bgp(Entity):
 
     def _parse_bgp_as(self, config):
         as_num = re.search(r'(?<=^router bgp ).*', config).group(0)
-        return { 'bgp_as': int(as_num) if as_num.isnumeric() else as_num }
+        return {'bgp_as': int(as_num) if as_num.isnumeric() else as_num}
 
     def _parse_router_id(self, config):
         match = re.search(r'router-id ([^\s]+)', config)
@@ -216,7 +216,7 @@ class BgpNeighbors(EntityCollection):
     def _parse_remote_as(self, config, name):
         remote_as_re = rf'(?<=neighbor {name} remote-as ).*'
         match = re.search(remote_as_re, config)
-        return { 'remote_as': match.group(0) if match else None}
+        return {'remote_as': match.group(0) if match else None}
 
     def _parse_send_community(self, config, name):
         exp = 'no neighbor {} send-community'.format(name)

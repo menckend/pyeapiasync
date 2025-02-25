@@ -122,7 +122,8 @@ class StaticRouteAsync(EntityCollectionAsync):
         return routes.get(name)
 
     async def getall(self):
-        """Return all ip routes configured on the switch as a resource dict asynchronously
+        """Return all ip routes configured on the switch as a resource dict
+         asynchronously
 
         Returns:
             dict: An dict object of static route entries in the form::
@@ -225,7 +226,8 @@ class StaticRouteAsync(EntityCollectionAsync):
         return await self._set_route(ip_dest, next_hop, **kwargs)
 
     async def default(self, ip_dest, next_hop, **kwargs):
-        """Set a static route to default (i.e. delete the matching route) asynchronously
+        """Set a static route to default (i.e. delete the matching route)
+         asynchronously
 
         Args:
             ip_dest (string): The ip address of the destination in the

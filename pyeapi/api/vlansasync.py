@@ -272,7 +272,7 @@ class VlansAsync(EntityCollectionAsync):
 
         This method handles configuring the vlan trunk group value to default
         if the default flag is set to True.
-        
+
         If the default flag is set to False, then this method will calculate
         the set of trunk group names to be added and to be removed.
 

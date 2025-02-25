@@ -44,7 +44,8 @@ from pyeapi.api import EntityAsync
 
 
 class NtpAsync(EntityAsync):
-    """The NtpAsync class implements global NTP router configuration asynchronously
+    """The NtpAsync class implements global NTP router
+    configuration asynchronously
     """
 
     def __init__(self, *args, **kwargs):
@@ -64,16 +65,16 @@ class NtpAsync(EntityAsync):
                               as the value if the server is preferred.
 
         Returns:
-            A Python dictionary object of key/value pairs that represents
-            the current NTP configuration of the node::
+            A Python dictionary object of key/value pairs that
+            represents the current NTP configuration of the node::
 
                 {
-                    "source_interface": 'Loopback0',
-                    'servers': [
-                        { '1.1.1.1': None },
-                        { '1.1.1.2': 'prefer' },
-                        { '1.1.1.3': 'prefer' },
-                        { '1.1.1.4': None },
+                    "source_interface": "Loopback0",
+                    "servers": [
+                        {"1.1.1.1": None},
+                        {"1.1.1.2": "prefer"},
+                        {"1.1.1.3": "prefer"},
+                        {"1.1.1.4": None},
                     ]
                 }
         """
@@ -88,15 +89,15 @@ class NtpAsync(EntityAsync):
         return response
 
     def _parse_source_interface(self, config):
-        if self.version_number >= '4.23':
-            match = re.search(r'^ntp local-interface ([^\s]+)', config, re.M)
+        if self.version_number >= "4.23":
+            match = re.search(r"^ntp local-interface (\S+)", config, re.M)
         else:
-            match = re.search(r'^ntp source ([^\s]+)', config, re.M)
+            match = re.search(r"^ntp source (\S+)", config, re.M)
         value = match.group(1) if match else None
         return dict(source_interface=value)
 
     def _parse_servers(self, config):
-        matches = re.findall(r'ntp server ([\S]+) ?(prefer)?', config, re.M)
+        matches = re.findall(r"ntp server (\S+) ?(prefer)?", config, re.M)
         value = []
         for match in matches:
             server = match[0]
@@ -164,7 +165,7 @@ class NtpAsync(EntityAsync):
         Returns:
             True if the operation succeeds, otherwise False.
         """
-        if not name or re.match(r'^[\s]+$', name):
+        if not name or re.match(r"^\s+$", name):
             raise ValueError('ntp server name must be specified')
         if prefer:
             name = '%s prefer' % name

@@ -31,17 +31,18 @@
 #
 """Provides asynchronous wrapper for eAPI calls
 
-This module provides an asynchronous connection to eAPI by wrapping eAPI calls in an
-instance of AsyncConnection. The connection module provides an easy implementation
-for sending and receiving calls over eAPI using asyncio and aiohttp.
+This module provides an asynchronous connection to eAPI by wrapping eAPI calls
+in an instance of AsyncConnection. The connection module provides an easy
+implementation for sending and receiving calls over eAPI using asyncio and
+aiohttp.
 """
 
-import socket
+# import socket
 import base64
 import logging
 import ssl
 import re
-import asyncio
+# import asyncio
 import aiohttp
 
 try:
@@ -54,19 +55,21 @@ except ImportError:
 
 from pyeapi.utils import make_iterable
 from pyeapi.eapilib import (
-    EapiError, CommandError, ConnectionError,
-    DEFAULT_HTTP_PORT, DEFAULT_HTTPS_PORT, DEFAULT_HTTP_LOCAL_PORT,
-    DEFAULT_HTTPS_LOCAL_PORT, DEFAULT_HTTP_PATH, DEFAULT_UNIX_SOCKET
+    CommandError, ConnectionError, DEFAULT_HTTP_PORT, DEFAULT_HTTPS_PORT,
+    DEFAULT_HTTP_LOCAL_PORT, DEFAULT_HTTP_PATH,
+    DEFAULT_UNIX_SOCKET  # ,EapiError, DEFAULT_HTTPS_LOCAL_PORT
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class EapiAsyncConnection(object):
-    """Creates an asynchronous connection to eAPI for sending and receiving eAPI requests
+    """Creates an asynchronous connection to eAPI for sending and receiving
+    eAPI requests
 
     The EapiAsyncConnection object provides an implementation for sending and
-    receiving eAPI requests and responses asynchronously using asyncio and aiohttp.
+    receiving eAPI requests and responses asynchronously using asyncio and
+    aiohttp.
     """
 
     def __init__(self):
@@ -93,7 +96,6 @@ class EapiAsyncConnection(object):
                 connection with
             password (str): The password in clear text to use to authenticate
                 the eAPI connection with
-
         """
         _auth_text = '{}:{}'.format(username, password)
         _auth_bin = base64.encodebytes(_auth_text.encode())
@@ -139,7 +141,6 @@ class EapiAsyncConnection(object):
 
         Returns:
             A JSON encoding request structure that can be send over eAPI
-
         """
         commands = make_iterable(commands)
         reqid = id(self) if reqid is None else reqid
@@ -302,7 +303,7 @@ class EapiAsyncConnection(object):
                     data=data,
                     headers=headers,
                     ssl=self.ssl_context) as response:
-                
+
                 response_content = await response.text()
                 _LOGGER.debug('Response: status:{status}'.format(
                     status=response.status))
@@ -310,7 +311,8 @@ class EapiAsyncConnection(object):
 
                 if response.status == 401:
                     raise ConnectionError(str(self),
-                                         f'{response.reason}. {response_content}')
+                                          f'{response.reason}. ' +
+                                          '{response_content}')
 
                 decoded = json.loads(response_content)
                 _LOGGER.debug('eapi_response: %s' % decoded)
@@ -324,7 +326,8 @@ class EapiAsyncConnection(object):
                                     ' version of EOS.' % match.group(1))
                         _LOGGER.error(auto_msg)
                         msg = msg + '. ' + auto_msg
-                    raise CommandError(code, msg, command_error=err, output=out)
+                    raise CommandError(code, msg, command_error=err,
+                                       output=out)
 
                 return decoded
 
@@ -389,7 +392,8 @@ class HttpLocalEapiAsyncConnection(EapiAsyncConnection):
         path = path or DEFAULT_HTTP_PATH
         self.url = f"http://localhost:{port}{path}"
         self.ssl_context = None
-        self._session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout))
+        self._session = aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=timeout))
 
     async def __aenter__(self):
         return self
@@ -406,7 +410,8 @@ class HttpEapiAsyncConnection(EapiAsyncConnection):
         path = path or DEFAULT_HTTP_PATH
         self.url = f"http://{host}:{port}{path}"
         self.ssl_context = None
-        self._session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout))
+        self._session = aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=timeout))
         if username and password:
             self.authentication(username, password)
 
@@ -435,7 +440,8 @@ class HttpsEapiAsyncConnection(EapiAsyncConnection):
         else:
             self.ssl_context = context
 
-        self._session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout))
+        self._session = aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=timeout))
         if username and password:
             self.authentication(username, password)
 
@@ -478,7 +484,8 @@ class HttpsEapiCertAsyncConnection(EapiAsyncConnection):
         if ca_file:
             self.ssl_context.load_verify_locations(ca_file)
 
-        self._session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout))
+        self._session = aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=timeout))
 
     async def __aenter__(self):
         return self
@@ -492,22 +499,23 @@ class SessionApiAsyncConnection(object):
         try:
             data = json.dumps({"username": username, "password": password})
             login_url = self.url.replace('/command-api', '/login')
-            
+
             headers = {'Content-Type': 'application/json'}
             async with self._session.post(
                     login_url,
                     data=data,
                     headers=headers,
                     ssl=self.ssl_context) as resp:
-                
+
                 if resp.status != 200:
                     response_text = await resp.text()
-                    raise ConnectionError(str(self), 
-                                         f'{resp.reason}. {response_text}')
-                
+                    raise ConnectionError(str(self),
+                                          f'{resp.reason}. {response_text}')
+
                 # Get the session cookie
                 cookies = resp.cookies
-                cookie_str = '; '.join([f'{name}={value}' for name, value in cookies.items()])
+                cookie_str = '; '.join([f'{name}={value}'
+                                        for name, value in cookies.items()])
                 self._auth = ("Cookie", cookie_str)
 
         except aiohttp.ClientError as exc:
@@ -523,11 +531,13 @@ class SessionApiAsyncConnection(object):
             raise ConnectionError(str(self), 'unable to connect to eAPI')
 
 
-class HttpEapiSessionAsyncConnection(SessionApiAsyncConnection, HttpEapiAsyncConnection):
+class HttpEapiSessionAsyncConnection(SessionApiAsyncConnection,
+                                     HttpEapiAsyncConnection):
     pass
 
 
-class HttpsEapiSessionAsyncConnection(SessionApiAsyncConnection, HttpsEapiAsyncConnection):
+class HttpsEapiSessionAsyncConnection(SessionApiAsyncConnection,
+                                      HttpsEapiAsyncConnection):
     pass
 
 
@@ -538,4 +548,5 @@ class SocketEapiAsyncConnection(EapiAsyncConnection):
         super(SocketEapiAsyncConnection, self).__init__()
         self.path = path or DEFAULT_UNIX_SOCKET
         self.timeout = timeout
-        raise NotImplementedError("Async socket connection not yet implemented")
+        raise NotImplementedError("Async socket connection not yet \
+                                  implemented")

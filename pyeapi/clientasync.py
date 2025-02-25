@@ -31,17 +31,17 @@
 #
 """Python Async Client for eAPI
 
-This module provides the async client for eAPI. It provides the primary functions
-for building applications that work with Arista EOS eAPI-enabled nodes using
-asyncio and aiohttp.
+This module provides the async client for eAPI. It provides the primary
+    functions for building applications that work with Arista EOS
+    eAPI-enabled nodes using asyncio and aiohttp.
 """
 
 import re
 from uuid import uuid4
 from functools import lru_cache
 
-from pyeapi.utils import make_iterable, debug, CliVariants
-from pyeapi.client import config, config_for
+from pyeapi.utils import make_iterable, CliVariants  # , debug
+from pyeapi.client import config_for  # ,config
 
 from pyeapi.eapilibasync import (
     HttpLocalEapiAsyncConnection, HttpEapiAsyncConnection,
@@ -88,9 +88,9 @@ async def make_connection_async(transport, **kwargs):
 
 
 async def connect_async(transport=None, host='localhost', username='admin',
-                  password='', port=None, key_file=None, cert_file=None,
-                  ca_file=None, timeout=60, return_node=False, context=None,
-                  **kwargs):
+                        password='', port=None, key_file=None, cert_file=None,
+                        ca_file=None, timeout=60, return_node=False,
+                        context=None, **kwargs):
     """Creates an async connection using the supplied settings
 
     This function will create an async connection to an Arista EOS node using
@@ -119,7 +119,8 @@ async def connect_async(transport=None, host='localhost', username='admin',
             returns an EapiConnection object.
 
     Returns:
-        An instance of an EapiAsyncConnection object for the specified transport.
+        An instance of an EapiAsyncConnection object for the specified
+            transport.
     """
     transport = transport or DEFAULT_TRANSPORT
     connection = await make_connection_async(
@@ -127,25 +128,28 @@ async def connect_async(transport=None, host='localhost', username='admin',
         password=password, key_file=key_file,
         cert_file=cert_file, ca_file=ca_file,
         port=port, timeout=timeout, context=context)
-    
+
     if return_node:
         return AsyncNode(connection, transport=transport, host=host,
-                    username=username, password=password, key_file=key_file,
-                    cert_file=cert_file, ca_file=ca_file, port=port, **kwargs)
+                         username=username, password=password,
+                         key_file=key_file, cert_file=cert_file,
+                         ca_file=ca_file, port=port, **kwargs)
     return connection
 
 
 class AsyncNode(object):
-    """Represents a single device for sending and receiving eAPI messages asynchronously
+    """Represents a single device for sending and receiving eAPI messages
+        asynchronously
 
-    The AsyncNode object provides an instance for communicating with Arista EOS
-    devices using asyncio. The AsyncNode object provides easy to use methods for sending both
-    enable and config commands to the device using a specific transport.
+    The AsyncNode object provides an instance for communicating with Arista
+        EOS devices using asyncio. The AsyncNode object provides easy to use
+        methods for sending both enable and config commands to the device
+        using a specific transport.
 
     Attributes:
-        connection (EapiAsyncConnection): The connection property represents the
-            underlying transport used by the AsyncNode object to communicate
-            with the device using eAPI.
+        connection (EapiAsyncConnection): The connection property represents
+            the underlying transport used by the AsyncNode object to
+            communicate with the device using eAPI.
         running_config (str): The running-config from the device. This
             property is lazily loaded and refreshed over the life cycle of
             the instance.
@@ -162,8 +166,9 @@ class AsyncNode(object):
         api (dict): Dictionary containing API module instances for this node.
 
     Args:
-        connection (EapiAsyncConnection): An instance of EapiAsyncConnection used as the
-            transport for sending and receiving eAPI requests and responses.
+        connection (EapiAsyncConnection): An instance of EapiAsyncConnection
+            used as the transport for sending and receiving eAPI requests
+            and responses.
         **kwargs: An arbitrary list of keyword arguments
     """
     def __init__(self, connection, **kwargs):
@@ -238,7 +243,7 @@ class AsyncNode(object):
             return self._running_config
         params = 'all' if self.config_defaults else None
         self._running_config = await self.get_config(params=params,
-                                                    as_string=True)
+                                                     as_string=True)
         return self._running_config
 
     async def get_startup_config(self):
@@ -250,7 +255,7 @@ class AsyncNode(object):
         if self._startup_config is not None:
             return self._startup_config
         self._startup_config = await self.get_config('startup-config',
-                                                    as_string=True)
+                                                     as_string=True)
         return self._startup_config
 
     async def get_version(self):
@@ -498,7 +503,7 @@ class AsyncNode(object):
         """
         if config is None:
             config = await self.get_running_config()
-        
+
         chunked = self._chunkify(config)
         r = re.compile(regex)
         matching_keys = [k for k in chunked.keys() if r.search(k)]
@@ -509,8 +514,9 @@ class AsyncNode(object):
         return match
 
     async def enable(self, commands, encoding='json', strict=False,
-                    send_enable=True, **kwargs):
-        """Sends the array of commands to the node in enable mode asynchronously
+                     send_enable=True, **kwargs):
+        """Sends the array of commands to the node in enable mode
+            asynchronously
 
         This method will send the commands to the node and evaluate
         the results. If a command fails due to an encoding error,
@@ -558,8 +564,8 @@ class AsyncNode(object):
         # there in error and both are now present to avoid breaking
         # existing scripts. 'response' will be removed in a future release.
         if strict:
-            responses = await self.run_commands(commands, encoding, send_enable,
-                                              **kwargs)
+            responses = await self.run_commands(commands, encoding,
+                                                send_enable, **kwargs)
             for index, response in enumerate(responses):
                 results.append(dict(command=commands[index],
                                     result=response,
@@ -568,15 +574,15 @@ class AsyncNode(object):
         else:
             for command in commands:
                 try:
-                    resp = await self.run_commands(command, encoding, send_enable,
-                                                 **kwargs)
+                    resp = await self.run_commands(command, encoding,
+                                                   send_enable, **kwargs)
                     results.append(dict(command=command,
                                         result=resp[0],
                                         encoding=encoding))
                 except CommandError as exc:
                     if exc.error_code == 1003:
-                        resp = await self.run_commands(command, 'text', send_enable,
-                                                     **kwargs)
+                        resp = await self.run_commands(command, 'text',
+                                                       send_enable, **kwargs)
                         results.append(dict(command=command,
                                             result=resp[0],
                                             encoding='text'))
@@ -585,7 +591,7 @@ class AsyncNode(object):
         return results
 
     async def run_commands(self, commands, encoding='json', send_enable=True,
-                          **kwargs):
+                           **kwargs):
         """Sends the commands over the transport to the device asynchronously
 
         This method sends the commands to the device using the nodes
@@ -636,7 +642,7 @@ class AsyncNode(object):
         return response['result']
 
     async def get_config(self, config='running-config', params=None,
-                        as_string=False):
+                         as_string=False):
         """Retreives the config from the node asynchronously
 
         This method will retrieve the config from the node as either a string

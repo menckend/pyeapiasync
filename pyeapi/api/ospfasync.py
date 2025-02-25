@@ -40,8 +40,10 @@ import re
 from pyeapi.api import EntityAsync
 from pyeapi.utils import make_iterable
 
+
 class OspfAsync(EntityAsync):
-    """ The OspfAsync class implements global Ospf router configuration asynchronously
+    """ The OspfAsync class implements global Ospf router configuration
+     asynchronously
     """
 
     def __init__(self, *args, **kwargs):
@@ -195,7 +197,8 @@ class OspfAsync(EntityAsync):
         return await self.configure_ospf(cmd)
 
     async def set_no_shutdown(self):
-        """Removes the shutdown property from the OSPF process asynchronously
+        """Removes the shutdown property from the OSPF process
+            asynchronously
 
            Args:
                None
@@ -203,12 +206,12 @@ class OspfAsync(EntityAsync):
               bool: True if the commands are completed successfully
         """
 
-
         cmd = 'no shutdown'
         return await self.configure_ospf(cmd)
 
     async def delete(self):
-        """Removes the entire ospf process from the running configuration asynchronously
+        """Removes the entire ospf process from the running configuration
+            asynchronously
 
            Args:
                None
@@ -222,7 +225,8 @@ class OspfAsync(EntityAsync):
         return await self.configure(command)
 
     async def create(self, ospf_process_id, vrf=None):
-        """Creates a OSPF process in the specified VRF or the default VRF asynchronously.
+        """Creates a OSPF process in the specified VRF or the default VRF
+            asynchronously.
 
            Args:
                 ospf_process_id (str): The OSPF process Id value
@@ -242,7 +246,8 @@ class OspfAsync(EntityAsync):
         return await self.configure(command)
 
     async def configure_ospf(self, cmd):
-        """Allows for a list of OSPF subcommands to be configured asynchronously"
+        """Allows for a list of OSPF subcommands to be configured
+            asynchronously"
 
            Args:
                cmd: (list or str): Subcommand to be entered
@@ -355,6 +360,7 @@ class OspfAsync(EntityAsync):
                              'bgp, connected, rip or static')
         cmd = 'no redistribute {}'.format(protocol)
         return await self.configure_ospf(cmd)
+
 
 def instance(api):
     """Returns an instance of OspfAsync

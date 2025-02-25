@@ -105,7 +105,8 @@ class IpinterfacesAsync(EntityCollectionAsync):
         """
         match = re.findall(r'ip address ([^\s]+)', config, re.M)
         primary, secondary = (match[0], match[1:]) if match else (None, None)
-        return dict(address=primary, secondary=secondary) if secondary else dict(address=primary)
+        return dict(address=primary,
+                    secondary=secondary) if secondary else dict(address=primary)
 
     def _parse_mtu(self, config):
         """Parses the config block and returns the configured IP MTU value

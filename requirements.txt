@@ -1,2 +1,4 @@
 netaddr
 aiohttp>=3.8.0
+python-rapidjson
+simplejson

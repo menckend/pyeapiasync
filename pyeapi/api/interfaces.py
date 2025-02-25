@@ -575,6 +575,7 @@ class EthernetInterface(BaseInterface):
                                                  disable=disable))
         return self.configure(commands)
 
+
 class PortchannelInterface(BaseInterface):
 
     def __str__(self):
@@ -886,7 +887,7 @@ class VxlanInterface(BaseInterface):
     def _parse_multicast_decap(self, config):
         val1 = 'vxlan multicast-group decap' in config
         val2 = 'no vxlan multicast-group decap' in config
-        return dict( multicast_decap=bool(val1 ^ val2) )
+        return dict(multicast_decap=bool(val1 ^ val2))
 
     def _parse_udp_port(self, config):
         match = re.search(r'vxlan udp-port (\d+)', config)
@@ -959,12 +960,17 @@ class VxlanInterface(BaseInterface):
         """
         string_dpr = 'vxlan multicast-group'
         cmds_dpr = self.command_builder(string_dpr,
-            value=value, default=default, disable=disable)
+                                        value=value,
+                                        default=default,
+                                        disable=disable)
         string_new = 'vxlan multicast-group decap'
         cmds_new = self.command_builder(string_new,
-            value=value, default=default, disable=disable)
+                                        value=value,
+                                        default=default,
+                                        disable=disable)
         return self.configure_interface(name,
-            CliVariants(cmds_new, cmds_dpr) )
+                                        CliVariants(cmds_new,
+                                                    cmds_dpr))
 
     def set_multicast_decap(self, name, default=False,
                             disable=False):
@@ -989,7 +995,6 @@ class VxlanInterface(BaseInterface):
         else:
             cmds = [string]
         return self.configure_interface(name, cmds)
-
 
     def set_udp_port(self, name, value=None, default=False, disable=False):
         """Configures vxlan udp-port value
@@ -1085,9 +1090,9 @@ class VxlanInterface(BaseInterface):
             True if the command completes successfully
 
         """
-        return self.configure_interface( name,
+        return self.configure_interface(name,
             CliVariants(f'vxlan vlan remove {vid} vni $',
-                f'vxlan vlan remove {vid} vni') )
+                f'vxlan vlan remove {vid} vni'))
 
 
 INTERFACE_CLASS_MAP = {

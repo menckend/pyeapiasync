@@ -64,6 +64,7 @@ class BaseEntity(object):
     Args:
         node (Node): An instance of Node
     """
+
     def __init__(self, node):
         self.node = node
 
@@ -188,6 +189,7 @@ class Entity(BaseEntity, Callable):
 
     Examples of Entity candidates include global spanning tree
     """
+
     def __call__(self):
         return self.get()
 

@@ -75,15 +75,16 @@ def isprivilege(value):
 
 
 class UsersAsync(EntityCollectionAsync):
-    """The UsersAsync class provides a configuration resource for local users asynchronously.
-    The regex used here parses the running configuration to find username
-    entries. There is extra logic in the regular expression to store
-    the username as 'user' and then creates a backreference to find a
-    following configuration line that might contain the users sshkey.
+    """The UsersAsync class provides a configuration resource for local users
+     asynchronously. The regex used here parses the running configuration to
+     find username entries. There is extra logic in the regular expression
+     to store the username as 'user' and then creates a backreference to find
+     a following configuration line that might contain the users sshkey.
     """
 
     async def get(self, name):
-        """Returns the local user configuration as a resource dict asynchronously
+        """Returns the local user configuration as a resource dict
+         asynchronously
 
         Args:
             name (str): The username to return from the nodes global running-
@@ -98,13 +99,14 @@ class UsersAsync(EntityCollectionAsync):
         return users.get(name)
 
     async def getall(self):
-        """Returns all local users configuration as a resource dict asynchronously
+        """Returns all local users configuration as a resource dict
+         asynchronously
 
         Returns:
             dict: A dict of usernames with a nested resource dict object
         """
         config = await self.config
-        
+
         if self.version_number >= '4.23':
             self.users_re = re.compile(r'username (?P<user>[^\s]+) '
                                        r'privilege (\d+)'
@@ -151,7 +153,8 @@ class UsersAsync(EntityCollectionAsync):
             resource['sshkey'] = sshkey
         return {username: resource}
 
-    async def create(self, name, nopassword=None, secret=None, encryption=None):
+    async def create(self, name, nopassword=None, secret=None,
+                     encryption=None):
         """Creates a new user on the local system asynchronously.
 
         Creating users requires either a secret (password) or the nopassword
@@ -236,7 +239,8 @@ class UsersAsync(EntityCollectionAsync):
         return await self.configure('no username %s' % name)
 
     async def default(self, name):
-        """Configures the local username using the default keyword asynchronously
+        """Configures the local username using the default keyword
+         asynchronously
 
         Args:
             name (str): The name of the user to configure
@@ -320,9 +324,9 @@ class UsersAsync(EntityCollectionAsync):
 def instance(node):
     """Returns an instance of UsersAsync
 
-    This method will create and return an instance of the UsersAsync object passing
-    the value of API to the object.  The instance method is required for the
-    resource to be autoloaded by the Node object
+    This method will create and return an instance of the UsersAsync object
+     passing the value of API to the object.  The instance method is required
+     for the resource to be autoloaded by the Node object
 
     Args:
         node (Node): The node argument passes an instance of Node to the

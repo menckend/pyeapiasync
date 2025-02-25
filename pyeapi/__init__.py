@@ -34,7 +34,7 @@ __author__ = 'Arista EOS+'
 
 
 from .client import load_config, connect, connect_to, config_for
-from .client import connect_async, connect_to_async
+from .clientasync import connect_async, connect_to_async
 
-__all__ = ['load_config', 'connect', 'connect_to', 'config_for', 
+__all__ = ['load_config', 'connect', 'connect_to', 'config_for',
            'connect_async', 'connect_to_async']
