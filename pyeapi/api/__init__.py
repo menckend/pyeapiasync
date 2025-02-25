@@ -30,5 +30,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 from .abstract import Entity, EntityCollection
+from .abstractasync import EntityAsync, EntityCollectionAsync
 
-__all__ = ['Entity', 'EntityCollection']
+__all__ = ['Entity', 'EntityCollection',
+           'EntityAsync', 'EntityCollectionAsync']

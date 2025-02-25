@@ -109,6 +109,10 @@ from pyeapi.eapilib import HttpsEapiSessionConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
 from pyeapi.eapilib import CommandError
 
+# Import async versions for async support
+import asyncio
+from pyeapi.clientasync import connect_async, connect_to_async
+
 CONFIG_SEARCH_PATH = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
 
 TRANSPORTS = {
