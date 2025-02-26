@@ -29,12 +29,16 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-__version__ = '1.0.4'
-__author__ = 'Arista EOS+'
+
+# Forked from pyeapi
+#  __version__ = '1.0.4'
+#  __author__ = 'Arista EOS+'
+
+__version__ = '0.0.1'
+__author__ = 'menckend'
 
 
-from .client import load_config, connect, connect_to, config_for
+#from .client import load_config, connect, connect_to, config_for
 from .clientasync import connect_async, connect_to_async
 
-__all__ = ['load_config', 'connect', 'connect_to', 'config_for',
-           'connect_async', 'connect_to_async']
+__all__ = ['connect_async', 'connect_to_async']
