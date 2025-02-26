@@ -150,7 +150,7 @@ class AsyncNode(object):
         connection (EapiAsyncConnection): The connection property represents
             the underlying transport used by the AsyncNode object to
             communicate with the device using eAPI.
-        running_config (str): The running-config from the device. This
+        running_config (str): The running-c0)0onfig from the device. This
             property is lazily loaded and refreshed over the life cycle of
             the instance.
         startup_config (str): The startup-config from the device. This
