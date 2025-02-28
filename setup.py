@@ -13,18 +13,18 @@ with open(path.join(here, 'VERSION'), mode='r', encoding='utf-8') as version_fil
         version = version_file.read().strip()
 
 setup(
-    name='pyeapi',
+    name='pyeapiasync',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
     version=version,
 
-    description='Python Client for eAPI',
+    description='Async Version Python Client for eAPI',
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/arista-eosplus/pyeapi',
+    url='https://github.com/menckend/pyeapiasync',
 
     # Author details
     author='Arista EOS+ CS',
