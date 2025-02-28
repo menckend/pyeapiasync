@@ -8,7 +8,3 @@ and aiohttp.
 [pyeapi documentation](https://menckend.github.io/pyeapisync)
 
 
-## Documentation
-
-(pending)
-

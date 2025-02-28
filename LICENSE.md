@@ -1,4 +1,6 @@
-__________START: Copyright and License notice for pyeapiasync project
+# Current license
+
+!__________START: Copyright and License notice for pyeapiasync project
 
 Copyright (c) 2025, Mencken Davidson
 All rights reserved.
@@ -11,14 +13,15 @@ ifications:
   or "the following disclaimer" should be understood to refer to this 
   amended document in its entirety.
 
-__________END: Copyright and License notice for pyeapiasync project
+!__________END: Copyright and License notice for pyeapiasync project
 
 
 
+# Originating project license
 
-__________START: Original Copyright and License notice
-__________From https://github.com/arista-eosplus/pyeapi/license
-__________Forked on February 26th, 2025
+!__________START: Original Copyright and License notice
+!__________From https://github.com/arista-eosplus/pyeapi/license
+!__________Forked on February 26th, 2025
 
 Copyright (c) 2016, Arista Networks EOS+
 All rights reserved.
@@ -48,4 +51,4 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-_________________END: Original Copyright and License notice
+!_________________END: Original Copyright and License notice

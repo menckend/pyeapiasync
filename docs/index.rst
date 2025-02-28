@@ -2,7 +2,9 @@
    :hidden:
 
    README <self>
+   ...
    license
+   ...
    contributing
    ...
    autoapi/index
