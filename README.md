@@ -12,5 +12,3 @@ and aiohttp.
 
 (pending)
 
-
-[License](./LICENSE.md)
