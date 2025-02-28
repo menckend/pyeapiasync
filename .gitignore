@@ -23,7 +23,8 @@ var/
 venv/
 .venv/
 .vscode/
-
+pyeapiasync/__pycache__/
+pyeapiasync/__pycache__/*
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
