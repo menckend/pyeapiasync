@@ -27,8 +27,8 @@ setup(
     url='https://github.com/menckend/pyeapiasync',
 
     # Author details
-    author='Arista EOS+ CS',
-    author_email='eosplus-dev@arista.com',
+    author='menckend; ported by pyeapi written by Arista EOS+ CS',
+    author_email='mencken@gmail.com',
 
     # Choose your license
     license='BSD-3',
@@ -39,7 +39,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 4 - Beta',
+        'Development Status :: 3 - Alpha',
 
         'Intended Audience :: System Administrators',
         'Topic :: System :: Networking',
@@ -49,7 +49,7 @@ setup(
         'Programming Language :: Python :: 3 :: Only'
     ],
 
-    keywords='networking arista eos eapi',
+    keywords='networking arista eos eapi async',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
@@ -59,7 +59,7 @@ setup(
     # project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['netaddr'],
+    install_requires=['netaddr', 'asyncio', 'aiohttp']
 
     # List additional dependencies here (e.g. development dependencies).
     # You can install these using the following syntax, for example:
