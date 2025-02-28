@@ -39,7 +39,7 @@ autodoc_typehints = "description"
 autoapi_template_dir = "_templates/autoapi"
 #autodoc_class_signature = "separated"
 autoapi_own_page_level = "module"
-autoapi_dirs = ['../ptovnetlab/']
+autoapi_dirs = ['../pyeapiasync/']
 autoapi_type = "python"
 autoapi_options = [
     "members",
