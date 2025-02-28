@@ -193,5 +193,16 @@ class SystemAsync(EntityAsync):
 
 def instance(api):
     """Returns an instance of SystemAsync
+
+    This method will create and return an instance of the SystemAsync object
+    passing the value of api to the object. The instance method is required
+    for the resource to be autoloaded by the AsyncNode object
+
+    Args:
+        api (AsyncNode): The api argument passes an instance of AsyncNode
+            to the resource
+
+    Returns:
+        An instance of SystemAsync
     """
     return SystemAsync(api)

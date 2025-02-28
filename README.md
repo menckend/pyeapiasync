@@ -9,7 +9,7 @@ and aiohttp.
 
 ## Documentation
 
-TBD
+(pending)
 
 * [Quickstart] [quickstart]
 * [Installation] [install]
@@ -58,10 +58,5 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-[pyeapi]: https://github.com/arista-eosplus/pyeapi
-[quickstart]: http://pyeapi.readthedocs.org/en/master/quickstart.html
-[install]: http://pyeapi.readthedocs.org/en/master/install.html
-[contribute]: http://pyeapi.readthedocs.org/en/master/contribute.html
-[modules]: http://pyeapi.readthedocs.org/en/master/modules.html
-[support]: http://pyeapi.readthedocs.org/en/master/support.html
-[rns]: http://pyeapi.readthedocs.org/en/master/release-notes.html
+[pyeapiasync]: https://github.com/menckend/pyeapiasync
+[docs]: https://menckend.github.io/pyeapisync

@@ -364,5 +364,16 @@ class OspfAsync(EntityAsync):
 
 def instance(api):
     """Returns an instance of OspfAsync
+
+    This method will create and return an instance of the OspfAsync object
+    passing the value of api to the object. The instance method is required
+    for the resource to be autoloaded by the AsyncNode object
+
+    Args:
+        api (AsyncNode): The api argument passes an instance of
+            AsyncNode to the resource
+
+    Returns:
+        An instance of OspfAsync
     """
     return OspfAsync(api)

@@ -31,8 +31,8 @@
 #
 """Module for working with EOS MLAG resources asynchronously
 
-The MlagAsync resource provides configuration management of global and interface
-MLAG settings on an EOS node asynchronously.
+The MlagAsync resource provides configuration management of global and
+    interface MLAG settings on an EOS node asynchronously.
 
 Parameters:
 
@@ -72,10 +72,11 @@ from pyeapiasync.api import EntityAsync
 
 
 class MlagAsync(EntityAsync):
-    """The MlagAsync class provides management of the MLAG configuration asynchronously
+    """The MlagAsync class provides management of the MLAG configuration
+        asynchronously
 
-    The MlagAsync class is derived from EntityAsync and provides an API for working
-    with the nodes MLAG configuraiton asynchronously.
+    The MlagAsync class is derived from EntityAsync and provides an API for
+        working with the nodes MLAG configuraiton asynchronously.
     """
 
     async def get(self):
@@ -176,7 +177,8 @@ class MlagAsync(EntityAsync):
         return dict(shutdown=value)
 
     async def _parse_interfaces(self):
-        """Scans the global config and returns the configured interfaces asynchronously
+        """Scans the global config and returns the configured interfaces
+            asynchronously
 
         Returns:
             dict: A dict object that is intended to be merged into the
@@ -211,7 +213,8 @@ class MlagAsync(EntityAsync):
         """
         return await self._configure_mlag('domain-id', value, default, disable)
 
-    async def set_local_interface(self, value=None, default=False, disable=False):
+    async def set_local_interface(self, value=None, default=False,
+                                  disable=False):
         """Configures the mlag local-interface value asynchronously
 
         Args:
@@ -223,7 +226,8 @@ class MlagAsync(EntityAsync):
         Returns:
             bool: Returns True if the commands complete successfully
         """
-        return await self._configure_mlag('local-interface', value, default, disable)
+        return await self._configure_mlag('local-interface', value,
+                                          default, disable)
 
     async def set_peer_address(self, value=None, default=False, disable=False):
         """Configures the mlag peer-address value asynchronously
@@ -237,7 +241,8 @@ class MlagAsync(EntityAsync):
         Returns:
             bool: Returns True if the commands complete successfully
         """
-        return await self._configure_mlag('peer-address', value, default, disable)
+        return await self._configure_mlag('peer-address', value,
+                                          default, disable)
 
     async def set_peer_link(self, value=None, default=False, disable=False):
         """Configures the mlag peer-link value asynchronously
@@ -270,8 +275,10 @@ class MlagAsync(EntityAsync):
         """
         return await self._configure_mlag('shutdown', True, default, disable)
 
-    async def set_mlag_id(self, name, value=None, default=False, disable=False):
-        """Configures the interface mlag value for the specified interface asynchronously
+    async def set_mlag_id(self, name, value=None, default=False,
+                          disable=False):
+        """Configures the interface mlag value for the specified interface
+            asynchronously
 
         Args:
             name (str): The interface to configure.  Valid values for the
@@ -293,11 +300,15 @@ class MlagAsync(EntityAsync):
 def instance(node):
     """Returns an instance of MlagAsync
 
+    This method will create and return an instance of the MlagAsync object
+    passing the value of node to the object. The instance method is required
+    for the resource to be autoloaded by the AsyncNode object
+
     Args:
-        node (Node): The node argument passes an instance of Node to the
-            resource
+        node (AsyncNode): The node argument passes an instance of
+            AsyncNode to the resource
 
     Returns:
-        object: An instance of MlagAsync
+        An instance of MlagAsync
     """
     return MlagAsync(node)

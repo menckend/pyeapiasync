@@ -416,13 +416,15 @@ class SwitchportsAsync(EntityCollectionAsync):
 
 def instance(node):
     """Returns an instance of SwitchportsAsync
-
     This method will create and return an instance of the SwitchportsAsync
-    object passing the value of node to the instance. The module method is
-    required for the resource to be autoloaded by the Node object
+    object passing the value of node to the object. The instance method is
+    required for the resource to be autoloaded by the AsyncNode object
 
     Args:
-        node (Node): The node argument provides an instance of Node to the
-            resource
+        node (AsyncNode): The node argument passes an instance of
+            AsyncNode to the resource
+
+    Returns:
+        An instance of SwitchportsAsync
     """
     return SwitchportsAsync(node)

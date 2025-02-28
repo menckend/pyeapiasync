@@ -82,7 +82,8 @@ class IpinterfacesAsync(EntityCollectionAsync):
                 interface does not exist then None is returned.
         """
         config = await self.get_block('interface %s' % name)
-        if name[0:2] in ['Et', 'Po'] and not SWITCHPORT_RE.search(config, re.M):
+        if name[0:2] in ['Et', 'Po'] and not SWITCHPORT_RE.search(config,
+                                                                  re.M):
             return None
 
         resource = dict(name=name)
@@ -106,7 +107,8 @@ class IpinterfacesAsync(EntityCollectionAsync):
         match = re.findall(r'ip address ([^\s]+)', config, re.M)
         primary, secondary = (match[0], match[1:]) if match else (None, None)
         return dict(address=primary,
-                    secondary=secondary) if secondary else dict(address=primary)
+                    secondary=secondary) if secondary else\
+            dict(address=primary)
 
     def _parse_mtu(self, config):
         """Parses the config block and returns the configured IP MTU value
@@ -125,7 +127,8 @@ class IpinterfacesAsync(EntityCollectionAsync):
         return dict(mtu=int(match.group(1)) if match else None)
 
     async def getall(self):
-        """Returns all of the IP interfaces found in the running-config asynchronously
+        """Returns all of the IP interfaces found in the running-config
+            asynchronously
 
         Returns:
             A Python dictionary object of key/value pairs keyed by interface
@@ -173,7 +176,8 @@ class IpinterfacesAsync(EntityCollectionAsync):
         return await self.configure(commands)
 
     async def delete(self, name):
-        """Deletes an IP interface instance from the running configuration asynchronously
+        """Deletes an IP interface instance from the running configuration
+            asynchronously
 
         This method will delete the logical IP interface for the specified
         physical interface.  If the interface does not have a logical
@@ -192,7 +196,8 @@ class IpinterfacesAsync(EntityCollectionAsync):
         commands = ['interface %s' % name, 'no ip address', 'switchport']
         return await self.configure(commands)
 
-    async def set_address(self, name, value=None, default=False, disable=False):
+    async def set_address(self, name, value=None, default=False,
+                          disable=False):
         """Configures the interface IP address asynchronously
 
         Args:
@@ -256,12 +261,15 @@ class IpinterfacesAsync(EntityCollectionAsync):
 def instance(node):
     """Returns an instance of IpinterfacesAsync
 
-    This method will create and return an instance of the IpinterfacesAsync object
-    passing the value of node to the instance.  This function is required
-    for the resource to be autoloaded by the Node object
+    This method will create and return an instance of the IpinterfacesAsync
+    object passing the value of node to the instance. This function is
+    required for the resource to be autoloaded by the AsyncNode object
 
     Args:
-        node (Node): The node argument provides an instance of Node to
-            the IpinterfacesAsync instance
+        node (AsyncNode): The node argument passes an instance of
+            AsyncNode to the resource
+
+    Returns:
+        An instance of IpinterfacesAsync
     """
     return IpinterfacesAsync(node)

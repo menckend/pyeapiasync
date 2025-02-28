@@ -199,11 +199,15 @@ class NtpAsync(EntityAsync):
 def instance(node):
     """Returns an instance of NtpAsync
 
+    This method will create and return an instance of the NtpAsync object
+    passing the value of node to the object. The instance method is required
+    for the resource to be autoloaded by the AsyncNode object
+
     Args:
-        node (Node): The node argument passes an instance of Node to the
-            resource
+        node (AsyncNode): The node argument passes an instance of
+            AsyncNode to the resource
 
     Returns:
-        object: An instance of NtpAsync
+        An instance of NtpAsync
     """
     return NtpAsync(node)

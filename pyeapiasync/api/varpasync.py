@@ -104,7 +104,8 @@ class VarpAsync(EntityCollectionAsync):
         interfaces = await VarpInterfacesAsync(self.node).getall()
         return dict(interfaces=interfaces)
 
-    async def set_mac_address(self, mac_address=None, default=False, disable=False):
+    async def set_mac_address(self, mac_address=None, default=False,
+                              disable=False):
         """Sets the virtual-router mac address asynchronously
 
         This method will set the switch virtual-router mac address. If a
@@ -169,7 +170,7 @@ class VarpInterfacesAsync(EntityCollectionAsync):
         return resources
 
     async def set_addresses(self, name, addresses=None, default=False,
-                           disable=False):
+                            disable=False):
         """Sets the virtual-router addresses for an interface asynchronously
 
         Args:

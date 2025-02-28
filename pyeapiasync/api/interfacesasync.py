@@ -84,12 +84,29 @@ def isvalidinterface(value):
 
 
 class InterfacesAsync(EntityCollectionAsync):
+    """The InterfacesAsync class provides a configuration resource for
+        interfaces
+
+    The InterfacesAsync class is derived from EntityCollectionAsync and
+        provides a standard set of methods for configuring interfaces on
+        an EOS node asynchronously. Different interface types are
+        managed by specific interface handler classes.
+    """
 
     def __init__(self, node, *args, **kwargs):
         super(InterfacesAsync, self).__init__(node, *args, **kwargs)
         self._instances = dict()
 
     async def get(self, name):
+        """Returns an interface resource object asynchronously
+
+        Args:
+            name (str): The interface name to retrieve from the running-config
+
+        Returns:
+            A Python dictionary object containing the interface configuration
+            or None if the interface does not exist
+        """
         return (await self.get_instance(name))[name]
 
     async def getall(self):
@@ -98,12 +115,10 @@ class InterfacesAsync(EntityCollectionAsync):
         Returns:
             A Python dictionary object containing all interface
             configuration indexed by interface name::
-
                 {
                     "Ethernet1": {...},
                     "Ethernet2": {...}
                 }
-
         """
         interfaces_re = re.compile(r'(?<=^interface\s)(.+)$', re.M)
         config = await self.config
@@ -116,9 +131,29 @@ class InterfacesAsync(EntityCollectionAsync):
         return response
 
     def __getattr__(self, name):
+        """Provides attribute access to interface handler methods
+
+        Args:
+            name (str): The method name to call on the interface handler
+
+        Returns:
+            A function wrapper that marshalls the request
+        """
         return ProxyCall(self.marshall, name)
 
     async def get_instance(self, interface):
+        """Returns an instance of the appropriate interface handler
+            asynchronously
+
+        This method will determine the interface type and return the
+            appropriate handler instance.
+
+        Args:
+            interface (str): The name of the interface
+
+        Returns:
+            The interface handler instance for the specified interface type
+        """
         cls = INTERFACE_CLASS_MAP.get(interface[0:2]) or BaseInterfaceAsync
         if cls in self._instances:
             instance = self._instances[cls]
@@ -128,6 +163,20 @@ class InterfacesAsync(EntityCollectionAsync):
         return instance
 
     async def marshall(self, name, *args, **kwargs):
+        """Marshalls calls to instance methods asynchronously
+
+        Args:
+            name (str): The method name to call on the interface handler
+            *args: The arguments to pass to the method
+            **kwargs: The keyword arguments to pass to the method
+
+        Returns:
+            The result of the method call
+
+        Raises:
+            ValueError: If the interface name is invalid
+            AttributeError: If the method does not exist on the instance
+        """
         interface = args[0]
         if not isvalidinterface(interface):
             raise ValueError('invalid interface {}'.format(interface))
@@ -888,6 +937,15 @@ class VxlanInterfaceAsync(BaseInterfaceAsync):
         return dict(source_interface=value)
 
     def _parse_multicast_group(self, config):
+        """Parses the config block and returns the vxlan multicast-group value
+
+        Args:
+            config (str): The Vxlan config block to scan
+
+        Returns:
+            dict: A dict object with the multicast_group value intended
+                to be merged into the resource dict
+        """
         match = re.search(r'vxlan multicast-group '
                           r'([\d]{3}\.[\d]+\.[\d]+\.[\d]+)',
                           config)
@@ -895,16 +953,43 @@ class VxlanInterfaceAsync(BaseInterfaceAsync):
         return dict(multicast_group=value)
 
     def _parse_multicast_decap(self, config):
+        """Parses the config block and returns the vxlan multicast-decap state
+
+        Args:
+            config (str): The Vxlan config block to scan
+
+        Returns:
+            dict: A dict object with the multicast_decap boolean value intended
+                to be merged into the resource dict
+        """
         val1 = 'vxlan multicast-group decap' in config
         val2 = 'no vxlan multicast-group decap' in config
         return dict(multicast_decap=bool(val1 ^ val2))
 
     def _parse_udp_port(self, config):
+        """Parses the config block and returns the vxlan udp-port value
+
+        Args:
+            config (str): The Vxlan config block to scan
+
+        Returns:
+            dict: A dict object with the udp_port value intended
+                to be merged into the resource dict
+        """
         match = re.search(r'vxlan udp-port (\d+)', config)
         value = int(match.group(1))
         return dict(udp_port=value)
 
     def _parse_vlans(self, config):
+        """Parses the config block and returns the vxlan vlan to vni mappings
+
+        Args:
+            config (str): The Vxlan config block to scan
+
+        Returns:
+            dict: A dict object with the vlans mapping value intended
+                to be merged into the resource dict
+        """
         vlans = frozenset(re.findall(r'vxlan vlan (\d+)', config))
         values = dict()
 
@@ -923,6 +1008,15 @@ class VxlanInterfaceAsync(BaseInterfaceAsync):
         return dict(vlans=values)
 
     def _parse_flood_list(self, config):
+        """Parses the config block and returns the vxlan flood list
+
+        Args:
+            config (str): The Vxlan config block to scan
+
+        Returns:
+            dict: A dict object with the flood_list value intended
+            to be merged into the resource dict
+        """
         match = re.search(r'^ *vxlan flood vtep +([\d. ]+)$', config, re.M)
         values = list()
         if match:
@@ -1100,7 +1194,10 @@ class VxlanInterfaceAsync(BaseInterfaceAsync):
             True if the command completes successfully
 
         """
-        return await self.configure_interface(name, CliVariants(f'vxlan vlan remove {vid} vni $', f'vxlan vlan remove {vid} vni'))
+        tinystr1 = f'vxlan vlan remove {vid} vni $'
+        tinystr2 = f'vxlan vlan remove {vid} vni'
+        return await self.configure_interface(name, CliVariants(tinystr1,
+                                                                tinystr2))
 
 
 INTERFACE_CLASS_MAP = {
@@ -1111,4 +1208,17 @@ INTERFACE_CLASS_MAP = {
 
 
 def instance(node):
+    """Returns an instance of InterfacesAsync
+
+    This method will create and return an instance of the InterfacesAsync
+    object passing the value of node to the object. The instance method
+    is required for the resource to be autoloaded by the AsyncNode object
+
+    Args:
+        node (AsyncNode): The node argument passes an instance of
+            AsyncNode to the resource
+
+    Returns:
+        An instance of InterfacesAsync
+    """
     return InterfacesAsync(node)

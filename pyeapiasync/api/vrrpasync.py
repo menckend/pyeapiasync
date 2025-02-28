@@ -50,14 +50,16 @@ PROPERTIES = ['primary_ip', 'priority', 'description', 'secondary_ip',
 
 
 class VrrpAsync(EntityCollectionAsync):
-    """The VrrpAsync class provides management of the VRRP configuration asynchronously
+    """The VrrpAsync class provides management of the VRRP configuration
+        asynchronously
 
-    The VrrpAsync class is derived from EntityCollectionAsync and provides an API for
-    working with the node's vrrp configurations asynchronously.
+    The VrrpAsync class is derived from EntityCollectionAsync and provides an
+        API for working with the node's vrrp configurations asynchronously.
     """
 
     async def get(self, name):
-        """Get the vrrp configurations for a single node interface asynchronously
+        """Get the vrrp configurations for a single node interface
+            asynchronously
 
         Args:
             name (string): The name of the interface for which vrrp
@@ -114,7 +116,8 @@ class VrrpAsync(EntityCollectionAsync):
         return result if result else None
 
     async def getall(self):
-        """Get the vrrp configurations for all interfaces on a node asynchronously
+        """Get the vrrp configurations for all interfaces on a node
+            asynchronously
 
         Returns:
             A dictionary containing the vrrp configurations on the node,
@@ -398,7 +401,7 @@ class VrrpAsync(EntityCollectionAsync):
         return cmd
 
     async def set_ip_version(self, name, vrid, value=None, disable=False,
-                       default=False, run=True):
+                             default=False, run=True):
         """Set the ip_version property of the vrrp asynchronously
 
         Args:
@@ -519,7 +522,7 @@ class VrrpAsync(EntityCollectionAsync):
         return cmds
 
     async def set_timers_advertise(self, name, vrid, value=None, disable=False,
-                             default=False, run=True):
+                                   default=False, run=True):
         """Set the timers_advertise property of the vrrp asynchronously
 
         Args:
@@ -566,8 +569,9 @@ class VrrpAsync(EntityCollectionAsync):
         # Otherwise return the formatted command
         return cmd
 
-    async def set_mac_addr_adv_interval(self, name, vrid, value=None, disable=False,
-                                  default=False, run=True):
+    async def set_mac_addr_adv_interval(self, name, vrid, value=None,
+                                        disable=False, default=False,
+                                        run=True):
         """Set the mac_addr_adv_interval property of the vrrp asynchronously
 
         Args:
@@ -612,7 +616,7 @@ class VrrpAsync(EntityCollectionAsync):
         return cmd
 
     async def set_preempt(self, name, vrid, value=None, disable=False,
-                    default=False, run=True):
+                          default=False, run=True):
         """Set the preempt property of the vrrp asynchronously
 
         Args:
@@ -653,8 +657,9 @@ class VrrpAsync(EntityCollectionAsync):
         # Otherwise return the formatted command
         return cmd
 
-    async def set_preempt_delay_min(self, name, vrid, value=None, disable=False,
-                              default=False, run=True):
+    async def set_preempt_delay_min(self, name, vrid,
+                                    value=None, disable=False,
+                                    default=False, run=True):
         """Set the preempt_delay_min property of the vrrp asynchronously
 
         Args:
@@ -695,8 +700,8 @@ class VrrpAsync(EntityCollectionAsync):
         # Otherwise return the formatted command
         return cmd
 
-    async def set_preempt_delay_reload(self, name, vrid, value=None, disable=False,
-                                 default=False, run=True):
+    async def set_preempt_delay_reload(self, name, vrid, value=None,
+                                       disable=False, default=False, run=True):
         """Set the preempt_delay_reload property of the vrrp asynchronously
 
         Args:
@@ -738,7 +743,7 @@ class VrrpAsync(EntityCollectionAsync):
         return cmd
 
     async def set_delay_reload(self, name, vrid, value=None, disable=False,
-                         default=False, run=True):
+                               default=False, run=True):
         """Set the delay_reload property of the vrrp asynchronously
 
         Args:
@@ -942,7 +947,7 @@ class VrrpAsync(EntityCollectionAsync):
         return cmds
 
     async def set_bfd_ip(self, name, vrid, value=None, disable=False,
-                   default=False, run=True):
+                         default=False, run=True):
         """Set the bfd_ip property of the vrrp asynchronously
 
         Args:
@@ -1008,74 +1013,92 @@ class VrrpAsync(EntityCollectionAsync):
         primary_ip = vrconf.get('primary_ip', '__NONE__')
         if primary_ip != '__NONE__':
             if primary_ip in ('no', None):
-                cmd = await self.set_primary_ip(name, vrid, value=None,
-                                          disable=True, run=False)
+                cmd = \
+                    await self.set_primary_ip(name, vrid, value=None,
+                                              disable=True, run=False)
             elif primary_ip == 'default':
-                cmd = await self.set_primary_ip(name, vrid, value=None,
-                                          default=True, run=False)
+                cmd = \
+                    await self.set_primary_ip(name, vrid, value=None,
+                                              default=True, run=False)
             else:
-                cmd = await self.set_primary_ip(name, vrid, value=primary_ip,
-                                          run=False)
+                cmd = \
+                    await self.set_primary_ip(name, vrid, value=primary_ip,
+                                              run=False)
             commands.append(cmd)
 
         priority = vrconf.get('priority', '__NONE__')
         if priority != '__NONE__':
             if priority in ('no', None):
-                cmd = await self.set_priority(name, vrid, value=priority,
-                                        disable=True, run=False)
+                cmd = \
+                    await self.set_priority(name, vrid, value=priority,
+                                            disable=True, run=False)
             elif priority == 'default':
-                cmd = await self.set_priority(name, vrid, value=priority,
-                                        default=True, run=False)
+                cmd = \
+                    await self.set_priority(name, vrid, value=priority,
+                                            default=True, run=False)
             else:
-                cmd = await self.set_priority(name, vrid, value=priority, run=False)
+                cmd = \
+                    await self.set_priority(name, vrid, value=priority,
+                                            run=False)
             commands.append(cmd)
 
         description = vrconf.get('description', '__NONE__')
         if description != '__NONE__':
             if description in ('no', None):
-                cmd = await self.set_description(name, vrid, value=description,
-                                           disable=True, run=False)
+                cmd = \
+                    await self.set_description(name, vrid, value=description,
+                                               disable=True, run=False)
             elif description == 'default':
-                cmd = await self.set_description(name, vrid, value=description,
-                                           default=True, run=False)
+                cmd = \
+                    await self.set_description(name, vrid, value=description,
+                                               default=True, run=False)
             else:
-                cmd = await self.set_description(name, vrid, value=description,
-                                           run=False)
+                cmd = \
+                    await self.set_description(name, vrid, value=description,
+                                               run=False)
             commands.append(cmd)
 
         ip_version = vrconf.get('ip_version', '__NONE__')
         if ip_version != '__NONE__':
             if ip_version in ('no', None):
-                cmd = await self.set_ip_version(name, vrid, value=ip_version,
-                                          disable=True, run=False)
+                cmd = \
+                    await self.set_ip_version(name, vrid, value=ip_version,
+                                              disable=True, run=False)
             elif ip_version == 'default':
-                cmd = await self.set_ip_version(name, vrid, value=ip_version,
-                                          default=True, run=False)
+                cmd = \
+                    await self.set_ip_version(name, vrid, value=ip_version,
+                                              default=True, run=False)
             else:
-                cmd = await self.set_ip_version(name, vrid, value=ip_version,
-                                          run=False)
+                cmd = \
+                    await self.set_ip_version(name, vrid, value=ip_version,
+                                              run=False)
             commands.append(cmd)
 
         secondary_ip = vrconf.get('secondary_ip', '__NONE__')
         if secondary_ip != '__NONE__':
-            cmds = await self.set_secondary_ips(name, vrid, secondary_ip, run=False)
+            cmds = \
+                await self.set_secondary_ips(name, vrid, secondary_ip,
+                                             run=False)
             for cmd in cmds:
                 commands.append(cmd)
 
         timers_advertise = vrconf.get('timers_advertise', '__NONE__')
         if timers_advertise != '__NONE__':
             if timers_advertise in ('no', None):
-                cmd = await self.set_timers_advertise(name, vrid,
-                                                value=timers_advertise,
-                                                disable=True, run=False)
+                cmd = \
+                    await self.set_timers_advertise(name, vrid,
+                                                    value=timers_advertise,
+                                                    disable=True, run=False)
             elif timers_advertise == 'default':
-                cmd = await self.set_timers_advertise(name, vrid,
-                                                value=timers_advertise,
-                                                default=True, run=False)
+                cmd = \
+                    await self.set_timers_advertise(name, vrid,
+                                                    value=timers_advertise,
+                                                    default=True, run=False)
             else:
-                cmd = await self.set_timers_advertise(name, vrid,
-                                                value=timers_advertise,
-                                                run=False)
+                cmd = \
+                    await self.set_timers_advertise(name, vrid,
+                                                    value=timers_advertise,
+                                                    run=False)
             commands.append(cmd)
 
         mac_addr_adv_interval = \
@@ -1083,94 +1106,113 @@ class VrrpAsync(EntityCollectionAsync):
         if mac_addr_adv_interval != '__NONE__':
             if mac_addr_adv_interval in ('no', None):
                 cmd = \
-                    await self.set_mac_addr_adv_interval(name, vrid,
-                                                   value=mac_addr_adv_interval,
-                                                   disable=True, run=False)
+                    await self.\
+                    set_mac_addr_adv_interval(name, vrid,
+                                              value=mac_addr_adv_interval,
+                                              disable=True, run=False)
             elif mac_addr_adv_interval == 'default':
                 cmd = \
-                    await self.set_mac_addr_adv_interval(name, vrid,
-                                                   value=mac_addr_adv_interval,
-                                                   default=True, run=False)
+                    await self.\
+                    set_mac_addr_adv_interval(name, vrid,
+                                              value=mac_addr_adv_interval,
+                                              default=True, run=False)
             else:
                 cmd = \
-                    await self.set_mac_addr_adv_interval(name, vrid,
-                                                   value=mac_addr_adv_interval,
-                                                   run=False)
+                    await self.\
+                    set_mac_addr_adv_interval(name, vrid,
+                                              value=mac_addr_adv_interval,
+                                              run=False)
             commands.append(cmd)
 
         preempt = vrconf.get('preempt', '__NONE__')
         if preempt != '__NONE__':
             if preempt in ('no', False):
-                cmd = await self.set_preempt(name, vrid, value=preempt,
-                                       disable=True, run=False)
+                cmd = \
+                    await self.set_preempt(name, vrid, value=preempt,
+                                           disable=True, run=False)
             elif preempt == 'default':
-                cmd = await self.set_preempt(name, vrid, value=preempt,
-                                       default=True, run=False)
+                cmd = \
+                    await self.set_preempt(name, vrid, value=preempt,
+                                           default=True, run=False)
             else:
-                cmd = await self.set_preempt(name, vrid, value=preempt, run=False)
+                cmd = \
+                    await self.set_preempt(name, vrid,
+                                           value=preempt, run=False)
             commands.append(cmd)
 
         preempt_delay_min = vrconf.get('preempt_delay_min', '__NONE__')
         if preempt_delay_min != '__NONE__':
             if preempt_delay_min in ('no', None):
-                cmd = await self.set_preempt_delay_min(name, vrid,
-                                                 value=preempt_delay_min,
-                                                 disable=True, run=False)
+                cmd = \
+                    await self.set_preempt_delay_min(name, vrid,
+                                                     value=preempt_delay_min,
+                                                     disable=True, run=False)
             elif preempt_delay_min == 'default':
                 cmd = await self.set_preempt_delay_min(name, vrid,
-                                                 value=preempt_delay_min,
-                                                 default=True, run=False)
+                                                       value=preempt_delay_min,
+                                                       default=True, run=False)
             else:
                 cmd = await self.set_preempt_delay_min(name, vrid,
-                                                 value=preempt_delay_min,
-                                                 run=False)
+                                                       value=preempt_delay_min,
+                                                       run=False)
             commands.append(cmd)
 
         preempt_delay_reload = vrconf.get('preempt_delay_reload', '__NONE__')
         if preempt_delay_reload != '__NONE__':
             if preempt_delay_reload in ('no', None):
-                cmd = await self.set_preempt_delay_reload(name, vrid,
-                                                    value=preempt_delay_reload,
-                                                    disable=True, run=False)
+                cmd = await self.\
+                    set_preempt_delay_reload(name, vrid,
+                                             value=preempt_delay_reload,
+                                             disable=True, run=False)
             elif preempt_delay_reload == 'default':
-                cmd = await self.set_preempt_delay_reload(name, vrid,
-                                                    value=preempt_delay_reload,
-                                                    default=True, run=False)
+                cmd = \
+                    await self.\
+                    set_preempt_delay_reload(name, vrid,
+                                             value=preempt_delay_reload,
+                                             default=True, run=False)
             else:
-                cmd = await self.set_preempt_delay_reload(name, vrid,
-                                                    value=preempt_delay_reload,
-                                                    run=False)
+                cmd = await self.\
+                    set_preempt_delay_reload(name, vrid,
+                                             value=preempt_delay_reload,
+                                             run=False)
             commands.append(cmd)
 
         delay_reload = vrconf.get('delay_reload', '__NONE__')
         if delay_reload != '__NONE__':
             if delay_reload in ('no', None):
-                cmd = await self.set_delay_reload(name, vrid, value=delay_reload,
-                                            disable=True, run=False)
+                cmd = \
+                    await self.set_delay_reload(name, vrid, value=delay_reload,
+                                                disable=True, run=False)
             elif delay_reload == 'default':
-                cmd = await self.set_delay_reload(name, vrid, value=delay_reload,
-                                            default=True, run=False)
+                cmd = \
+                    await self.set_delay_reload(name, vrid, value=delay_reload,
+                                                default=True, run=False)
             else:
-                cmd = await self.set_delay_reload(name, vrid, value=delay_reload,
-                                            run=False)
+                cmd = \
+                    await self.set_delay_reload(name, vrid, value=delay_reload,
+                                                run=False)
             commands.append(cmd)
 
         track = vrconf.get('track', '__NONE__')
         if track != '__NONE__':
-            cmds = await self.set_tracks(name, vrid, track, run=False)
+            cmds = \
+                await self.set_tracks(name, vrid, track, run=False)
             for cmd in cmds:
                 commands.append(cmd)
 
         bfd_ip = vrconf.get('bfd_ip', '__NONE__')
         if bfd_ip != '__NONE__':
             if bfd_ip in ('no', None):
-                cmd = await self.set_bfd_ip(name, vrid, value=bfd_ip,
-                                      disable=True, run=False)
+                cmd = \
+                    await self.set_bfd_ip(name, vrid, value=bfd_ip,
+                                          disable=True, run=False)
             elif bfd_ip == 'default':
-                cmd = await self.set_bfd_ip(name, vrid, value=bfd_ip,
-                                      default=True, run=False)
+                cmd = \
+                    await self.set_bfd_ip(name, vrid, value=bfd_ip,
+                                          default=True, run=False)
             else:
-                cmd = await self.set_bfd_ip(name, vrid, value=bfd_ip, run=False)
+                cmd = \
+                    await self.set_bfd_ip(name, vrid, value=bfd_ip, run=False)
             commands.append(cmd)
 
         # Send the commands to the requested interface
