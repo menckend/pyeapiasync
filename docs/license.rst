@@ -1,6 +1,13 @@
-.. _license
+.. toctree::
+   :hidden:
 
-.. include:: ../LICENSE.md
+   README <self>
+   ...
+   license
+   ...
+   contributing
+   ...
+   autoapi/index
+
+.. include:: ../license.md
   :parser: myst_parser.docutils_
-
-

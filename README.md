@@ -5,6 +5,7 @@ from version 1.0.4 and refactored for asynchronous operation using asyncio
 and aiohttp.
 
 [pyeapiasync repository](https://github.com/menckend/pyeapiasync)
+
 [pyeapi documentation](https://menckend.github.io/pyeapisync)
 
 
