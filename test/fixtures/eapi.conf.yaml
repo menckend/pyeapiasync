@@ -1,7 +1,0 @@
----
-:username: test
-:password: test
-:use_ssl: true
-:port: 443
-:hostname: 192.168.122.10
-

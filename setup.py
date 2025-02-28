@@ -20,14 +20,14 @@ setup(
     # https://packaging.python.org/en/latest/single_source_version.html
     version=version,
 
-    description='Async Version Python Client for eAPI',
+    description='Async Version Python of Client for eAPI',
     long_description=long_description,
 
     # The project's main homepage.
     url='https://github.com/menckend/pyeapiasync',
 
     # Author details
-    author='menckend; ported by pyeapi written by Arista EOS+ CS',
+    author='menckend; ported from pyeapi written by Arista EOS+ CS',
     author_email='mencken@gmail.com',
 
     # Choose your license
@@ -53,7 +53,7 @@ setup(
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
+    # packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
 
     # List run-time dependencies here.  These will be installed by pip when your
     # project is installed. For an analysis of "install_requires" vs pip's
@@ -77,12 +77,12 @@ def install():
         return False
 
 # Use the following to dynamically build pyeapi module documentation
-if install() and environ.get('READTHEDOCS'):
-    print('This method is only called by READTHEDOCS.')
-    from subprocess import Popen
-    proc = Popen(['make', 'modules'], cwd='docs/')
-    (_, err) = proc.communicate()
-    return_code = proc.wait()
+#if install() and environ.get('READTHEDOCS'):
+#    print('This method is only called by READTHEDOCS.')
+#    from subprocess import Popen
+#    proc = Popen(['make', 'modules'], cwd='docs/')
+#    (_, err) = proc.communicate()
+#    return_code = proc.wait()
 
-    if return_code or err:
-        raise ('Failed to make modules.(%s:%s)' % (return_code, err))
+#    if return_code or err:
+#        raise ('Failed to make modules.(%s:%s)' % (return_code, err))
