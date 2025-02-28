@@ -4,30 +4,17 @@ A fork of the Python library for Arista's eAPI command implementation.  Forked
 from version 1.0.4 and refactored for asynchronous operation using asyncio 
 and aiohttp.
 
-
+[pyeapiasync repository](https://github.com/menckend/pyeapiasync)
+[pyeapi documentation](https://menckend.github.io/pyeapisync)
 
 
 ## Documentation
 
 (pending)
 
-* [Quickstart] [quickstart]
-* [Installation] [install]
-* [Modules] [modules]
-* [Release Notes] [rns]
-* [Contribute] [contribute]
 
-### Building Local Documentation
 
-If you cannot access readthedocs.org you have the option of building the
-documentation locally.
-
-1. ``pip install -r dev-requirements.txt``
-2. ``cd docs``
-3. ``make html``
-4. ``open _build/html/index.html``
-
-# License
+# License (originating source)
 
 Copyright (c) 2015, Arista Networks EOS+
 All rights reserved.
@@ -57,6 +44,3 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-[pyeapiasync]: https://github.com/menckend/pyeapiasync
-[docs]: https://menckend.github.io/pyeapisync
