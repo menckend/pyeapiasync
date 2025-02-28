@@ -1,55 +1,15 @@
 # Async re-factor of Arista eAPI Python Library
 
-Intent is to refactor all modules that rely on synchronous libraries for network connectivity to operate asynchronously, using the asyncio framework.
-
-Work (VERY much) in progress.
-
-Modules refactored for asynchronous operation:
-
-* Core
-  * client.py -> clientasync.py
-  * eapilib.py -> eapilibasync.py
-* api
-  * abstract.py -> abstractasync.py
-  * acl.py -> aclasync.py
-  * bgp.py -> bgpasync.py
-  * interfaces.py -> interfacesasync.py
-  * ipinterfaces.py -> ipinterfacesasync.py
-  * mlag.py -> mlagasync.py
-  * ntp.py -> ntpasync.py
-  * ospf.py -> ospfasync.py
-  * routemaps.py -> routemapsasync.py
-  * staticroute.py -> staticrouteasync.py
-  * stp.py -> stpasync.py
-  * switchports.py -> switchportsasync.py
-  * system.py -> systemasync.py
-  * users.py -> usersasync.py
-  * varp.py -> varpasync.py
-  * vlans.py -> vlansasync.py
-  * vrfs.py -> vrfsasync.py
-  * vrrp.py -> vrrpasync.py
+A fork of the Python library for Arista's eAPI command implementation.  Forked 
+from version 1.0.4 and refactored for asynchronous operation using asyncio 
+and aiohttp.
 
 
-# Arista eAPI Python Library
 
-[![Build Status](https://travis-ci.org/arista-eosplus/pyeapi.svg?branch=develop)](https://travis-ci.org/arista-eosplus/pyeapi) [![Coverage Status](https://coveralls.io/repos/github/arista-eosplus/pyeapi/badge.svg?branch=develop)](https://coveralls.io/github/arista-eosplus/pyeapi?branch=develop) [![Documentation Status](https://readthedocs.org/projects/pyeapi/badge/?version=latest)](http://readthedocs.org/docs/pyeapi/en/latest/?badge=latest)
-
-The Python library for Arista's eAPI command API implementation provides a
-client API work using eAPI and communicating with EOS nodes.  The Python
-library can be used to communicate with EOS either locally (on-box) or remotely
-(off-box).  It uses a standard INI-style configuration file to specify one or
-more nodes and connection properties.
-
-The pyeapi library also provides an API layer for building native Python
-objects to interact with the destination nodes. The API layer is a convenient
-implementation for working with the EOS configuration and is extensible for
-developing custom implementations.
-
-This library is freely provided to the open source community for building
-robust applications using Arista EOS.  Support is provided as best effort
-through Github issues.
 
 ## Documentation
+
+TBD
 
 * [Quickstart] [quickstart]
 * [Installation] [install]

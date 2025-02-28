@@ -39,21 +39,21 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import random_int, random_string, get_fixture
 from unittest.mock import patch
 
-import pyeapi.client
-import pyeapi.eapilib
+import pyeapiasync.client
+import pyeapiasync.eapilib
 
 
 class TestClient(unittest.TestCase):
 
     def setUp(self):
-        pyeapi.client.load_config(filename=get_fixture('dut.conf'))
-        config = pyeapi.client.config
+        pyeapiasync.client.load_config(filename=get_fixture('dut.conf'))
+        config = pyeapiasync.client.config
 
         self.duts = list()
         for name in config.sections():
             if name.startswith('connection:') and 'localhost' not in name:
                 name = name.split(':')[1]
-                dut = pyeapi.client.connect_to(name)
+                dut = pyeapiasync.client.connect_to(name)
                 self.duts.append(dut)
                 if dut._enablepwd is not None:
                     # If enable password defined for dut, set the
@@ -67,14 +67,14 @@ class TestClient(unittest.TestCase):
         error_string = ('Unauthorized. Unable to authenticate user: Bad'
                         ' username/password combination')
         for dut in self.duts:
-            temp_node = pyeapi.connect(host=dut.settings['host'],
+            temp_node = pyeapiasync.connect(host=dut.settings['host'],
                                        transport=dut.settings['transport'],
                                        username='wrong', password='nope',
                                        port=dut.settings['port'],
                                        return_node=True)
             try:
                 temp_node.run_commands('show version')
-            except pyeapi.eapilib.ConnectionError as err:
+            except pyeapiasync.eapilib.ConnectionError as err:
                 self.assertEqual(err.message, error_string)
 
     def test_populate_version_properties(self):
@@ -116,7 +116,7 @@ class TestClient(unittest.TestCase):
 
     def test_no_enable_single_command_no_auth(self):
         for dut in self.duts:
-            with self.assertRaises(pyeapi.eapilib.CommandError):
+            with self.assertRaises(pyeapiasync.eapilib.CommandError):
                 dut.run_commands(['disable',
                     'show running-config'], 'json', send_enable=False)
 
@@ -211,7 +211,7 @@ class TestClient(unittest.TestCase):
             else:
                 # Verify exception thrown for EOS version that does not
                 # support autoComplete parameter with EAPI
-                with self.assertRaises(pyeapi.eapilib.CommandError):
+                with self.assertRaises(pyeapiasync.eapilib.CommandError):
                     dut.connection.execute(['sh ver'], encoding='json',
                                            autoComplete=True)
 
@@ -231,7 +231,7 @@ class TestClient(unittest.TestCase):
             else:
                 # Verify exception thrown for EOS version that does not
                 # support expandAliases parameter with EAPI
-                with self.assertRaises(pyeapi.eapilib.CommandError):
+                with self.assertRaises(pyeapiasync.eapilib.CommandError):
                     dut.connection.execute(['test'], encoding='json',
                                            expandAliases=True)
 
@@ -242,7 +242,7 @@ class TestClient(unittest.TestCase):
             dut.connection.transport.timeout = 0.001
             try:
                 dut.connection.execute(['show version'], encoding='json')
-            except pyeapi.eapilib.ConnectionError as err:
+            except pyeapiasync.eapilib.ConnectionError as err:
                 error_msg = 'Socket error during eAPI connection: timed out'
                 self.assertEqual(err.message, error_msg)
             logexception.assert_called_once()
@@ -263,14 +263,14 @@ class TestClient(unittest.TestCase):
 class TestNode(unittest.TestCase):
 
     def setUp(self):
-        pyeapi.client.load_config(filename=get_fixture('dut.conf'))
-        config = pyeapi.client.config
+        pyeapiasync.client.load_config(filename=get_fixture('dut.conf'))
+        config = pyeapiasync.client.config
 
         self.duts = list()
         for name in config.sections():
             if name.startswith('connection:') and 'localhost' not in name:
                 name = name.split(':')[1]
-                self.duts.append(pyeapi.client.connect_to(name))
+                self.duts.append(pyeapiasync.client.connect_to(name))
 
         if not hasattr(self, 'assertRegex'):
             self.assertRegex = self.assertRegexpMatches
@@ -311,7 +311,7 @@ class TestNode(unittest.TestCase):
                                    strict=True, send_enable=False)
 
                     self.fail('A CommandError should have been raised')
-                except pyeapi.eapilib.CommandError as exc:
+                except pyeapiasync.eapilib.CommandError as exc:
                     # Validate the properties of the exception
                     self.assertEqual( len(exc.trace),
                         3 if cmd == 'show running-config' else 4 )

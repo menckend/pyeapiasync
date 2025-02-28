@@ -35,9 +35,9 @@ import string
 import unittest
 
 from unittest.mock import MagicMock as Mock
-from pyeapi.utils import CliVariants
+from pyeapiasync.utils import CliVariants
 
-from pyeapi.client import Node
+from pyeapiasync.client import Node
 
 def get_fixtures_path():
     return os.path.join(os.path.dirname(__file__), '../fixtures')

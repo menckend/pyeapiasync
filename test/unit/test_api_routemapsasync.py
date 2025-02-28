@@ -38,14 +38,14 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, async_function, random_string
 from testlib import AsyncEapiConfigUnitTest
 
-import pyeapi.api.routemapsasync
+import pyeapiasync.api.routemapsasync
 
 
 class TestApiRoutemapsAsync(AsyncEapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiRoutemapsAsync, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.routemapsasync.RoutemapsAsync(None)
+        self.instance = pyeapiasync.api.routemapsasync.RoutemapsAsync(None)
         self.config = open(get_fixture('running_config.routemaps')).read()
         # Mock the config property to return the test config
         self.instance.get_block = unittest.mock.AsyncMock()
@@ -53,8 +53,8 @@ class TestApiRoutemapsAsync(AsyncEapiConfigUnitTest):
         self.instance.configure = unittest.mock.AsyncMock(return_value=True)
 
     def test_instance(self):
-        result = pyeapi.api.routemapsasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.routemapsasync.RoutemapsAsync)
+        result = pyeapiasync.api.routemapsasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.routemapsasync.RoutemapsAsync)
 
     async def test_get(self):
         # Mock _parse_entries to return a fixed structure

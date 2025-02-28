@@ -37,7 +37,7 @@ Example script for using the async API modules in pyeapi
 
 import asyncio
 import sys
-import pyeapi
+import pyeapiasync
 
 
 async def get_vlans(node):
@@ -49,19 +49,19 @@ async def get_vlans(node):
 async def create_vlan(node, vlan_id, vlan_name):
     """Create a new VLAN on the device asynchronously"""
     vlans = node.api['vlansasync']
-    
+
     # Create the VLAN
     result = await vlans.create(vlan_id)
     if not result:
         print(f"Failed to create VLAN {vlan_id}")
         return False
-    
+
     # Set the VLAN name
     result = await vlans.set_name(vlan_id, vlan_name)
     if not result:
         print(f"Failed to set name for VLAN {vlan_id}")
         return False
-    
+
     return True
 
 
@@ -75,11 +75,12 @@ async def main():
     """Main function to demonstrate async API functionality"""
     # Connect to the device
     try:
-        # You can use connect_to_async to connect using a profile from eapi.conf
+        # You can use connect_to_async to connect using a profile
+        #   from eapi.conf
         # node = await pyeapi.connect_to_async('veos01')
-        
+
         # Or connect directly with parameters
-        node = await pyeapi.connect_async(
+        node = await pyeapiasync.connect_async(
             transport='https',
             host='localhost',
             username='admin',
@@ -87,15 +88,15 @@ async def main():
             port=443,
             return_node=True
         )
-        
+
         # Load the API modules
         node.api_autoload()
-        
+
         # Get all VLANs
         print("Getting all VLANs...")
         vlans = await get_vlans(node)
         print(f"Current VLANs: {vlans}")
-        
+
         # Create a new VLAN
         vlan_id = '100'
         vlan_name = 'Test_VLAN_100'
@@ -103,27 +104,27 @@ async def main():
         result = await create_vlan(node, vlan_id, vlan_name)
         if result:
             print(f"Successfully created VLAN {vlan_id}")
-        
+
         # Get the VLANs again to see the new VLAN
         print("Getting all VLANs after creation...")
         vlans = await get_vlans(node)
         print(f"Updated VLANs: {vlans}")
-        
+
         # Delete the VLAN
         print(f"Deleting VLAN {vlan_id}...")
         result = await delete_vlan(node, vlan_id)
         if result:
             print(f"Successfully deleted VLAN {vlan_id}")
-        
+
         # Get the VLANs again to confirm deletion
         print("Getting all VLANs after deletion...")
         vlans = await get_vlans(node)
         print(f"Final VLANs: {vlans}")
-        
+
     except Exception as e:
         print(f"Error: {e}")
         return 1
-    
+
     return 0
 
 

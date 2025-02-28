@@ -39,13 +39,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, async_function
 from testlib import AsyncEapiConfigUnitTest
 
-import pyeapi.api.aclasync
+import pyeapiasync.api.aclasync
 
 
 class TestApiAclAsyncFunctions(unittest.TestCase):
     """Tests for non-async functions in the aclasync module"""
     def test_mask_to_prefixlen(self):
-        result = pyeapi.api.aclasync.mask_to_prefixlen('255.255.255.0')
+        result = pyeapiasync.api.aclasync.mask_to_prefixlen('255.255.255.0')
         self.assertEqual(result, 24)
 
 
@@ -53,14 +53,14 @@ class TestApiAclsAsync(AsyncEapiConfigUnitTest):
 
     def setUp(self):
         super().setUp()
-        self.instance = pyeapi.api.aclasync.AclsAsync(None)
+        self.instance = pyeapiasync.api.aclasync.AclsAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the config property to return the test config
         self.instance.config = self.config
 
     def test_instance(self):
-        result = pyeapi.api.aclasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.aclasync.AclsAsync)
+        result = pyeapiasync.api.aclasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.aclasync.AclsAsync)
 
     async def test_getall(self):
         result = await self.instance.getall()
@@ -78,25 +78,25 @@ class TestApiAclsAsync(AsyncEapiConfigUnitTest):
 
     async def test_get_instance(self):
         result = await self.instance.get_instance('test')
-        self.assertIsInstance(result, pyeapi.api.aclasync.StandardAclsAsync)
+        self.assertIsInstance(result, pyeapiasync.api.aclasync.StandardAclsAsync)
         self.instance._instances['test'] = result
         result = await self.instance.get_instance('exttest')
-        self.assertIsInstance(result, pyeapi.api.aclasync.ExtendedAclsAsync)
+        self.assertIsInstance(result, pyeapiasync.api.aclasync.ExtendedAclsAsync)
         result = await self.instance.get_instance('unconfigured')
         self.assertIsInstance(result, dict)
         self.assertIsNone(result['unconfigured'])
         result = await self.instance.get_instance('test')
-        self.assertIsInstance(result, pyeapi.api.aclasync.StandardAclsAsync)
+        self.assertIsInstance(result, pyeapiasync.api.aclasync.StandardAclsAsync)
         self.assertEqual(len(self.instance._instances), 2)
 
     async def test_create_instance_standard(self):
         result = await self.instance.create_instance('test', 'standard')
-        self.assertIsInstance(result, pyeapi.api.aclasync.StandardAclsAsync)
+        self.assertIsInstance(result, pyeapiasync.api.aclasync.StandardAclsAsync)
         self.assertEqual(len(self.instance._instances), 1)
 
     async def test_create_instance_extended(self):
         result = await self.instance.create_instance('exttest', 'extended')
-        self.assertIsInstance(result, pyeapi.api.aclasync.ExtendedAclsAsync)
+        self.assertIsInstance(result, pyeapiasync.api.aclasync.ExtendedAclsAsync)
         self.assertEqual(len(self.instance._instances), 1)
 
     async def test_create_standard(self):
@@ -145,7 +145,7 @@ class TestApiStandardAclsAsync(AsyncEapiConfigUnitTest):
 
     def setUp(self):
         super().setUp()
-        self.instance = pyeapi.api.aclasync.StandardAclsAsync(None)
+        self.instance = pyeapiasync.api.aclasync.StandardAclsAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the get_block method to return the appropriate config section
         self.instance.get_block = unittest.mock.AsyncMock()
@@ -244,7 +244,7 @@ class TestApiExtendedAclsAsync(AsyncEapiConfigUnitTest):
 
     def setUp(self):
         super().setUp()
-        self.instance = pyeapi.api.aclasync.ExtendedAclsAsync(None)
+        self.instance = pyeapiasync.api.aclasync.ExtendedAclsAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the get_block method to return the appropriate config section
         self.instance.get_block = unittest.mock.AsyncMock()

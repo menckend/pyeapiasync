@@ -38,7 +38,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, random_string, async_function
 from testlib import AsyncEapiConfigUnitTest
 
-import pyeapi.api.stpasync
+import pyeapiasync.api.stpasync
 
 
 def get_running_config():
@@ -49,23 +49,23 @@ class TestApiStpAsync(AsyncEapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiStpAsync, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.stpasync.StpAsync(None)
+        self.instance = pyeapiasync.api.stpasync.StpAsync(None)
         self.config = open(get_running_config()).read()
         # Mock the get_block method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
         self.instance.configure = unittest.mock.AsyncMock(return_value=True)
 
     def test_instance(self):
-        result = pyeapi.api.stpasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.stpasync.StpAsync)
+        result = pyeapiasync.api.stpasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.stpasync.StpAsync)
 
     def test_interfaces(self):
         result = self.instance.interfaces
-        self.assertIsInstance(result, pyeapi.api.stpasync.StpInterfacesAsync)
+        self.assertIsInstance(result, pyeapiasync.api.stpasync.StpInterfacesAsync)
 
     def test_instances(self):
         result = self.instance.instances
-        self.assertIsInstance(result, pyeapi.api.stpasync.StpInstancesAsync)
+        self.assertIsInstance(result, pyeapiasync.api.stpasync.StpInstancesAsync)
 
     async def test_set_mode_with_value(self):
         for value in ['mstp', 'none']:
@@ -95,7 +95,7 @@ class TestApiStpInterfacesAsync(AsyncEapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiStpInterfacesAsync, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.stpasync.StpInterfacesAsync(None)
+        self.instance = pyeapiasync.api.stpasync.StpInterfacesAsync(None)
         self.config = open(get_running_config()).read()
         # Mock the get_block method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)

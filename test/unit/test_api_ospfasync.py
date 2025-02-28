@@ -38,22 +38,22 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, async_function
 from testlib import AsyncEapiConfigUnitTest
 
-import pyeapi.api.ospfasync
+import pyeapiasync.api.ospfasync
 
 
 class TestApiOspfAsync(AsyncEapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiOspfAsync, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.ospfasync.instance(None)
+        self.instance = pyeapiasync.api.ospfasync.instance(None)
         self.config = open(get_fixture('running_config.ospf')).read()
         # Mock the get_block method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
         self.instance.configure = unittest.mock.AsyncMock(return_value=True)
 
     def test_instance(self):
-        result = pyeapi.api.ospfasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.ospfasync.OspfAsync)
+        result = pyeapiasync.api.ospfasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.ospfasync.OspfAsync)
 
     async def test_get_no_vrf(self):
         result = await self.instance.get()
@@ -180,7 +180,7 @@ class TestApiNegOspfAsync(AsyncEapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiNegOspfAsync, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.ospfasync.instance(None)
+        self.instance = pyeapiasync.api.ospfasync.instance(None)
         self.config = open(get_fixture('running_config.bgp')).read()
         # Mock the get_block method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)

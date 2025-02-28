@@ -38,14 +38,14 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, random_string, async_function
 from testlib import AsyncEapiConfigUnitTest
 
-import pyeapi.api.systemasync
+import pyeapiasync.api.systemasync
 
 
 class TestApiSystemAsync(AsyncEapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiSystemAsync, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.systemasync.SystemAsync(None)
+        self.instance = pyeapiasync.api.systemasync.SystemAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the get_block method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
@@ -53,8 +53,8 @@ class TestApiSystemAsync(AsyncEapiConfigUnitTest):
         self.instance.error = unittest.mock.MagicMock()
 
     def test_instance(self):
-        result = pyeapi.api.systemasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.systemasync.SystemAsync)
+        result = pyeapiasync.api.systemasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.systemasync.SystemAsync)
 
     async def test_get(self):
         # Mock get_block to return a specific configuration

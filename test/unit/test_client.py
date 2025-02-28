@@ -40,7 +40,7 @@ from unittest.mock import Mock, patch, call
 
 from testlib import get_fixture, random_string, random_int
 
-import pyeapi.client
+import pyeapiasync.client
 
 DEFAULT_CONFIG = {'connection:localhost': dict(transport='socket')}
 
@@ -49,7 +49,7 @@ class TestNode(unittest.TestCase):
 
     def setUp(self):
         self.connection = Mock()
-        self.node = pyeapi.client.Node(self.connection)
+        self.node = pyeapiasync.client.Node(self.connection)
 
     def test_get_version_properties_match_version_number_no_match_model(self):
         self.node.enable = Mock()
@@ -227,12 +227,12 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         if 'EAPI_CONF' in os.environ:
             del os.environ['EAPI_CONF']
-        importlib.reload(pyeapi.client)
+        importlib.reload(pyeapiasync.client)
 
     def test_load_config_for_connection_with_filename(self):
         conf = get_fixture('eapi.conf')
-        pyeapi.client.load_config(filename=conf)
-        cfg = pyeapi.client.config.get_connection('test1')
+        pyeapiasync.client.load_config(filename=conf)
+        cfg = pyeapiasync.client.config.get_connection('test1')
         self.assertEqual(cfg['host'], '192.168.1.16')
         self.assertEqual(cfg['username'], 'eapi')
         self.assertEqual(cfg['password'], 'password')
@@ -240,8 +240,8 @@ class TestClient(unittest.TestCase):
 
     def test_load_config_for_connection_with_env(self):
         os.environ['EAPI_CONF'] = get_fixture('eapi.conf')
-        pyeapi.client.load_config(random_string())
-        cfg = pyeapi.client.config.get_connection('test1')
+        pyeapiasync.client.load_config(random_string())
+        cfg = pyeapiasync.client.config.get_connection('test1')
         self.assertEqual(cfg['host'], '192.168.1.16')
         self.assertEqual(cfg['username'], 'eapi')
         self.assertEqual(cfg['password'], 'password')
@@ -249,105 +249,105 @@ class TestClient(unittest.TestCase):
 
     def test_load_config(self):
         conf = get_fixture('eapi.conf')
-        pyeapi.client.load_config(conf)
-        self.assertEqual(len(pyeapi.client.config.sections()), 3)
+        pyeapiasync.client.load_config(conf)
+        self.assertEqual(len(pyeapiasync.client.config.sections()), 3)
         for name in ['localhost', 'test1', 'test2']:
             name = 'connection:%s' % name
-            self.assertIn(name, pyeapi.client.config.sections())
+            self.assertIn(name, pyeapiasync.client.config.sections())
 
     def test_load_config_empty_conf(self):
         conf = get_fixture('empty.conf')
-        pyeapi.client.load_config(filename=conf)
-        conns = pyeapi.client.config.connections
+        pyeapiasync.client.load_config(filename=conf)
+        conns = pyeapiasync.client.config.connections
         self.assertEqual(conns, ['localhost'])
 
     def test_load_config_yaml(self):
         conf = get_fixture('eapi.conf.yaml')
-        pyeapi.client.load_config(filename=conf)
-        conns = pyeapi.client.config.connections
+        pyeapiasync.client.load_config(filename=conf)
+        conns = pyeapiasync.client.config.connections
         self.assertEqual(conns, ['localhost'])
 
     def test_load_config_env_path(self):
         os.environ['EAPI_CONF'] = get_fixture('env_path.conf')
-        pyeapi.client.config.autoload()
-        self.assertIn('connection:env_path', pyeapi.client.config.sections())
+        pyeapiasync.client.config.autoload()
+        self.assertIn('connection:env_path', pyeapiasync.client.config.sections())
 
     def test_config_always_has_default_connection(self):
         conf = '/invalid.conf'
-        pyeapi.client.load_config(conf)
-        self.assertEqual(len(pyeapi.client.config.sections()), 1)
+        pyeapiasync.client.load_config(conf)
+        self.assertEqual(len(pyeapiasync.client.config.sections()), 1)
         name = 'connection:localhost'
-        self.assertIn(name, pyeapi.client.config.sections())
+        self.assertIn(name, pyeapiasync.client.config.sections())
 
     def test_connections_property(self):
         conf = get_fixture('eapi.conf')
-        pyeapi.client.load_config(conf)
+        pyeapiasync.client.load_config(conf)
         connections = ['test1', 'test2', 'localhost']
-        result = pyeapi.client.config.connections
+        result = pyeapiasync.client.config.connections
         self.assertEqual(sorted(connections), sorted(result))
 
     def test_missing_connection_raises_attribute_error(self):
         with self.assertRaises(AttributeError):
-            pyeapi.client.connect_to('invalid')
+            pyeapiasync.client.connect_to('invalid')
 
     def test_config_for_replaces_host_w_name(self):
         conf = get_fixture('nohost.conf')
-        pyeapi.client.load_config(conf)
-        cfg = pyeapi.config_for('test')
+        pyeapiasync.client.load_config(conf)
+        cfg = pyeapiasync.config_for('test')
         self.assertEqual(cfg['host'], 'test')
 
     def test_hosts_for_tag_returns_none(self):
-        result = pyeapi.client.hosts_for_tag(random_string())
+        result = pyeapiasync.client.hosts_for_tag(random_string())
         self.assertIsNone(result)
 
     def test_hosts_for_tag_returns_names(self):
         conf = get_fixture('eapi.conf')
-        pyeapi.client.load_config(conf)
-        result = pyeapi.client.hosts_for_tag('tag1')
+        pyeapiasync.client.load_config(conf)
+        result = pyeapiasync.client.hosts_for_tag('tag1')
         self.assertEqual(sorted(['test1', 'test2']), sorted(result))
 
     @patch('pyeapi.client.make_connection')
     def test_connect_types(self, connection):
-        transports = list(pyeapi.client.TRANSPORTS.keys())
+        transports = list(pyeapiasync.client.TRANSPORTS.keys())
         kwargs = dict(host='localhost', username='admin', password='',
                       port=None, key_file=None, cert_file=None,
                       ca_file=None, timeout=60, context=None)
 
         for transport in transports:
-            pyeapi.client.connect(transport)
+            pyeapiasync.client.connect(transport)
             connection.assert_called_with(transport, **kwargs)
 
     def test_make_connection_raises_typeerror(self):
         with self.assertRaises(TypeError):
-            pyeapi.client.make_connection('invalid')
+            pyeapiasync.client.make_connection('invalid')
 
     def test_node_str_returns(self):
-        node = pyeapi.client.Node(None)
+        node = pyeapiasync.client.Node(None)
         self.assertIsNotNone(str(node))
 
     def test_node_repr_returns(self):
-        node = pyeapi.client.Node(None)
+        node = pyeapiasync.client.Node(None)
         self.assertIsNotNone(repr(node))
 
     def test_node_hasattr_connection(self):
-        node = pyeapi.client.Node(None)
+        node = pyeapiasync.client.Node(None)
         self.assertTrue(hasattr(node, 'connection'))
 
     @patch('pyeapi.client.Node.get_config')
     def test_node_calls_running_config_with_all_by_default(self, get_config_mock):
-        node = pyeapi.client.Node(None)
+        node = pyeapiasync.client.Node(None)
         _ = node.running_config
         get_config_mock.assert_called_once_with(params='all', as_string=True)
 
     @patch('pyeapi.client.Node.get_config')
     def test_node_calls_running_config_without_params_if_config_defaults_false(
             self, get_config_mock):
-        node = pyeapi.client.Node(None, config_defaults=False)
+        node = pyeapiasync.client.Node(None, config_defaults=False)
         _ = node.running_config
         get_config_mock.assert_called_once_with(params=None, as_string=True)
 
     def test_node_returns_running_config(self):
-        node = pyeapi.client.Node(None)
+        node = pyeapiasync.client.Node(None)
         get_config_mock = Mock(name='get_config')
         config_file = open(get_fixture('running_config.text'))
         config = config_file.read()
@@ -357,7 +357,7 @@ class TestClient(unittest.TestCase):
         self.assertIsInstance(node.running_config, str)
 
     def test_node_returns_startup_config(self):
-        node = pyeapi.client.Node(None)
+        node = pyeapiasync.client.Node(None)
         get_config_mock = Mock(name='get_config')
         config_file = open(get_fixture('running_config.text'))
         config = config_file.read()
@@ -367,7 +367,7 @@ class TestClient(unittest.TestCase):
         self.assertIsInstance(node.startup_config, str)
 
     def test_node_returns_cached_startup_config(self):
-        node = pyeapi.client.Node(None)
+        node = pyeapiasync.client.Node(None)
         config_file = open(get_fixture('running_config.text'))
         config = config_file.read()
         config_file.close()
@@ -375,7 +375,7 @@ class TestClient(unittest.TestCase):
         self.assertEqual(node.startup_config, config)
 
     def test_node_returns_version(self):
-        node = pyeapi.client.Node(None)
+        node = pyeapiasync.client.Node(None)
         version = '4.17.1.1F-3512479.41711F (engineering build)'
         node.enable = Mock()
         node.enable.return_value = [{'result': {'version': version,
@@ -384,12 +384,12 @@ class TestClient(unittest.TestCase):
         self.assertEqual(node.version, version)
 
     def test_node_returns_cached_version(self):
-        node = pyeapi.client.Node(None)
+        node = pyeapiasync.client.Node(None)
         node._version = '4.16.7R'
         self.assertEqual(node.version, '4.16.7R')
 
     def test_node_returns_version_number(self):
-        node = pyeapi.client.Node(None)
+        node = pyeapiasync.client.Node(None)
         version = '4.17.1.1F-3512479.41711F (engineering build)'
         node.enable = Mock()
         node.enable.return_value = [{'result': {'version': version,
@@ -398,12 +398,12 @@ class TestClient(unittest.TestCase):
         self.assertIn(node.version_number, version)
 
     def test_node_returns_cached_version_number(self):
-        node = pyeapi.client.Node(None)
+        node = pyeapiasync.client.Node(None)
         node._version_number = '4.16.7'
         self.assertEqual(node.version_number, '4.16.7')
 
     def test_node_returns_model(self):
-        node = pyeapi.client.Node(None)
+        node = pyeapiasync.client.Node(None)
         version = '4.17.1.1F-3512479.41711F (engineering build)'
         model = 'DCS-7260QX-64-F'
         node.enable = Mock()
@@ -413,14 +413,14 @@ class TestClient(unittest.TestCase):
         self.assertIn(node.model, model)
 
     def test_node_returns_cached_model(self):
-        node = pyeapi.client.Node(None)
+        node = pyeapiasync.client.Node(None)
         node._model = '7777'
         self.assertEqual(node.model, '7777')
 
     def test_connect_default_type(self):
         transport = Mock()
-        with patch.dict(pyeapi.client.TRANSPORTS, {'https': transport}):
-            pyeapi.client.connect()
+        with patch.dict(pyeapiasync.client.TRANSPORTS, {'https': transport}):
+            pyeapiasync.client.connect()
             kwargs = dict(host='localhost', username='admin', password='',
                           port=None, key_file=None, cert_file=None,
                           ca_file=None, timeout=60, context=None)
@@ -428,10 +428,10 @@ class TestClient(unittest.TestCase):
 
     def test_connect_return_node(self):
         transport = Mock()
-        with patch.dict(pyeapi.client.TRANSPORTS, {'https': transport}):
+        with patch.dict(pyeapiasync.client.TRANSPORTS, {'https': transport}):
             conf = get_fixture('eapi.conf')
-            pyeapi.client.load_config(filename=conf)
-            node = pyeapi.client.connect(host='192.168.1.16', username='eapi',
+            pyeapiasync.client.load_config(filename=conf)
+            node = pyeapiasync.client.connect(host='192.168.1.16', username='eapi',
                                          password='password', port=None,
                                          timeout=60, return_node=True)
             kwargs = dict(host='192.168.1.16', username='eapi',
@@ -443,10 +443,10 @@ class TestClient(unittest.TestCase):
 
     def test_connect_return_node_enablepwd(self):
         transport = Mock()
-        with patch.dict(pyeapi.client.TRANSPORTS, {'https': transport}):
+        with patch.dict(pyeapiasync.client.TRANSPORTS, {'https': transport}):
             conf = get_fixture('eapi.conf')
-            pyeapi.client.load_config(filename=conf)
-            node = pyeapi.client.connect(host='192.168.1.16', username='eapi',
+            pyeapiasync.client.load_config(filename=conf)
+            node = pyeapiasync.client.connect(host='192.168.1.16', username='eapi',
                                          password='password', port=None,
                                          timeout=60, enablepwd='enablepwd',
                                          return_node=True)
@@ -459,10 +459,10 @@ class TestClient(unittest.TestCase):
 
     def test_connect_to_with_config(self):
         transport = Mock()
-        with patch.dict(pyeapi.client.TRANSPORTS, {'https': transport}):
+        with patch.dict(pyeapiasync.client.TRANSPORTS, {'https': transport}):
             conf = get_fixture('eapi.conf')
-            pyeapi.client.load_config(filename=conf)
-            node = pyeapi.client.connect_to('test1')
+            pyeapiasync.client.load_config(filename=conf)
+            node = pyeapiasync.client.connect_to('test1')
             kwargs = dict(host='192.168.1.16', username='eapi',
                           password='password', port=None, key_file=None,
                           cert_file=None, ca_file=None, timeout=60,

@@ -38,22 +38,22 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, async_function
 from testlib import AsyncEapiConfigUnitTest
 
-import pyeapi.api.ntpasync
+import pyeapiasync.api.ntpasync
 
 
 class TestApiNtpAsync(AsyncEapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiNtpAsync, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.ntpasync.NtpAsync(None)
+        self.instance = pyeapiasync.api.ntpasync.NtpAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the get_block method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
         self.instance.configure = unittest.mock.AsyncMock(return_value=True)
 
     def test_instance(self):
-        result = pyeapi.api.ntpasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.ntpasync.NtpAsync)
+        result = pyeapiasync.api.ntpasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.ntpasync.NtpAsync)
 
     async def test_get(self):
         result = await self.instance.get()

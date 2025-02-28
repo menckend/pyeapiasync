@@ -39,22 +39,22 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, async_function
 from testlib import AsyncEapiConfigUnitTest
 
-import pyeapi.api.bgpasync
+import pyeapiasync.api.bgpasync
 
 
 class TestApiBgpAsync(AsyncEapiConfigUnitTest):
 
     def setUp(self):
         super().setUp()
-        self.instance = pyeapi.api.bgpasync.instance(None)
+        self.instance = pyeapiasync.api.bgpasync.instance(None)
         self.config = open(get_fixture('running_config.bgp')).read()
         # Mock the config property to return the test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
         self.instance.configure = unittest.mock.AsyncMock(return_value=True)
 
     def test_instance(self):
-        result = pyeapi.api.bgpasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.bgpasync.BgpAsync)
+        result = pyeapiasync.api.bgpasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.bgpasync.BgpAsync)
 
     async def test_get(self):
         # Mock neighbors.getall to return an empty dict
@@ -203,7 +203,7 @@ class TestApiBgpNeighborAsync(AsyncEapiConfigUnitTest):
 
     def setUp(self):
         super().setUp()
-        self.instance = pyeapi.api.bgpasync.BgpNeighborsAsync(None)
+        self.instance = pyeapiasync.api.bgpasync.BgpNeighborsAsync(None)
         self.config = open(get_fixture('running_config.bgp')).read()
         # Mock the get_block and configure methods
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)

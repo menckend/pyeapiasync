@@ -38,7 +38,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, random_vlan, async_function
 from testlib import AsyncEapiConfigUnitTest
 
-import pyeapi.api.switchportsasync
+import pyeapiasync.api.switchportsasync
 
 
 class TestApiSwitchportsAsync(AsyncEapiConfigUnitTest):
@@ -47,15 +47,15 @@ class TestApiSwitchportsAsync(AsyncEapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiSwitchportsAsync, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.switchportsasync.instance(None)
+        self.instance = pyeapiasync.api.switchportsasync.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the get_block method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
         self.instance.configure = unittest.mock.AsyncMock(return_value=True)
 
     def test_instance(self):
-        result = pyeapi.api.switchportsasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.switchportsasync.SwitchportsAsync)
+        result = pyeapiasync.api.switchportsasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.switchportsasync.SwitchportsAsync)
 
     async def test_get(self):
         result = await self.instance.get('Ethernet1')

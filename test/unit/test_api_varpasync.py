@@ -38,14 +38,14 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, async_function
 from testlib import AsyncEapiConfigUnitTest
 
-import pyeapi.api.varpasync
+import pyeapiasync.api.varpasync
 
 
 class TestApiVarpAsync(AsyncEapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiVarpAsync, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.varpasync.VarpAsync(None)
+        self.instance = pyeapiasync.api.varpasync.VarpAsync(None)
         self.config = open(get_fixture('running_config.varp')).read()
         # Mock the config and get_block properties
         self.instance.config = self.config
@@ -53,8 +53,8 @@ class TestApiVarpAsync(AsyncEapiConfigUnitTest):
         self.instance.configure = unittest.mock.AsyncMock(return_value=True)
 
     def test_instance(self):
-        result = pyeapi.api.varpasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.varpasync.VarpAsync)
+        result = pyeapiasync.api.varpasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.varpasync.VarpAsync)
 
     async def test_get(self):
         result = await self.instance.get()
@@ -69,7 +69,7 @@ class TestApiVarpAsync(AsyncEapiConfigUnitTest):
         self.assertIsNotNone(result)
 
     async def test_get_interfaces_already_defined(self):
-        self.instance._interfaces = pyeapi.api.varpasync.VarpInterfacesAsync(None)
+        self.instance._interfaces = pyeapiasync.api.varpasync.VarpInterfacesAsync(None)
         result = await self.instance.interfaces()
         self.assertIsNotNone(result)
 
@@ -108,7 +108,7 @@ class TestApiVarpInterfacesAsync(AsyncEapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiVarpInterfacesAsync, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.varpasync.VarpInterfacesAsync(None)
+        self.instance = pyeapiasync.api.varpasync.VarpInterfacesAsync(None)
         self.config = open(get_fixture('running_config.varp')).read()
         # Mock the config and get_block properties
         self.instance.config = self.config

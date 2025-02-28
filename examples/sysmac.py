@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 from __future__ import print_function
-import pyeapi
+import pyeapiasync
 
-pyeapi.load_config('nodes.conf')
-node = pyeapi.connect_to('veos01')
+pyeapiasync.load_config('nodes.conf')
+node = pyeapiasync.connect_to('veos01')
 
 output = node.enable('show version')
 

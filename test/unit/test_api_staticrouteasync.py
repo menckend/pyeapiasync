@@ -39,7 +39,7 @@ from testlib import get_fixture, async_function, random_int, random_string
 from testlib import AsyncEapiConfigUnitTest
 from random import choice
 
-import pyeapi.api.staticrouteasync
+import pyeapiasync.api.staticrouteasync
 
 # Define test data
 IP_DESTS = ['1.1.1.0/24', '2.2.2.0/24']
@@ -52,14 +52,14 @@ class TestApiStaticrouteAsync(AsyncEapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiStaticrouteAsync, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.staticrouteasync.StaticRouteAsync(None)
+        self.instance = pyeapiasync.api.staticrouteasync.StaticRouteAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the get_block method to return test config
         self.instance.config = self.config
 
     def test_instance(self):
-        result = pyeapi.api.staticrouteasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.staticrouteasync.StaticRouteAsync)
+        result = pyeapiasync.api.staticrouteasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.staticrouteasync.StaticRouteAsync)
 
     async def test_get(self):
         # Test retrieval of a specific static route entry

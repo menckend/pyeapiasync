@@ -40,7 +40,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, random_string, async_function, random_int
 from testlib import AsyncEapiConfigUnitTest
 
-import pyeapi.api.interfacesasync
+import pyeapiasync.api.interfacesasync
 
 INTERFACES = ['Ethernet1', 'Ethernet1/1', 'Vlan1234', 'Management1',
               'Port-Channel1', 'Vxlan1']
@@ -49,25 +49,25 @@ INTERFACES = ['Ethernet1', 'Ethernet1/1', 'Vlan1234', 'Management1',
 class TestFunctions(unittest.TestCase):
 
     def test_isvalidinterface_returns_true(self):
-        func = pyeapi.api.interfacesasync.isvalidinterface
+        func = pyeapiasync.api.interfacesasync.isvalidinterface
         for intf in INTERFACES:
             self.assertTrue(func(intf))
 
     def test_isvalidinterface_returns_false(self):
-        func = pyeapi.api.interfacesasync.isvalidinterface
+        func = pyeapiasync.api.interfacesasync.isvalidinterface
         for intf in ['Et1', 'Ma1', 'Po1', 'Vl1', random_string()]:
             self.assertFalse(func(intf))
 
     def test_instance(self):
-        result = pyeapi.api.interfacesasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.interfacesasync.InterfacesAsync)
+        result = pyeapiasync.api.interfacesasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.interfacesasync.InterfacesAsync)
 
 
 class TestApiInterfacesAsync(AsyncEapiConfigUnitTest):
 
     def setUp(self):
         super().setUp()
-        self.instance = pyeapi.api.interfacesasync.InterfacesAsync(None)
+        self.instance = pyeapiasync.api.interfacesasync.InterfacesAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the get_config method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
@@ -149,7 +149,7 @@ class TestApiBaseInterfaceAsync(AsyncEapiConfigUnitTest):
 
     def setUp(self):
         super().setUp()
-        self.instance = pyeapi.api.interfacesasync.BaseInterfaceAsync(None)
+        self.instance = pyeapiasync.api.interfacesasync.BaseInterfaceAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the get_config method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
@@ -226,7 +226,7 @@ class TestApiEthernetInterfaceAsync(AsyncEapiConfigUnitTest):
 
     def setUp(self):
         super().setUp()
-        self.instance = pyeapi.api.interfacesasync.EthernetInterfaceAsync(None)
+        self.instance = pyeapiasync.api.interfacesasync.EthernetInterfaceAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the get_config method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
@@ -298,7 +298,7 @@ class TestApiVxlanInterfaceAsync(AsyncEapiConfigUnitTest):
 
     def setUp(self):
         super().setUp()
-        self.instance = pyeapi.api.interfacesasync.VxlanInterfaceAsync(None)
+        self.instance = pyeapiasync.api.interfacesasync.VxlanInterfaceAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the get_config method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
@@ -404,7 +404,7 @@ class TestApiPortChannelInterfaceAsync(AsyncEapiConfigUnitTest):
 
     def setUp(self):
         super().setUp()
-        self.instance = pyeapi.api.interfacesasync.PortChannelInterfaceAsync(None)
+        self.instance = pyeapiasync.api.interfacesasync.PortChannelInterfaceAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the get_config method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)

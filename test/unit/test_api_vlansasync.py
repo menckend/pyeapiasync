@@ -38,14 +38,14 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, random_vlan, random_string, async_function
 from testlib import AsyncEapiConfigUnitTest
 
-import pyeapi.api.vlansasync
+import pyeapiasync.api.vlansasync
 
 
 class TestApiVlansAsync(AsyncEapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiVlansAsync, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.vlansasync.instance(None)
+        self.instance = pyeapiasync.api.vlansasync.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the get_block method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
@@ -53,19 +53,19 @@ class TestApiVlansAsync(AsyncEapiConfigUnitTest):
 
     def test_isvlan_with_string(self):
         # This is a static method, so no need for async
-        self.assertFalse(pyeapi.api.vlansasync.isvlan('a' + random_string()))
+        self.assertFalse(pyeapiasync.api.vlansasync.isvlan('a' + random_string()))
 
     def test_isvlan_valid_value(self):
         # This is a static method, so no need for async
-        self.assertTrue(pyeapi.api.vlansasync.isvlan('1234'))
+        self.assertTrue(pyeapiasync.api.vlansasync.isvlan('1234'))
 
     def test_isvlan_invalid_value(self):
         # This is a static method, so no need for async
-        self.assertFalse(pyeapi.api.vlansasync.isvlan('5000'))
+        self.assertFalse(pyeapiasync.api.vlansasync.isvlan('5000'))
 
     def test_instance(self):
-        result = pyeapi.api.vlansasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.vlansasync.VlansAsync)
+        result = pyeapiasync.api.vlansasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.vlansasync.VlansAsync)
 
     async def test_get(self):
         result = await self.instance.get('1')

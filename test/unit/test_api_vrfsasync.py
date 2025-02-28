@@ -38,22 +38,22 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, async_function
 from testlib import AsyncEapiConfigUnitTest
 
-import pyeapi.api.vrfsasync
+import pyeapiasync.api.vrfsasync
 
 
 class TestApiVrfsAsync(AsyncEapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiVrfsAsync, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.vrfsasync.instance(None)
+        self.instance = pyeapiasync.api.vrfsasync.instance(None)
         self.config = open(get_fixture('running_config.vrf')).read()
         # Mock the get_block method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
         self.instance.configure = unittest.mock.AsyncMock(return_value=True)
 
     def test_instance(self):
-        result = pyeapi.api.vrfsasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.vrfsasync.VrfsAsync)
+        result = pyeapiasync.api.vrfsasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.vrfsasync.VrfsAsync)
 
     async def test_get(self):
         result = await self.instance.get('blah')

@@ -38,7 +38,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, function, random_int, random_string
 from testlib import AsyncEapiConfigUnitTest, async_function
 
-import pyeapi.api.ipinterfacesasync
+import pyeapiasync.api.ipinterfacesasync
 
 
 class TestApiIpinterfacesAsync(AsyncEapiConfigUnitTest):
@@ -48,7 +48,7 @@ class TestApiIpinterfacesAsync(AsyncEapiConfigUnitTest):
 
     def setUp(self):
         super().setUp()
-        self.instance = pyeapi.api.ipinterfacesasync.instance(None)
+        self.instance = pyeapiasync.api.ipinterfacesasync.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the get_block method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
@@ -88,8 +88,8 @@ class TestApiIpinterfacesAsync(AsyncEapiConfigUnitTest):
 
     async def test_instance_functions(self):
         # Test the instance function
-        instance = pyeapi.api.ipinterfacesasync.instance(None)
-        self.assertIsInstance(instance, pyeapi.api.ipinterfacesasync.IpinterfacesAsync)
+        instance = pyeapiasync.api.ipinterfacesasync.instance(None)
+        self.assertIsInstance(instance, pyeapiasync.api.ipinterfacesasync.IpinterfacesAsync)
 
         # Test create and delete
         for intf in self.INTERFACES:

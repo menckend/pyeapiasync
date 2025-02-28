@@ -38,7 +38,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, async_function
 from testlib import AsyncEapiConfigUnitTest
 
-import pyeapi.api.usersasync
+import pyeapiasync.api.usersasync
 
 # Sample SSH key for testing
 TEST_SSH_KEY = ('ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKL1UtYLcK1E7w82Da/R+dB9QOwGgxD3AxWXeU'
@@ -54,7 +54,7 @@ class TestApiUsersAsync(AsyncEapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiUsersAsync, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.usersasync.instance(None)
+        self.instance = pyeapiasync.api.usersasync.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the config property to return the test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
@@ -63,12 +63,12 @@ class TestApiUsersAsync(AsyncEapiConfigUnitTest):
 
     def test_isprivilege_returns_false(self):
         # This is a static method, so no need for async
-        result = pyeapi.api.usersasync.isprivilege('test')
+        result = pyeapiasync.api.usersasync.isprivilege('test')
         self.assertFalse(result)
 
     def test_instance(self):
-        result = pyeapi.api.usersasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.usersasync.UsersAsync)
+        result = pyeapiasync.api.usersasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.usersasync.UsersAsync)
 
     async def test_get(self):
         keys = ['nopassword', 'privilege', 'role', 'secret', 'format', 'sshkey']

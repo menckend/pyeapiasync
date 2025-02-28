@@ -38,7 +38,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, function
 from testlib import EapiConfigUnitTest
 
-import pyeapi.api.vrrp
+import pyeapiasync.api.vrrp
 
 upd_intf = 'Vlan50'
 upd_vrid = 10
@@ -141,12 +141,12 @@ class TestApiVrrp(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiVrrp, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.vrrp.Vrrp(None)
+        self.instance = pyeapiasync.api.vrrp.Vrrp(None)
         self.config = open(get_fixture('running_config.vrrp')).read()
 
     def test_instance(self):
-        result = pyeapi.api.vrrp.instance(None)
-        self.assertIsInstance(result, pyeapi.api.vrrp.Vrrp)
+        result = pyeapiasync.api.vrrp.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.vrrp.Vrrp)
 
     def test_get(self):
         # Request various sets of vrrp configurations

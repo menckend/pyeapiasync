@@ -33,9 +33,9 @@ import unittest
 import random
 
 from testlib import get_fixture
-from pyeapi.utils import CliVariants
+from pyeapiasync.utils import CliVariants
 
-import pyeapi.client
+import pyeapiasync.client
 
 class DutSystemTest(unittest.TestCase):
 
@@ -44,8 +44,8 @@ class DutSystemTest(unittest.TestCase):
         self.longMessage = True
 
     def setUp(self):
-        pyeapi.client.load_config(filename=get_fixture('dut.conf'))
-        config = pyeapi.client.config
+        pyeapiasync.client.load_config(filename=get_fixture('dut.conf'))
+        config = pyeapiasync.client.config
 
         self.duts = list()
         for name in config.sections():
@@ -54,7 +54,7 @@ class DutSystemTest(unittest.TestCase):
             if 'localhost' in name:
                 continue
             name = name.split(':')[1]
-            self.duts.append( pyeapi.client.connect_to(name) )
+            self.duts.append( pyeapiasync.client.connect_to(name) )
             # revert to a legacy behavior for interface availability
             if self.duts[ -1 ]:
                 self.duts[ -1 ].config( CliVariants(

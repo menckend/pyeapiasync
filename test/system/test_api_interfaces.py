@@ -31,7 +31,7 @@
 #
 import os
 import unittest
-from pyeapi.utils import CliVariants
+from pyeapiasync.utils import CliVariants
 
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))

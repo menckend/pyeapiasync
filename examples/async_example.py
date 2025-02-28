@@ -36,7 +36,7 @@ Example script for using the async functionality in pyeapi
 """
 
 import asyncio
-import pyeapi
+import pyeapiasync
 import sys
 
 
@@ -62,11 +62,12 @@ async def main():
     """Main function to demonstrate async functionality"""
     # Connect to the device
     try:
-        # You can use connect_to_async to connect using a profile from eapi.conf
+        # You can use connect_to_async to connect using a
+        #   profile from eapi.conf
         # node = await pyeapi.connect_to_async('veos01')
-        
+
         # Or connect directly with parameters
-        node = await pyeapi.connect_async(
+        node = await pyeapiasync.connect_async(
             transport='https',
             host='localhost',
             username='admin',
@@ -74,34 +75,36 @@ async def main():
             port=443,
             return_node=True
         )
-        
+
         # Run multiple commands concurrently
         version_task = asyncio.create_task(get_version(node))
         config_task = asyncio.create_task(get_running_config(node))
-        commands_task = asyncio.create_task(run_commands(node, ['show version', 'show interfaces']))
-        
+        commands_task = asyncio.create_task(run_commands(node,
+                                                         ['show version',
+                                                          'show interfaces']))
+
         # Wait for all tasks to complete
         version = await version_task
         config = await config_task
         commands_result = await commands_task
-        
+
         # Print results
         print(f"Version: {version}")
         print(f"Config length: {len(config)} characters")
         print(f"Commands result: {commands_result}")
-        
+
         # Configure the device asynchronously
         config_result = await node.config(['hostname async-test'])
         print(f"Config result: {config_result}")
-        
+
         # Get a section of the config asynchronously
         hostname_section = await node.section('hostname')
         print(f"Hostname section: {hostname_section}")
-        
+
     except Exception as e:
         print(f"Error: {e}")
         return 1
-    
+
     return 0
 
 

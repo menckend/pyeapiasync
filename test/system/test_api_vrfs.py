@@ -37,7 +37,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import random_string
 from systestlib import DutSystemTest
-from pyeapi.utils import CliVariants
+from pyeapiasync.utils import CliVariants
 
 
 class TestApiVrfs(DutSystemTest):

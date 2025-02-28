@@ -35,7 +35,7 @@ import unittest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-import pyeapi.api.vrrpasync
+import pyeapiasync.api.vrrpasync
 
 from testlib import get_fixture
 
@@ -140,13 +140,13 @@ class TestApiVrrpAsync(unittest.IsolatedAsyncioTestCase):
     maxDiff = None
 
     async def asyncSetUp(self):
-        self.instance = pyeapi.api.vrrpasync.VrrpAsync(None)
+        self.instance = pyeapiasync.api.vrrpasync.VrrpAsync(None)
         self.config = open(get_fixture('running_config.vrrp')).read()
         self.instance.config = self.config
 
     async def test_instance(self):
-        result = pyeapi.api.vrrpasync.instance(None)
-        self.assertIsInstance(result, pyeapi.api.vrrpasync.VrrpAsync)
+        result = pyeapiasync.api.vrrpasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.vrrpasync.VrrpAsync)
 
     async def test_get(self):
         # Request various sets of vrrp configurations

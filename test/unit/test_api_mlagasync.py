@@ -38,14 +38,14 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, async_function
 from testlib import AsyncEapiConfigUnitTest
 
-import pyeapi.api.mlagasync
+import pyeapiasync.api.mlagasync
 
 
 class TestApiMlagAsync(AsyncEapiConfigUnitTest):
 
     def setUp(self):
         super().setUp()
-        self.instance = pyeapi.api.mlagasync.instance(None)
+        self.instance = pyeapiasync.api.mlagasync.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
         # Mock the get_block method to return test config
         self.instance.get_block = unittest.mock.AsyncMock(return_value=self.config)
