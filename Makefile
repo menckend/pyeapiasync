@@ -18,7 +18,7 @@
 ########################################################
 # variable section
 
-NAME = "pyeapi"
+NAME = "pyeapiasync"
 
 PYTHON=python
 COVERAGE=coverage
