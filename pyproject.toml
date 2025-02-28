@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+version_file = "pyeapiasync/_version.py"
+#fallback_version = '0.0.99'
+#version_scheme : str | Callable[[ScmVersion], str]
+
+[tool.setuptools.packages.find]
+#where = ["."]
+#include = ["pyeapiasync*"]
+#include = ["src*"]
+#exclude = [".venv*", "tests*", "docs*", ".github*", ".gitignore"]
+
+
+[project]
+name = "eapiasync"
+dynamic = ["version"]
+description = "A fork from v1.0.4 of pyeapi that has been refactored for async operation using asyncio and aiohttp."
+dependencies = [
+  'build',
+  'asyncio',
+  'requests',
+  'aiodocker',
+  'netaddr',
+  'aiohttp>=3.8.0',
+  'python-rapidjson',
+  'simplejson',
+]
+
+authors = [
+  {name = "Mencken Davidson", email = "mencken@gmail.com"},
+]
+maintainers = [
+  {name = "Mencken Davidson", email = "mencken@gmail.com"}
+]
+requires-python= ">=3.10"
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["arista", "eapi", "eos", "networking", "async", "asyncio", "aiohttp"]
+
+[project.urls]
+Homepage = "https://menckend.github.io/pyeapiasync"
+Repository = "https://github.com/menckend/pyeapiasync.git"
+Issues = "https://github.com/menckend/pyeapiasync/issues"
