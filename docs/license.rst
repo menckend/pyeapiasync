@@ -1,5 +1,6 @@
-License
+.. _license
+
 .. include:: ../LICENSE.md
   :parser: myst_parser.docutils_
-===================
+
 
