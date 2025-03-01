@@ -5,37 +5,37 @@ import unittest
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import get_fixture, function
-from testlib import EapiConfigUnitTest
+from testlib import EapiAsyncConfigUnitTest
 
-import pyeapi.api.ospf
+import pyeapiasync.api.ospfasync
 
 
-class TestApiOspf(EapiConfigUnitTest):
+class TestApiOspf(EapiAsyncConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
-        super(TestApiOspf, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.ospf.instance(None)
+        super().__init__(*args, **kwargs)
+        self.instance = pyeapiasync.api.ospfasync.instance(None)
         self.config = open(get_fixture('running_config.ospf')).read()
 
-    def test_get_no_vrf(self):
-        result = self.instance.get()
+    async def test_get_no_vrf(self):
+        result = await self.instance.get()
         keys = ['networks', 'ospf_process_id', 'vrf', 'redistributions',
                 'router_id', 'shutdown']
         self.assertEqual(sorted(keys), sorted(result.keys()))
         self.assertEqual(result['vrf'], 'default')
 
-    def test_get_with_vrf(self):
-        result = self.instance.get(vrf='test')
+    async def test_get_with_vrf(self):
+        result = await self.instance.get(vrf='test')
         keys = ['networks', 'ospf_process_id', 'vrf', 'redistributions',
                 'router_id', 'shutdown']
         self.assertEqual(sorted(keys), sorted(result.keys()))
         self.assertEqual(result['vrf'], 'test')
 
-    def test_create(self):
+    async def test_create(self):
         for ospf_id in ['65000', 65000]:
             func = function('create', ospf_id)
             cmds = 'router ospf {}'.format(ospf_id)
-            self.eapi_positive_config_test(func, cmds)
+            await self.eapi_positive_config_test(func, cmds)
 
     def test_create_with_vrf(self):
         for ospf_id in ['65000', 65000]:
@@ -133,11 +133,11 @@ class TestApiOspf(EapiConfigUnitTest):
                 self.eapi_exception_config_test(func, ValueError)
 
 
-class TestApiNegOspf(EapiConfigUnitTest):
+class TestApiNegOspf(EapiAsyncConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
-        super(TestApiNegOspf, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.ospf.instance(None)
+        super().__init__(*args, **kwargs)
+        self.instance = pyeapiasync.api.ospfasync.instance(None)
         self.config = open(get_fixture('running_config.bgp')).read()
 
     def test_no_get(self):

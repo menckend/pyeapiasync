@@ -363,7 +363,7 @@ class BgpNeighborsAsync(EntityCollectionAsync):
         """
         config = await self.get_block('^router bgp .*')
         response = dict(name=name)
-        response.update(self._parse_peer_group(config, name))
+        response.update(await self._parse_peer_group(config, name))
         response.update(self._parse_remote_as(config, name))
         response.update(self._parse_send_community(config, name))
         response.update(self._parse_shutdown(config, name))
@@ -389,17 +389,9 @@ class BgpNeighborsAsync(EntityCollectionAsync):
             collection[neighbor] = await self.get(neighbor)
         return collection
 
-    def _parse_peer_group(self, config, name):
-        """Parses the peer group configuration for the neighbor
-
-        Args:
-            config (str): The BGP configuration block
-            name (str): The neighbor name
-
-        Returns:
-            dict: Dictionary containing the peer_group value
-        """
-        if self.version_number >= '4.23':
+    async def _parse_peer_group(self, config, name):
+        version = await self.get_version_number()
+        if version >= '4.23':
             regexp = r'neighbor {} peer group ([^\s]+)'.format(name)
         else:
             regexp = r'neighbor {} peer-group ([^\s]+)'.format(name)

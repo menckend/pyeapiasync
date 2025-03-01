@@ -36,24 +36,23 @@ import unittest
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import get_fixture, function
-from testlib import EapiConfigUnitTest
+from testlib import EapiAsyncConfigUnitTest
+from pyeapiasync.api.ntpasync import NtpAsync
 
-import pyeapi.api.ntp
 
-
-class TestApiNtp(EapiConfigUnitTest):
+class TestApiNtpAsync(EapiAsyncConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
-        super(TestApiNtp, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.ntp.Ntp(None)
+        super().__init__(*args, **kwargs)
+        self.instance = NtpAsync.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
 
     def test_instance(self):
-        result = pyeapi.api.ntp.instance(None)
-        self.assertIsInstance(result, pyeapi.api.ntp.Ntp)
+        result = NtpAsync.instance(None)
+        self.assertIsInstance(result, NtpAsync)
 
-    def test_get(self):
-        result = self.instance.get()
+    async def test_get(self):
+        result = await self.instance.get()
         ntp = {'servers': [{'1.2.3.4': 'prefer'},
                            {'10.20.30.40': None},
                            {'11.22.33.44': None},
@@ -66,52 +65,52 @@ class TestApiNtp(EapiConfigUnitTest):
         self.assertEqual(ntp['source_interface'], result['source_interface'])
         self.assertIsNotNone(result['servers'])
 
-    def test_create(self):
+    async def test_create(self):
         cmd = 'ntp source Ethernet2'
         func = function('create', 'Ethernet2')
-        self.eapi_positive_config_test(func, cmd)
+        await self.eapi_async_positive_config_test(func, cmd)
 
-    def test_delete(self):
+    async def test_delete(self):
         cmd = 'no ntp source'
         func = function('delete')
-        self.eapi_positive_config_test(func, cmd)
+        await self.eapi_async_positive_config_test(func, cmd)
 
-    def test_default(self):
+    async def test_default(self):
         cmd = 'default ntp source'
         func = function('default')
-        self.eapi_positive_config_test(func, cmd)
+        await self.eapi_async_positive_config_test(func, cmd)
 
-    def test_set_source_interface(self):
+    async def test_set_source_interface(self):
         cmd = 'ntp source Vlan50'
         func = function('set_source_interface', 'Vlan50')
-        self.eapi_positive_config_test(func, cmd)
+        await self.eapi_async_positive_config_test(func, cmd)
 
-    def test_add_server(self):
+    async def test_add_server(self):
         cmd = 'ntp server 1.1.1.1'
         func = function('add_server', '1.1.1.1')
-        self.eapi_positive_config_test(func, cmd)
+        await self.eapi_async_positive_config_test(func, cmd)
 
-    def test_add_server_prefer(self):
+    async def test_add_server_prefer(self):
         cmd = 'ntp server 1.1.1.1 prefer'
         func = function('add_server', '1.1.1.1', prefer=True)
-        self.eapi_positive_config_test(func, cmd)
+        await self.eapi_async_positive_config_test(func, cmd)
 
-    def test_add_server_invalid(self):
+    async def test_add_server_invalid(self):
         func = function('add_server', '', prefer=True)
-        self.eapi_exception_config_test(func, ValueError)
+        await self.eapi_async_exception_config_test(func, ValueError)
 
         func = function('add_server', ' ', prefer=True)
-        self.eapi_exception_config_test(func, ValueError)
+        await self.eapi_async_exception_config_test(func, ValueError)
 
-    def test_remove_server(self):
+    async def test_remove_server(self):
         cmd = 'no ntp server 1.1.1.1'
         func = function('remove_server', '1.1.1.1')
-        self.eapi_positive_config_test(func, cmd)
+        await self.eapi_async_positive_config_test(func, cmd)
 
-    def test_remove_all_servers(self):
+    async def test_remove_all_servers(self):
         cmd = 'no ntp'
         func = function('remove_all_servers')
-        self.eapi_positive_config_test(func, cmd)
+        await self.eapi_async_positive_config_test(func, cmd)
 
 
 if __name__ == '__main__':

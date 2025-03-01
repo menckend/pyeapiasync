@@ -36,25 +36,21 @@ import unittest
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import get_fixture, function
-from testlib import EapiConfigUnitTest
+from testlib import EapiAsyncConfigUnitTest
+from pyeapiasync.api.mlagasync import MlagAsync
 
-import pyeapi.api.mlag
-
-class TestApiMlag(EapiConfigUnitTest):
+class TestApiMlagAsync(EapiAsyncConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
-        super(TestApiMlag, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.mlag.instance(None)
+        super().__init__(*args, **kwargs)
+        self.instance = MlagAsync.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
 
-    def test_get(self):
-        result = self.instance.get()
-
+    async def test_get(self):
+        result = await self.instance.get()
         keys = ['config', 'interfaces']
-
         intfkeys = ['mlag_id']
         interfaces = result['interfaces']['Port-Channel10']
-
         cfgkeys = ['domain_id', 'local_interface', 'peer_address',
                    'peer_link', 'shutdown']
 
@@ -62,7 +58,7 @@ class TestApiMlag(EapiConfigUnitTest):
         self.assertEqual(sorted(cfgkeys), sorted(result['config'].keys()))
         self.assertEqual(sorted(intfkeys), sorted(interfaces.keys()))
 
-    def test_set_domain_id(self):
+    async def test_set_domain_id(self):
         for state in ['config', 'negate', 'default']:
             cmds = ['mlag configuration']
             if state == 'config':
@@ -74,9 +70,9 @@ class TestApiMlag(EapiConfigUnitTest):
             elif state == 'default':
                 cmds.append('default domain-id')
                 func = function('set_domain_id', value='test', default=True)
-            self.eapi_positive_config_test(func, cmds)
+            await self.eapi_async_positive_config_test(func, cmds)
 
-    def test_set_local_interface(self):
+    async def test_set_local_interface(self):
         for state in ['config', 'negate', 'default']:
             cmds = ['mlag configuration']
             if state == 'config':
@@ -89,9 +85,9 @@ class TestApiMlag(EapiConfigUnitTest):
                 cmds.append('default local-interface')
                 func = function('set_local_interface', value='Vlan1234',
                                 default=True)
-            self.eapi_positive_config_test(func, cmds)
+            await self.eapi_async_positive_config_test(func, cmds)
 
-    def test_set_peer_address(self):
+    async def test_set_peer_address(self):
         for state in ['config', 'negate', 'default']:
             cmds = ['mlag configuration']
             if state == 'config':
@@ -104,9 +100,9 @@ class TestApiMlag(EapiConfigUnitTest):
                 cmds.append('default peer-address')
                 func = function('set_peer_address', value='1.2.3.4',
                                 default=True)
-            self.eapi_positive_config_test(func, cmds)
+            await self.eapi_async_positive_config_test(func, cmds)
 
-    def test_set_peer_link(self):
+    async def test_set_peer_link(self):
         for state in ['config', 'negate', 'default']:
             cmds = ['mlag configuration']
             if state == 'config':
@@ -119,9 +115,9 @@ class TestApiMlag(EapiConfigUnitTest):
                 cmds.append('default peer-link')
                 func = function('set_peer_link', value='Ethernet1',
                                 default=True)
-            self.eapi_positive_config_test(func, cmds)
+            await self.eapi_async_positive_config_test(func, cmds)
 
-    def test_set_shutdown(self):
+    async def test_set_shutdown(self):
         for state in ['config', 'negate', 'default']:
             cmds = ['mlag configuration']
             if state == 'config':
@@ -133,22 +129,21 @@ class TestApiMlag(EapiConfigUnitTest):
             elif state == 'default':
                 cmds.append('default shutdown')
                 func = function('set_shutdown', default=True)
-            self.eapi_positive_config_test(func, cmds)
+            await self.eapi_async_positive_config_test(func, cmds)
 
-    def test_set_mlag_id(self):
+    async def test_set_mlag_id(self):
         for state in ['config', 'negate', 'default']:
             if state == 'config':
-                cmds = ['interface Ethernet1', 'mlag 1']
+                cmds = [f'interface Ethernet1', 'mlag 1']
                 func = function('set_mlag_id', 'Ethernet1', '1')
             elif state == 'negate':
-                cmds = ['interface Ethernet1', 'no mlag']
+                cmds = [f'interface Ethernet1', 'no mlag']
                 func = function('set_mlag_id', 'Ethernet1', disable=True)
             elif state == 'default':
-                cmds = ['interface Ethernet1', 'default mlag']
+                cmds = [f'interface Ethernet1', 'default mlag']
                 func = function('set_mlag_id', 'Ethernet1', value='1',
                                 default=True)
-            self.eapi_positive_config_test(func, cmds)
-
+            await self.eapi_async_positive_config_test(func, cmds)
 
 if __name__ == '__main__':
     unittest.main()

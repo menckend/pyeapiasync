@@ -32,125 +32,120 @@
 import sys
 import os
 import unittest
-
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
-
 from testlib import get_fixture, function
-from testlib import EapiConfigUnitTest
+from testlib import EapiAsyncConfigUnitTest
+import pyeapiasync.api.usersasync
 
-import pyeapi.api.users
-
-class TestApiUsers(EapiConfigUnitTest):
-
+class TestApiUsers(EapiAsyncConfigUnitTest):
     def __init__(self, *args, **kwargs):
         super(TestApiUsers, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.users.instance(None)
+        self.instance = pyeapiasync.api.usersasync.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
-
+    
     def test_isprivilege_returns_false(self):
-        result = pyeapi.api.users.isprivilege('test')
+        result = pyeapiasync.api.usersasync.isprivilege('test')
         self.assertFalse(result)
-
-    def test_get(self):
+    
+    async def test_get(self):
         keys = ['nopassword', 'privilege', 'role', 'secret', 'format', 'sshkey']
-        result = self.instance.get('test')
+        result = await self.instance.get('test')
         self.assertEqual(sorted(keys), sorted(result.keys()))
-
-    def test_getall(self):
-        result = self.instance.getall()
+    
+    async def test_getall(self):
+        result = await self.instance.getall()
         self.assertIsInstance(result, dict)
-
-    def test_create_with_nopassword(self):
+    
+    async def test_create_with_nopassword(self):
         cmds = 'username test nopassword'
         func = function('create', 'test', nopassword=True)
-        self.eapi_positive_config_test(func, cmds)
-
-    def test_create_with_secret_cleartext(self):
+        await self.eapi_positive_config_test(func, cmds)
+    
+    async def test_create_with_secret_cleartext(self):
         cmds = 'username test secret 0 pass'
         func = function('create', 'test', secret='pass')
-        self.eapi_positive_config_test(func, cmds)
-
-    def test_create_with_secret_md5(self):
+        await self.eapi_positive_config_test(func, cmds)
+    
+    async def test_create_with_secret_md5(self):
         cmds = 'username test secret 5 pass'
         func = function('create', 'test', secret='pass', encryption='md5')
-        self.eapi_positive_config_test(func, cmds)
-
-    def test_create_with_secret_nologin(self):
+        await self.eapi_positive_config_test(func, cmds)
+    
+    async def test_create_with_secret_nologin(self):
         cmds = 'username test secret *'
         func = function('create', 'test', secret='', encryption='nologin')
-        self.eapi_positive_config_test(func, cmds)
-
-    def test_create_with_secret_sha512(self):
+        await self.eapi_positive_config_test(func, cmds)
+    
+    async def test_create_with_secret_sha512(self):
         cmds = 'username test secret sha512 pass'
         func = function('create', 'test', secret='pass', encryption='sha512')
-        self.eapi_positive_config_test(func, cmds)
-
-    def test_create_with_missing_kwargs(self):
+        await self.eapi_positive_config_test(func, cmds)
+    
+    async def test_create_with_missing_kwargs(self):
         with self.assertRaises(TypeError):
-            self.instance.create('test')
-
-    def test_create_with_invalid_secret_arg(self):
+            await self.instance.create('test')
+    
+    async def test_create_with_invalid_secret_arg(self):
         with self.assertRaises(TypeError):
-            self.instance.create_with_secret('test', 'test', 'test')
-
-    def test_delete(self):
+            await self.instance.create_with_secret('test', 'test', 'test')
+    
+    async def test_delete(self):
         with self.assertRaises(TypeError):
-            self.instance.delete('admin')
-
-    def test_delete_admin_exception(self):
+            await self.instance.delete('admin')
+    
+    async def test_delete_admin_exception(self):
         cmds = 'no username test'
         func = function('delete', 'test')
-        self.eapi_positive_config_test(func, cmds)
-
-    def test_default(self):
+        await self.eapi_positive_config_test(func, cmds)
+    
+    async def test_default(self):
         cmds = 'default username test'
         func = function('default', 'test')
-        self.eapi_positive_config_test(func, cmds)
-
-    def test_set_privilege(self):
+        await self.eapi_positive_config_test(func, cmds)
+    
+    async def test_set_privilege(self):
         cmds = 'username test privilege 8'
         func = function('set_privilege', 'test', 8)
-        self.eapi_positive_config_test(func, cmds)
-
-    def test_set_privilege_negate(self):
+        await self.eapi_positive_config_test(func, cmds)
+    
+    async def test_set_privilege_negate(self):
         cmds = 'username test privilege 1'
         func = function('set_privilege', 'test')
-        self.eapi_positive_config_test(func, cmds)
-
-    def test_set_privilege_invalid_value(self):
+        await self.eapi_positive_config_test(func, cmds)
+    
+    async def test_set_privilege_invalid_value(self):
         with self.assertRaises(TypeError):
-            self.instance.set_privilege('test', 16)
-
-    def test_set_role(self):
+            await self.instance.set_privilege('test', 16)
+    
+    async def test_set_role(self):
         cmds = 'username test role ops'
         func = function('set_role', 'test', value='ops')
-        self.eapi_positive_config_test(func, cmds)
-
-    def test_set_role_negate(self):
+        await self.eapi_positive_config_test(func, cmds)
+    
+    async def test_set_role_negate(self):
         cmds = 'no username test role'
         func = function('set_role', 'test', disable=True)
-        self.eapi_positive_config_test(func, cmds)
-
-    def test_set_role_default(self):
+        await self.eapi_positive_config_test(func, cmds)
+    
+    async def test_set_role_default(self):
         cmds = 'default username test role'
         func = function('set_role', 'test', default=True)
-        self.eapi_positive_config_test(func, cmds)
-
-    def test_set_sshkey(self):
+        await self.eapi_positive_config_test(func, cmds)
+    
+    async def test_set_sshkey(self):
         cmds = 'username test sshkey newkey'
         func = function('set_sshkey', 'test', value='newkey')
-        self.eapi_positive_config_test(func, cmds)
-
-    def test_set_sshkey_negate(self):
+        await self.eapi_positive_config_test(func, cmds)
+    
+    async def test_set_sshkey_negate(self):
         cmds = 'no username test sshkey'
         func = function('set_sshkey', 'test', disable=True)
-        self.eapi_positive_config_test(func, cmds)
-
-    def test_set_sshkey_default(self):
+        await self.eapi_positive_config_test(func, cmds)
+    
+    async def test_set_sshkey_default(self):
         cmds = 'default username test sshkey'
         func = function('set_sshkey', 'test', default=True)
-        self.eapi_positive_config_test(func, cmds)
-
+        await self.eapi_positive_config_test(func, cmds)
 
 if __name__ == '__main__':
     unittest.main()

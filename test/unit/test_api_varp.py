@@ -32,120 +32,113 @@
 import sys
 import os
 import unittest
-
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
-
 from testlib import get_fixture, function
-from testlib import EapiConfigUnitTest
+from testlib import EapiAsyncConfigUnitTest
+import pyeapiasync.api.varpasync
 
-import pyeapi.api.varp
-
-
-class TestApiVarp(EapiConfigUnitTest):
-
+class TestApiVarp(EapiAsyncConfigUnitTest):
     def __init__(self, *args, **kwargs):
         super(TestApiVarp, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.varp.Varp(None)
+        self.instance = pyeapiasync.api.varpasync.Varp(None)
         self.config = open(get_fixture('running_config.varp')).read()
 
     def test_instance(self):
-        result = pyeapi.api.varp.instance(None)
-        self.assertIsInstance(result, pyeapi.api.varp.Varp)
+        result = pyeapiasync.api.varpasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.varpasync.Varp)
 
-    def test_get(self):
-        result = self.instance.get()
+    async def test_get(self):
+        result = await self.instance.get()
         keys = ['mac_address', 'interfaces']
         self.assertEqual(sorted(keys), sorted(result.keys()))
-        self.assertIsNotNone(self.instance.get()['mac_address'])
-        self.assertIsNotNone(self.instance.get()['interfaces'])
+        result = await self.instance.get()
+        self.assertIsNotNone(result['mac_address'])
+        self.assertIsNotNone(result['interfaces'])
 
-    def test_get_interfaces_none(self):
+    async def test_get_interfaces_none(self):
         self._interfaces = None
-        result = self.instance.interfaces()
+        result = await self.instance.interfaces()
         self.assertIsNotNone(result)
 
-    def test_get_interfaces_already_defined(self):
-        self.instance.interfaces()
-        result = self.instance.interfaces()
+    async def test_get_interfaces_already_defined(self):
+        await self.instance.interfaces()
+        result = await self.instance.interfaces()
         self.assertIsNotNone(result)
 
-    def test_set_mac_address_with_value(self):
+    async def test_set_mac_address_with_value(self):
         value = 'aa:bb:cc:dd:ee:ff'
         func = function('set_mac_address', mac_address=value)
         cmds = 'ip virtual-router mac-address %s' % value
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_set_mac_address_with_positional_value(self):
+    async def test_set_mac_address_with_positional_value(self):
         value = 'aa:bb:cc:dd:ee:ff'
         func = function('set_mac_address', value)
         cmds = 'ip virtual-router mac-address %s' % value
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_set_mac_address_with_disable(self):
+    async def test_set_mac_address_with_disable(self):
         func = function('set_mac_address', disable=True)
         cmds = 'no ip virtual-router mac-address 00:11:22:33:44:55'
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_set_mac_address_with_no_value(self):
+    async def test_set_mac_address_with_no_value(self):
         with self.assertRaises(ValueError):
-            self.instance.set_mac_address(mac_address=None)
+            await self.instance.set_mac_address(mac_address=None)
 
-    def test_set_mac_address_with_bad_value(self):
+    async def test_set_mac_address_with_bad_value(self):
         with self.assertRaises(ValueError):
-            self.instance.set_mac_address(mac_address='0011.2233.4455')
+            await self.instance.set_mac_address(mac_address='0011.2233.4455')
 
-    def test_set_mac_address_with_default(self):
+    async def test_set_mac_address_with_default(self):
         func = function('set_mac_address', default=True)
         cmds = 'default ip virtual-router mac-address 00:11:22:33:44:55'
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-
-class TestApiVarpInterfaces(EapiConfigUnitTest):
-
+class TestApiVarpInterfaces(EapiAsyncConfigUnitTest):
     def __init__(self, *args, **kwargs):
         super(TestApiVarpInterfaces, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.varp.VarpInterfaces(None)
+        self.instance = pyeapiasync.api.varpasync.VarpInterfaces(None)
         self.config = open(get_fixture('running_config.varp')).read()
 
-    def test_get_with_no_interface(self):
+    async def test_get_with_no_interface(self):
         self.config = ""
-        self.setUp()
-        result = self.instance.get('Vlan1000')
+        await self.asyncSetUp()
+        result = await self.instance.get('Vlan1000')
         self.assertIsNone(result)
 
-    def test_add_address_with_value(self):
+    async def test_add_address_with_value(self):
         func = function('set_addresses', 'Vlan4001', addresses=['1.1.1.4'])
         cmds = ['interface Vlan4001', 'no ip virtual-router address 1.1.1.2',
                 'ip virtual-router address 1.1.1.4']
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_add_address_when_interface_does_not_exist(self):
+    async def test_add_address_when_interface_does_not_exist(self):
         self.config = ""
-        self.setUp()
+        await self.asyncSetUp()
         func = function('set_addresses', 'Vlan10', addresses=['1.1.1.4'])
         cmds = ['interface Vlan10', 'ip virtual-router address 1.1.1.4']
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_add_address_with_no_value(self):
+    async def test_add_address_with_no_value(self):
         func = function('set_addresses', 'Vlan4002')
         cmds = ['interface Vlan4002', 'no ip virtual-router address']
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_add_address_with_empty_list(self):
+    async def test_add_address_with_empty_list(self):
         func = function('set_addresses', 'Vlan4001', addresses=[])
         cmds = ['interface Vlan4001', 'no ip virtual-router address 1.1.1.2']
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_add_address_with_default(self):
+    async def test_add_address_with_default(self):
         func = function('set_addresses', 'Vlan4001', default=True)
         cmds = ['interface Vlan4001', 'default ip virtual-router address']
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_add_address_with_disable(self):
+    async def test_add_address_with_disable(self):
         func = function('set_addresses', 'Vlan4001', disable=True)
         cmds = ['interface Vlan4001', 'no ip virtual-router address']
-        self.eapi_positive_config_test(func, cmds)
-
+        await self.eapi_positive_config_test(func, cmds)
 
 if __name__ == '__main__':
     unittest.main()

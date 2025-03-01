@@ -378,6 +378,19 @@ class BaseInterfaceAsync(EntityCollectionAsync):
                                              default=default, disable=disable))
         return await self.configure(commands)
 
+    async def set_vrf(self, name, vrf, default=False, disable=False):
+        commands = ['interface %s' % name]
+        version = await self.get_version_number()
+        if version >= '4.23':
+            commands.append(self.command_builder('vrf', vrf,
+                                                 default=default,
+                                                 disable=disable))
+        else:
+            commands.append(self.command_builder('vrf forwarding', vrf,
+                                                 default=default,
+                                                 disable=disable))
+        return await self.configure(commands)
+
 
 class EthernetInterfaceAsync(BaseInterfaceAsync):
 

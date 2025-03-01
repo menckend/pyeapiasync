@@ -34,10 +34,12 @@ import random
 import string
 import unittest
 
-from unittest.mock import MagicMock as Mock
-from pyeapi.utils import CliVariants
+from unittest.mock import AsyncMock
+from pyeapiasync.utils import CliVariants
+from pyeapiasync.clientasync import Node
+from collections import namedtuple
 
-from pyeapi.client import Node
+Function = namedtuple('Function', 'name args kwargs')
 
 def get_fixtures_path():
     return os.path.join(os.path.dirname(__file__), '../fixtures')
@@ -55,36 +57,31 @@ def random_vlan():
 def random_int(minvalue, maxvalue):
     return random.randint(minvalue, maxvalue)
 
-
-from collections import namedtuple
-Function = namedtuple('Function', 'name args kwargs')
-
 def function(name, *args, **kwargs):
     return Function(name, args, kwargs)
 
 
-class EapiConfigUnitTest(unittest.TestCase):
-
+class EapiAsyncConfigUnitTest(unittest.IsolatedAsyncioTestCase):
     def __init__(self, *args, **kwargs):
         self.instance = None
         self.config = None
-        super(EapiConfigUnitTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-    def setUp(self):
+    async def asyncSetUp(self):
         self.node = Node(None)
         self.node._version_number = '4.17.1.1'
         self.node._running_config = self.config
 
-        self.mock_config = Mock(name='node.config')
-        self.node.config = self.mock_config
+        self.mock_config = AsyncMock(name='node.config_async')
+        self.node.config_async = self.mock_config
 
-        self.mock_enable = Mock(name='node.enable')
-        self.node.enable = self.mock_enable
+        self.mock_enable = AsyncMock(name='node.enable_async')
+        self.node.enable_async = self.mock_enable
 
         self.assertIsNotNone(self.instance)
         self.instance.node = self.node
 
-    def eapi_config_test(self, func, cmds=None, *args, **kwargs):
+    async def eapi_config_test(self, func, cmds=None, *args, **kwargs):
         func, fargs, fkwargs = func
         func = getattr(self.instance, func)
 
@@ -92,37 +89,37 @@ class EapiConfigUnitTest(unittest.TestCase):
             lcmds = len([cmds]) if isinstance(cmds, str) else len(cmds)
             self.mock_config.return_value = [{} for i in range(0, lcmds)]
 
-        result = func(*fargs, **fkwargs)
+        result = await func(*fargs, **fkwargs)
 
         if cmds is not None:
             # if config was called with CliVariants, then create all possible
             # cli combinations with CliVariants and see if cmds is one of them
-            called_args = list( self.node.config.call_args )[ 0 ][ 0 ]
-            variants = [ x for x in called_args if isinstance(x, CliVariants) ]
+            called_args = list(self.mock_config.call_args)[0][0]
+            variants = [x for x in called_args if isinstance(x, CliVariants)]
             if not variants:
-                self.node.config.assert_called_with(cmds)
+                self.mock_config.assert_called_with(cmds)
                 return result
             # process all variants
             cli_variants = CliVariants.expand( called_args )
             self.assertIn( cmds, cli_variants )
         else:
-            self.assertEqual(self.node.config.call_count, 0)
+            self.assertEqual(self.mock_config.call_count, 0)
 
         return result
 
-    def eapi_positive_config_test(self, func, cmds=None, *args, **kwargs):
-        result = self.eapi_config_test(func, cmds, *args, **kwargs)
+    async def eapi_positive_config_test(self, func, cmds=None, *args, **kwargs):
+        result = await self.eapi_config_test(func, cmds, *args, **kwargs)
         self.assertTrue(result)
 
-    def eapi_negative_config_test(self, func, cmds=None, *args, **kwargs):
-        result = self.eapi_config_test(func, cmds, *args, **kwargs)
+    async def eapi_negative_config_test(self, func, cmds=None, *args, **kwargs):
+        result = await self.eapi_config_test(func, cmds, *args, **kwargs)
         self.assertFalse(result)
 
-    def eapi_exception_config_test(self, func, exc, *args, **kwargs):
+    async def eapi_exception_config_test(self, func, exc, *args, **kwargs):
         with self.assertRaises(exc):
-            self.eapi_config_test(func, *args, **kwargs)
+            await self.eapi_config_test(func, *args, **kwargs)
 
-    def eapi_positive_config_with_input_test(self, func, cmds=None,
+    async def eapi_positive_config_with_input_test(self, func, cmds=None,
                                              *args, **kwargs):
-        result = self.eapi_config_test(func, cmds, *args, **kwargs)
+        result = await self.eapi_config_test(func, cmds, *args, **kwargs)
         self.assertTrue(result)

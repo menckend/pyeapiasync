@@ -38,16 +38,16 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, function
 from testlib import EapiConfigUnitTest
 
-import pyeapi.api.acl
+import pyeapiasync.api.aclasync as aclasync
 
 class TestApiAclFunctions(unittest.TestCase):
 
     def test_mask_to_prefixlen(self):
-        result = pyeapi.api.acl.mask_to_prefixlen('255.255.255.0')
+        result = aclasync.mask_to_prefixlen('255.255.255.0')
         self.assertEqual(result, 24)
 
     def test_prefixlen_to_mask(self):
-        result = pyeapi.api.acl.prefixlen_to_mask(24)
+        result = aclasync.prefixlen_to_mask(24)
         self.assertEqual(result, '255.255.255.0')
 
 
@@ -55,48 +55,48 @@ class TestApiAcls(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiAcls, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.acl.Acls(None)
+        self.instance = aclasync.AclsAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
 
-    def test_instance(self):
-        result = pyeapi.api.acl.instance(None)
-        self.assertIsInstance(result, pyeapi.api.acl.Acls)
+    async def test_instance(self):
+        result = await aclasync.instance(None)
+        self.assertIsInstance(result, aclasync.AclsAsync)
 
-    def test_getall(self):
-        result = self.instance.getall()
+    async def test_getall(self):
+        result = await self.instance.getall()
         self.assertIsInstance(result, dict)
         self.assertIn('exttest', result['extended'])
         self.assertIn('test', result['standard'])
 
-    def test_get_not_configured(self):
-        self.assertIsNone(self.instance.get('unconfigured'))
+    async def test_get_not_configured(self):
+        self.assertIsNone(await self.instance.get('unconfigured'))
 
-    def test_get(self):
-        result = self.instance.get('test')
+    async def test_get(self):
+        result = await self.instance.get('test')
         keys = ['name', 'type', 'entries']
         self.assertEqual(sorted(keys), sorted(result.keys()))
 
-    def test_get_instance(self):
-        result = self.instance.get_instance('test')
-        self.assertIsInstance(result, pyeapi.api.acl.StandardAcls)
+    async def test_get_instance(self):
+        result = await self.instance.get_instance('test')
+        self.assertIsInstance(result, aclasync.StandardAclsAsync)
         self.instance._instances['test'] = result
         result = self.instance.get_instance('exttest')
-        self.assertIsInstance(result, pyeapi.api.acl.ExtendedAcls)
+        self.assertIsInstance(result, aclasync.ExtendedAclsAsync)
         result = self.instance.get_instance('unconfigured')
         self.assertIsInstance(result, dict)
         self.assertIsNone(result['unconfigured'])
         result = self.instance.get_instance('test')
-        self.assertIsInstance(result, pyeapi.api.acl.StandardAcls)
+        self.assertIsInstance(result, aclasync.StandardAclsAsync)
         self.assertEqual(len(self.instance._instances), 2)
 
-    def test_create_instance_standard(self):
-        result = self.instance.create_instance('test', 'standard')
-        self.assertIsInstance(result, pyeapi.api.acl.StandardAcls)
+    async def test_create_instance_standard(self):
+        result = await self.instance.create_instance('test', 'standard')
+        self.assertIsInstance(result, aclasync.StandardAclsAsync)
         self.assertEqual(len(self.instance._instances), 1)
 
-    def test_create_instance_extended(self):
-        result = self.instance.create_instance('exttest', 'extended')
-        self.assertIsInstance(result, pyeapi.api.acl.ExtendedAcls)
+    async def test_create_instance_extended(self):
+        result = await self.instance.create_instance('exttest', 'extended')
+        self.assertIsInstance(result, aclasync.ExtendedAclsAsync)
         self.assertEqual(len(self.instance._instances), 1)
 
     def test_create_standard(self):
@@ -114,8 +114,8 @@ class TestApiAcls(EapiConfigUnitTest):
         func = function('create', 'test', 'unknown')
         self.eapi_positive_config_test(func, cmds)
 
-    def test_proxy_method_success(self):
-        result = self.instance.remove_entry('test', '10')
+    async def test_proxy_method_success(self):
+        result = await self.instance.remove_entry('test', '10')
         self.assertTrue(result)
 
     def test_proxy_method_raises_attribute_error(self):
@@ -127,17 +127,17 @@ class TestApiStandardAcls(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiStandardAcls, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.acl.StandardAcls(None)
+        self.instance = aclasync.StandardAclsAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
 
-    def test_get(self):
-        result = self.instance.get('test')
+    async def test_get(self):
+        result = await self.instance.get('test')
         keys = ['name', 'type', 'entries']
         self.assertEqual(sorted(keys), sorted(result.keys()))
         self.assertEqual(result['type'], 'standard')
 
-    def test_get_not_configured(self):
-        self.assertIsNone(self.instance.get('unconfigured'))
+    async def test_get_not_configured(self):
+        self.assertIsNone(await self.instance.get('unconfigured'))
 
     def test_acl_functions(self):
         for name in ['create', 'delete', 'default']:
@@ -195,11 +195,11 @@ class TestApiExtendedAcls(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiExtendedAcls, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.acl.ExtendedAcls(None)
+        self.instance = aclasync.ExtendedAclsAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
 
-    def test_get(self):
-        result = self.instance.get('exttest')
+    async def test_get(self):
+        result = await self.instance.get('exttest')
         keys = ['name', 'type', 'entries']
         self.assertEqual(sorted(keys), sorted(result.keys()))
         self.assertEqual(result['type'], 'extended')
@@ -216,8 +216,8 @@ class TestApiExtendedAcls(EapiConfigUnitTest):
                      srclen='24', srcport='neq irc')
         self.assertEqual(entry, result['entries']['70'])
 
-    def test_get_not_configured(self):
-        self.assertIsNone(self.instance.get('unconfigured'))
+    async def test_get_not_configured(self):
+        self.assertIsNone(await self.instance.get('unconfigured'))
 
     def test_acl_functions(self):
         for name in ['create', 'delete', 'default']:

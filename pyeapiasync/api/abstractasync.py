@@ -70,8 +70,7 @@ class BaseEntityAsync(object):
         self.node = node
         self._running_config = None
 
-    @property
-    async def version_number(self):
+    async def get_version_number(self):
         return await self.node.get_version_number()
 
     @property

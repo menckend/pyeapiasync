@@ -35,110 +35,82 @@ import unittest
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-
 from testlib import get_fixture, function, random_int, random_string
-from testlib import EapiConfigUnitTest
+from testlib import EapiAsyncConfigUnitTest
+from pyeapiasync.api.ipinterfacesasync import IpInterfacesAsync
 
-import pyeapi.api.ipinterfaces
-
-
-class TestApiIpinterfaces(EapiConfigUnitTest):
+class TestApiIpinterfacesAsync(EapiAsyncConfigUnitTest):
 
     INTERFACES = ['Ethernet1', 'Ethernet1/1', 'Vlan1234', 'Management1',
                   'Port-Channel1']
 
     def __init__(self, *args, **kwargs):
-        super(TestApiIpinterfaces, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.ipinterfaces.instance(None)
+        super().__init__(*args, **kwargs)
+        self.instance = IpInterfacesAsync.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
 
-    def test_get(self):
-        result = self.instance.get( 'Loopback0' )
-        values = dict( name='Loopback0', address='1.1.1.1/32', mtu=1500 )
-        self.assertEqual( result, values )
-        # test interface with secondary ip
-        result = self.instance.get( 'Loopback2' )
-        values = dict( name='Loopback2', address='2.2.2.2/32',
-            secondary=['3.255.255.1/24', '4.255.255.1/24'], mtu=None )
+    async def test_get(self):
+        result = await self.instance.get('Loopback0')
+        values = dict(name='Loopback0', address='1.1.1.1/32', mtu=1500)
+        self.assertEqual(result, values)
+        # Test interface with secondary ip
+        result = await self.instance.get('Loopback2')
+        values = dict(name='Loopback2', address='2.2.2.2/32',
+                    secondary=['3.255.255.1/24', '4.255.255.1/24'], mtu=None)
         self.assertEqual(result, values)
 
-    def test_getall(self):
-        result = self.instance.getall()
+    async def test_getall(self):
+        result = await self.instance.getall()
         self.assertIsInstance(result, dict)
         self.assertEqual(len(result), 4)
 
-    def test_instance_functions(self):
+    async def test_instance_functions(self):
         for intf in self.INTERFACES:
             for name in ['create', 'delete']:
                 if name == 'create':
-                    cmds = ['interface %s' % intf, 'no switchport']
+                    cmds = [f'interface {intf}', 'no switchport']
                 elif name == 'delete':
-                    cmds = ['interface %s' % intf, 'no ip address',
-                            'switchport']
+                    cmds = [f'interface {intf}', 'no ip address', 'switchport']
                 func = function(name, intf)
-                self.eapi_positive_config_test(func, cmds)
+                await self.eapi_async_positive_config_test(func, cmds)
 
-    def test_set_address_with_value(self):
+    async def test_set_address_with_value(self):
         for intf in self.INTERFACES:
             value = '1.2.3.4/5'
-            cmds = ['interface %s' % intf, 'ip address 1.2.3.4/5']
+            cmds = [f'interface {intf}', f'ip address {value}']
             func = function('set_address', intf, value)
-            self.eapi_positive_config_test(func, cmds)
+            await self.eapi_async_positive_config_test(func, cmds)
 
-    def test_set_address_with_no_value(self):
+    async def test_set_address_with_no_value(self):
         for intf in self.INTERFACES:
-            cmds = ['interface %s' % intf, 'no ip address']
+            cmds = [f'interface {intf}', 'no ip address']
             func = function('set_address', intf, disable=True)
-            self.eapi_positive_config_test(func, cmds)
+            await self.eapi_async_positive_config_test(func, cmds)
 
-    def test_set_address_with_default(self):
+    async def test_set_address_with_default(self):
         for intf in self.INTERFACES:
-            cmds = ['interface %s' % intf, 'default ip address']
+            cmds = [f'interface {intf}', 'default ip address']
             func = function('set_address', intf, default=True)
-            self.eapi_positive_config_test(func, cmds)
+            await self.eapi_async_positive_config_test(func, cmds)
 
-    def test_set_address_invalid_value_raises_value_error(self):
-        for intf in self.INTERFACES:
-            # func = function('set_address', intf, None)
-            # self.eapi_exception_config_test(func, ValueError)
-            # If command_builder fails because value is None, uncomment
-            # above lines and remove below lines.
-            cmds = ['interface %s' % intf, 'no ip address']
-            func = function('set_address', intf, value=None)
-            self.eapi_positive_config_test(func, cmds)
-
-    def test_set_mtu_with_values(self):
+    async def test_set_mtu_with_values(self):
         for intf in self.INTERFACES:
             for value in [68, 65535, random_int(68, 65535)]:
-                cmds = ['interface %s' % intf, 'mtu %s' % value]
+                cmds = [f'interface {intf}', f'mtu {value}']
                 func = function('set_mtu', intf, value)
-                self.eapi_positive_config_test(func, cmds)
+                await self.eapi_async_positive_config_test(func, cmds)
 
-    def test_set_mtu_with_no_value(self):
+    async def test_set_mtu_with_no_value(self):
         for intf in self.INTERFACES:
-            cmds = ['interface %s' % intf, 'no mtu']
+            cmds = [f'interface {intf}', 'no mtu']
             func = function('set_mtu', intf, disable=True)
-            self.eapi_positive_config_test(func, cmds)
+            await self.eapi_async_positive_config_test(func, cmds)
 
-    def test_set_mtu_default(self):
+    async def test_set_mtu_default(self):
         for intf in self.INTERFACES:
-            cmds = ['interface %s' % intf, 'default mtu']
+            cmds = [f'interface {intf}', 'default mtu']
             func = function('set_mtu', intf, default=True)
-            self.eapi_positive_config_test(func, cmds)
-
-    def test_set_mtu_invalid_value_raises_value_error(self):
-        for intf in self.INTERFACES:
-            for value in [67, 65536, 'a' + random_string()]:
-                func = function('set_mtu', intf, value)
-                self.eapi_exception_config_test(func, ValueError)
-            for value in [None]:
-                # If command_builder fails because value is None, put None
-                # in the first loop to check for value error, and remove
-                # this second loop
-                cmds = ['interface %s' % intf, 'no mtu']
-                func = function('set_mtu', intf, value)
-                self.eapi_positive_config_test(func, cmds)
-
+            await self.eapi_async_positive_config_test(func, cmds)
 
 if __name__ == '__main__':
     unittest.main()

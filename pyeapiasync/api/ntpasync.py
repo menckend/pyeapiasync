@@ -81,15 +81,14 @@ class NtpAsync(EntityAsync):
         config = await self.config
         if not config:
             return None
-
+        version = await self.get_version_number()
         response = dict()
-        response.update(self._parse_source_interface(config))
+        response.update(self._parse_source_interface(config, version))
         response.update(self._parse_servers(config))
-
         return response
 
-    def _parse_source_interface(self, config):
-        if self.version_number >= "4.23":
+    def _parse_source_interface(self, config, version):
+        if version >= "4.23":
             match = re.search(r"^ntp local-interface (\S+)", config, re.M)
         else:
             match = re.search(r"^ntp source (\S+)", config, re.M)

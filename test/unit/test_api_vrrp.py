@@ -36,9 +36,9 @@ import unittest
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import get_fixture, function
-from testlib import EapiConfigUnitTest
+from testlib import EapiAsyncConfigUnitTest
 
-import pyeapi.api.vrrp
+import pyeapiasync.api.vrrpasync
 
 upd_intf = 'Vlan50'
 upd_vrid = 10
@@ -135,47 +135,47 @@ known_vrrps = {
 }
 
 
-class TestApiVrrp(EapiConfigUnitTest):
+class TestApiVrrp(EapiAsyncConfigUnitTest):
 
     maxDiff = None
 
     def __init__(self, *args, **kwargs):
         super(TestApiVrrp, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.vrrp.Vrrp(None)
+        self.instance = pyeapiasync.api.vrrpasync.VrrpAsync(None)
         self.config = open(get_fixture('running_config.vrrp')).read()
 
-    def test_instance(self):
-        result = pyeapi.api.vrrp.instance(None)
-        self.assertIsInstance(result, pyeapi.api.vrrp.Vrrp)
+    async def test_instance(self):
+        result = await pyeapiasync.api.vrrpasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.vrrpasync.VrrpAsync)
 
-    def test_get(self):
+    async def test_get(self):
         # Request various sets of vrrp configurations
         for interface in known_vrrps:
             known = known_vrrps.get(interface)
             for vrid in known:
                 known[vrid] = self.instance.vrconf_format(known[vrid])
-            result = self.instance.get(interface)
+            result = await self.instance.get(interface)
             self.assertEqual(result, known)
 
-    def test_get_non_existent_interface(self):
+    async def test_get_non_existent_interface(self):
         # Request vrrp configuration for an interface that
         # is not defined
-        result = self.instance.get('Vlan2000')
+        result = await self.instance.get('Vlan2000')
         self.assertIsNone(result)
 
-    def test_get_invalid_parameters(self):
+    async def test_get_invalid_parameters(self):
         # Pass empty, None, or other invalid parameters to get()
         with self.assertRaises(ValueError):
-            self.instance.get('')
+            await self.instance.get('')
         with self.assertRaises(ValueError):
-            self.instance.get(None)
+            await self.instance.get(None)
 
-    def test_getall(self):
+    async def test_getall(self):
         # Get all the vrrp configurations from the config
-        result = self.instance.getall()
+        result = await self.instance.getall()
         self.assertEqual(result, known_vrrps)
 
-    def test_create(self):
+    async def test_create(self):
         interface = 'Ethernet1'
         vrid = 10
 
@@ -224,7 +224,7 @@ class TestApiVrrp(EapiConfigUnitTest):
         ]
         func = function('create', interface, vrid, **configuration)
 
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
         # Test create setting possible parameters to 'no'
         configuration = {
@@ -260,7 +260,7 @@ class TestApiVrrp(EapiConfigUnitTest):
         ]
         func = function('create', interface, vrid, **configuration)
 
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
         # Test create setting possible parameters to 'default'
         configuration = {
@@ -296,9 +296,9 @@ class TestApiVrrp(EapiConfigUnitTest):
         ]
         func = function('create', interface, vrid, **configuration)
 
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_delete(self):
+    async def test_delete(self):
         interface = 'Ethernet1'
         vrid = 10
 
@@ -309,9 +309,9 @@ class TestApiVrrp(EapiConfigUnitTest):
 
         func = function('delete', interface, vrid)
 
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_default(self):
+    async def test_default(self):
         interface = 'Ethernet1'
         vrid = 10
 
@@ -322,9 +322,9 @@ class TestApiVrrp(EapiConfigUnitTest):
 
         func = function('default', interface, vrid)
 
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_set_enable(self):
+    async def test_set_enable(self):
         # no vrrp 10 shutdown
 
         # Test set_enable gives properly formatted commands
@@ -336,16 +336,16 @@ class TestApiVrrp(EapiConfigUnitTest):
         for (enable, cmd) in cases:
             func = function('set_enable', upd_intf, upd_vrid, value=enable)
             exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
+            await self.eapi_positive_config_test(func, exp_cmds)
 
         # Test raising ValueError from invalid parameters
         cases = ['a', 200]
 
         for enable in cases:
             func = function('set_enable', upd_intf, upd_vrid, value=enable)
-            self.eapi_exception_config_test(func, ValueError)
+            await self.eapi_exception_config_test(func, ValueError)
 
-    def test_set_primary_ip(self):
+    async def test_set_primary_ip(self):
         # vrrp 10 ip 10.10.4.10
 
         # Test set_primary_ip gives properly formatted commands
@@ -362,7 +362,7 @@ class TestApiVrrp(EapiConfigUnitTest):
             func = function('set_primary_ip', upd_intf, upd_vrid,
                             value=primary_ip, disable=disable, default=default)
             exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
+            await self.eapi_positive_config_test(func, exp_cmds)
 
         # Test raising ValueError from invalid parameters
         cases = ['abc', 500, '101.101']
@@ -370,9 +370,9 @@ class TestApiVrrp(EapiConfigUnitTest):
         for primary_ip in cases:
             func = function('set_primary_ip', upd_intf, upd_vrid,
                             value=primary_ip)
-            self.eapi_exception_config_test(func, ValueError)
+            await self.eapi_exception_config_test(func, ValueError)
 
-    def test_set_priority(self):
+    async def test_set_priority(self):
         # vrrp 10 priority 200
 
         # Test set_primary_ip gives properly formatted commands
@@ -387,7 +387,7 @@ class TestApiVrrp(EapiConfigUnitTest):
             func = function('set_priority', upd_intf, upd_vrid,
                             value=priority, disable=disable, default=default)
             exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
+            await self.eapi_positive_config_test(func, exp_cmds)
 
         # Test raising ValueError from invalid parameters
         cases = ['abc', 500, False]
@@ -395,9 +395,9 @@ class TestApiVrrp(EapiConfigUnitTest):
         for priority in cases:
             func = function('set_priority', upd_intf, upd_vrid,
                             value=priority)
-            self.eapi_exception_config_test(func, ValueError)
+            await self.eapi_exception_config_test(func, ValueError)
 
-    def test_set_description(self):
+    async def test_set_description(self):
         # no vrrp 10 description
 
         desc = 'test description'
@@ -415,9 +415,9 @@ class TestApiVrrp(EapiConfigUnitTest):
                             value=description, disable=disable,
                             default=default)
             exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
+            await self.eapi_positive_config_test(func, exp_cmds)
 
-    def test_set_ip_version(self):
+    async def test_set_ip_version(self):
         # vrrp 10 ip version 2
         # Test set_description gives properly formatted commands
         cases = [
@@ -431,7 +431,7 @@ class TestApiVrrp(EapiConfigUnitTest):
             func = function('set_ip_version', upd_intf, upd_vrid,
                             value=ip_version, disable=disable, default=default)
             exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
+            await self.eapi_positive_config_test(func, exp_cmds)
 
         # Test raising ValueError by entering invalid parameters
         cases = ['a', 5]
@@ -439,9 +439,9 @@ class TestApiVrrp(EapiConfigUnitTest):
         for ip_version in cases:
             func = function('set_ip_version', upd_intf, upd_vrid,
                             value=ip_version)
-            self.eapi_exception_config_test(func, ValueError)
+            await self.eapi_exception_config_test(func, ValueError)
 
-    def test_set_secondary_ips(self):
+    async def test_set_secondary_ips(self):
         # vrrp 10 ip 10.10.4.21 secondary
         # vrrp 10 ip 10.10.4.22 secondary
         # vrrp 10 ip 10.10.4.23 secondary
@@ -480,7 +480,7 @@ class TestApiVrrp(EapiConfigUnitTest):
             func = function('set_secondary_ips', upd_intf, upd_vrid,
                             secondary_ips)
             exp_cmds = [upd_cmd] + sorted(cmds)
-            self.eapi_positive_config_test(func, exp_cmds)
+            await self.eapi_positive_config_test(func, exp_cmds)
 
         # Test raising ValueError by entering invalid parameters
         cases = [
@@ -492,9 +492,9 @@ class TestApiVrrp(EapiConfigUnitTest):
         for secondary_ips in cases:
             func = function('set_secondary_ips', upd_intf, upd_vrid,
                             secondary_ips)
-            self.eapi_exception_config_test(func, ValueError)
+            await self.eapi_exception_config_test(func, ValueError)
 
-    def test_set_timers_advertise(self):
+    async def test_set_timers_advertise(self):
         # vrrp 10 timers advertise 3
 
         # Test set_timers_advertise gives properly formatted commands
@@ -510,7 +510,7 @@ class TestApiVrrp(EapiConfigUnitTest):
                             value=timers_advertise, disable=disable,
                             default=default)
             exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
+            await self.eapi_positive_config_test(func, exp_cmds)
 
         # Test raising ValueError by entering invalid parameters
         cases = [256, 0, 'a']
@@ -518,9 +518,9 @@ class TestApiVrrp(EapiConfigUnitTest):
         for timers_advertise in cases:
             func = function('set_timers_advertise', upd_intf, upd_vrid,
                             value=timers_advertise)
-            self.eapi_exception_config_test(func, ValueError)
+            await self.eapi_exception_config_test(func, ValueError)
 
-    def test_set_mac_addr_adv_interval(self):
+    async def test_set_mac_addr_adv_interval(self):
         # vrrp 10 mac-address advertisement-interval 30
 
         # Test set_timers_advertise gives properly formatted commands
@@ -537,7 +537,7 @@ class TestApiVrrp(EapiConfigUnitTest):
                             value=mac_addr_adv_interval, disable=disable,
                             default=default)
             exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
+            await self.eapi_positive_config_test(func, exp_cmds)
 
         # Test raising ValueError by entering invalid parameters
         cases = ['a', 10000]
@@ -545,9 +545,9 @@ class TestApiVrrp(EapiConfigUnitTest):
         for mac_addr_adv_interval in cases:
             func = function('set_mac_addr_adv_interval', upd_intf, upd_vrid,
                             value=mac_addr_adv_interval)
-            self.eapi_exception_config_test(func, ValueError)
+            await self.eapi_exception_config_test(func, ValueError)
 
-    def test_set_preempt(self):
+    async def test_set_preempt(self):
         # vrrp 10 preempt
 
         # Test set_description gives properly formatted commands
@@ -563,7 +563,7 @@ class TestApiVrrp(EapiConfigUnitTest):
             func = function('set_preempt', upd_intf, upd_vrid,
                             value=preempt, disable=disable, default=default)
             exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
+            await self.eapi_positive_config_test(func, exp_cmds)
 
         # Test raising ValueError by entering invalid parameters
         cases = ['a', 5]
@@ -571,9 +571,9 @@ class TestApiVrrp(EapiConfigUnitTest):
         for preempt in cases:
             func = function('set_preempt', upd_intf, upd_vrid,
                             value=preempt)
-            self.eapi_exception_config_test(func, ValueError)
+            await self.eapi_exception_config_test(func, ValueError)
 
-    def test_set_preempt_delay_min(self):
+    async def test_set_preempt_delay_min(self):
         # vrrp 10 preempt delay minimum 0
 
         # Test set_preempt_delay_min gives properly formatted commands
@@ -592,7 +592,7 @@ class TestApiVrrp(EapiConfigUnitTest):
                             value=preempt_delay_min, disable=disable,
                             default=default)
             exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
+            await self.eapi_positive_config_test(func, exp_cmds)
 
         # Test raising ValueError by entering invalid parameters
         cases = ['a', 3601]
@@ -600,9 +600,9 @@ class TestApiVrrp(EapiConfigUnitTest):
         for preempt_delay_min in cases:
             func = function('set_preempt_delay_min', upd_intf, upd_vrid,
                             value=preempt_delay_min)
-            self.eapi_exception_config_test(func, ValueError)
+            await self.eapi_exception_config_test(func, ValueError)
 
-    def test_set_preempt_delay_reload(self):
+    async def test_set_preempt_delay_reload(self):
         # vrrp 10 preempt delay reload 0
 
         # Test set_preempt_delay_min gives properly formatted commands
@@ -621,7 +621,7 @@ class TestApiVrrp(EapiConfigUnitTest):
                             value=preempt_delay_reload, disable=disable,
                             default=default)
             exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
+            await self.eapi_positive_config_test(func, exp_cmds)
 
         # Test raising ValueError by entering invalid parameters
         cases = ['a', 3601]
@@ -629,9 +629,9 @@ class TestApiVrrp(EapiConfigUnitTest):
         for preempt_delay_reload in cases:
             func = function('set_preempt_delay_reload', upd_intf, upd_vrid,
                             value=preempt_delay_reload)
-            self.eapi_exception_config_test(func, ValueError)
+            await self.eapi_exception_config_test(func, ValueError)
 
-    def test_set_delay_reload(self):
+    async def test_set_delay_reload(self):
         # vrrp 10 delay reload 0
 
         # Test set_delay_min gives properly formatted commands
@@ -647,7 +647,7 @@ class TestApiVrrp(EapiConfigUnitTest):
                             value=delay_reload, disable=disable,
                             default=default)
             exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
+            await self.eapi_positive_config_test(func, exp_cmds)
 
         # Test raising ValueError by entering invalid parameters
         cases = ['a', 3601]
@@ -655,9 +655,9 @@ class TestApiVrrp(EapiConfigUnitTest):
         for delay_reload in cases:
             func = function('set_delay_reload', upd_intf, upd_vrid,
                             value=delay_reload)
-            self.eapi_exception_config_test(func, ValueError)
+            await self.eapi_exception_config_test(func, ValueError)
 
-    def test_set_tracks(self):
+    async def test_set_tracks(self):
         # vrrp 10 track Ethernet1 decrement 10
         # vrrp 10 track Ethernet1 shutdown
         # vrrp 10 track Ethernet2 decrement 50
@@ -712,7 +712,7 @@ class TestApiVrrp(EapiConfigUnitTest):
 
             func = function('set_tracks', upd_intf, upd_vrid, tracks)
             exp_cmds = [upd_cmd] + sorted(cmds)
-            self.eapi_positive_config_test(func, exp_cmds)
+            await self.eapi_positive_config_test(func, exp_cmds)
 
         # Test raising ValueError by entering invalid parameters
         cases = [
@@ -726,9 +726,9 @@ class TestApiVrrp(EapiConfigUnitTest):
 
         for tracks in cases:
             func = function('set_tracks', upd_intf, upd_vrid, tracks)
-            self.eapi_exception_config_test(func, ValueError)
+            await self.eapi_exception_config_test(func, ValueError)
 
-    def test_set_bfd_ip(self):
+    async def test_set_bfd_ip(self):
         # no vrrp 10 bfd ip
 
         bfd_addr = '10.10.4.101'
@@ -745,7 +745,7 @@ class TestApiVrrp(EapiConfigUnitTest):
             func = function('set_bfd_ip', upd_intf, upd_vrid,
                             value=bfd_ip, disable=disable, default=default)
             exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
+            await self.eapi_positive_config_test(func, exp_cmds)
 
         # Test raising ValueError from invalid parameters
         cases = ['abc', 500, '101.101']
@@ -753,9 +753,9 @@ class TestApiVrrp(EapiConfigUnitTest):
         for bfd_ip in cases:
             func = function('set_bfd_ip', upd_intf, upd_vrid,
                             value=bfd_ip)
-            self.eapi_exception_config_test(func, ValueError)
+            await self.eapi_exception_config_test(func, ValueError)
 
-    def test_vrconf_format(self):
+    async def test_vrconf_format(self):
         # Test the function to format a vrrp configuration to
         # match the output from get/getall
         vrconf = {

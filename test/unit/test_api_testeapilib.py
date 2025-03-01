@@ -3,7 +3,7 @@ import json
 
 from unittest.mock import Mock, patch
 
-import pyeapiasync.eapilibasync as eapilib
+import pyeapiasync.eapilibasync
 
 
 class TestEapiConnection(unittest.IsolatedAsyncioTestCase):
@@ -13,61 +13,61 @@ class TestEapiConnection(unittest.IsolatedAsyncioTestCase):
         mock_send = Mock(name='send')
         mock_send.return_value = json.dumps(response_dict)
 
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         instance.send = mock_send
 
         result = await instance.execute(['command'])
         self.assertEqual(json.loads(result), response_dict)
 
     async def test_execute_raises_type_error(self):
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         with self.assertRaises(TypeError):
             await instance.execute(None, encoding='invalid')
 
     async def test_execute_raises_connection_error(self):
         mock_send = Mock(name='send')
-        mock_send.side_effect = eapilib.ConnectionError('test', 'test')
+        mock_send.side_effect = pyeapiasync.eapilibasync.ConnectionError('test', 'test')
 
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         instance.send = mock_send
 
-        with self.assertRaises(eapilib.ConnectionError):
+        with self.assertRaises(pyeapiasync.eapilibasync.ConnectionError):
             await instance.execute('test')
 
     async def test_execute_raises_command_error(self):
         mock_send = Mock(name='send')
-        mock_send.side_effect = eapilib.CommandError('1000', 'test')
+        mock_send.side_effect = pyeapiasync.eapilibasync.CommandError('1000', 'test')
 
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         instance.send = mock_send
 
-        with self.assertRaises(eapilib.CommandError):
+        with self.assertRaises(pyeapiasync.eapilibasync.CommandError):
             await instance.execute('test')
 
     async def test_create_socket_connection(self):
-        instance = eapilib.SocketEapiConnection()
-        self.assertIsInstance(instance, eapilib.EapiConnection)
+        instance = pyeapiasync.eapilibasync.SocketEapiConnection()
+        self.assertIsInstance(instance, pyeapiasync.eapilibasync.EapiConnection)
         self.assertIsNotNone(str(instance.transport))
 
     @patch('pyeapiasync.eapilibasync.socket')
     async def test_socket_connection_create(self, mock_socket):
-        instance = eapilib.SocketConnection('/path/to/sock')
+        instance = pyeapiasync.eapilibasync.SocketConnection('/path/to/sock')
         await instance.connect()
         mock_socket.socket.return_value.connect.assert_called_with('/path/to/sock')
 
     async def test_create_http_local_connection(self):
-        instance = eapilib.HttpLocalEapiConnection()
-        self.assertIsInstance(instance, eapilib.EapiConnection)
+        instance = pyeapiasync.eapilibasync.HttpLocalEapiConnection()
+        self.assertIsInstance(instance, pyeapiasync.eapilibasync.EapiConnection)
         self.assertIsNotNone(str(instance.transport))
 
     async def test_create_http_connection(self):
-        instance = eapilib.HttpEapiConnection('localhost')
-        self.assertIsInstance(instance, eapilib.EapiConnection)
+        instance = pyeapiasync.eapilibasync.HttpEapiConnection('localhost')
+        self.assertIsInstance(instance, pyeapiasync.eapilibasync.EapiConnection)
         self.assertIsNotNone(str(instance.transport))
 
     async def test_create_https_connection(self):
-        instance = eapilib.HttpsEapiConnection('localhost')
-        self.assertIsInstance(instance, eapilib.EapiConnection)
+        instance = pyeapiasync.eapilibasync.HttpsEapiConnection('localhost')
+        self.assertIsInstance(instance, pyeapiasync.eapilibasync.EapiConnection)
         self.assertIsNotNone(str(instance.transport))
 
     async def test_send(self):
@@ -78,7 +78,7 @@ class TestEapiConnection(unittest.IsolatedAsyncioTestCase):
         mockcfg = {'getresponse.return_value.read.return_value': response_json}
         mock_transport.configure_mock(**mockcfg)
 
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         instance.transport = mock_transport
         await instance.send('test')
         # HTTP requests to be processed by EAPI should always go to
@@ -97,7 +97,7 @@ class TestEapiConnection(unittest.IsolatedAsyncioTestCase):
         mockcfg = {'getresponse.return_value.read.return_value': response_json}
         mock_transport.configure_mock(**mockcfg)
 
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         instance.authentication('username', 'password')
         instance.transport = mock_transport
         await instance.send('test')
@@ -115,12 +115,12 @@ class TestEapiConnection(unittest.IsolatedAsyncioTestCase):
                    'getresponse.return_value.reason': 'Unauthorized'}
         mock_transport.configure_mock(**mockcfg)
 
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         instance.authentication('username', 'password')
         instance.transport = mock_transport
         try:
             await instance.send('test')
-        except eapilib.ConnectionError as err:
+        except pyeapiasync.eapilibasync.ConnectionError as err:
             self.assertEqual(err.message, error_string)
 
     async def test_send_raises_connection_error(self):
@@ -128,11 +128,11 @@ class TestEapiConnection(unittest.IsolatedAsyncioTestCase):
         mockcfg = {'getresponse.return_value.read.side_effect': ValueError}
         mock_transport.configure_mock(**mockcfg)
 
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         instance.transport = mock_transport
         try:
             await instance.send('test')
-        except eapilib.ConnectionError as err:
+        except pyeapiasync.eapilibasync.ConnectionError as err:
             self.assertEqual(err.message, 'unable to connect to eAPI')
 
     async def test_send_raises_connection_socket_error(self):
@@ -141,11 +141,11 @@ class TestEapiConnection(unittest.IsolatedAsyncioTestCase):
                    OSError('timeout')}
         mock_transport.configure_mock(**mockcfg)
 
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         instance.transport = mock_transport
         try:
             await instance.send('test')
-        except eapilib.ConnectionError as err:
+        except pyeapiasync.eapilibasync.ConnectionError as err:
             error_msg = 'Socket error during eAPI connection: timeout'
             self.assertEqual(err.message, error_msg)
 
@@ -158,10 +158,10 @@ class TestEapiConnection(unittest.IsolatedAsyncioTestCase):
         mockcfg = {'getresponse.return_value.read.return_value': response_json}
         mock_transport.configure_mock(**mockcfg)
 
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         instance.transport = mock_transport
 
-        with self.assertRaises(eapilib.CommandError):
+        with self.assertRaises(pyeapiasync.eapilibasync.CommandError):
             await instance.send('test')
 
     async def test_send_raises_autocomplete_command_error(self):
@@ -174,12 +174,12 @@ class TestEapiConnection(unittest.IsolatedAsyncioTestCase):
         mockcfg = {'getresponse.return_value.read.return_value': response_json}
         mock_transport.configure_mock(**mockcfg)
 
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         instance.transport = mock_transport
 
         try:
             await instance.send('test')
-        except eapilib.CommandError as error:
+        except pyeapiasync.eapilibasync.CommandError as error:
             match = ("autoComplete parameter is not supported in this version"
                      " of EOS.")
             self.assertIn(match, error.message)
@@ -195,34 +195,34 @@ class TestEapiConnection(unittest.IsolatedAsyncioTestCase):
         mockcfg = {'getresponse.return_value.read.return_value': response_json}
         mock_transport.configure_mock(**mockcfg)
 
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         instance.transport = mock_transport
 
         try:
             await instance.send('test')
-        except eapilib.CommandError as error:
+        except pyeapiasync.eapilibasync.CommandError as error:
             match = ("expandAliases parameter is not supported in this version"
                      " of EOS.")
             self.assertIn(match, error.message)
 
     async def test_request_adds_autocomplete(self):
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         request = instance.request(['sh ver'], encoding='json',
-                                   autoComplete=True)
+                                  autoComplete=True)
         data = json.loads(request)
         self.assertIn('autoComplete', data['params'])
 
     async def test_request_adds_expandaliases(self):
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         request = instance.request(['test'], encoding='json',
-                                   expandAliases=True)
+                                  expandAliases=True)
         data = json.loads(request)
         self.assertIn('expandAliases', data['params'])
 
     async def test_request_ignores_unknown_param(self):
-        instance = eapilib.EapiConnection()
+        instance = pyeapiasync.eapilibasync.EapiConnection()
         request = instance.request(['sh ver'], encoding='json',
-                                   unknown=True)
+                                  unknown=True)
         data = json.loads(request)
         self.assertNotIn('unknown', data['params'])
 
@@ -230,12 +230,12 @@ class TestEapiConnection(unittest.IsolatedAsyncioTestCase):
 class TestCommandError(unittest.TestCase):
 
     def test_create_command_error(self):
-        result = eapilib.CommandError(9999, 'test')
-        self.assertIsInstance(result, eapilib.EapiError)
+        result = pyeapiasync.eapilibasync.CommandError(9999, 'test')
+        self.assertIsInstance(result, pyeapiasync.eapilibasync.EapiError)
 
     def test_command_error_trace(self):
         commands = ['test command', 'test command', 'test command']
         output = [{}, 'test output']
-        result = eapilib.CommandError(9999, 'test', commands=commands,
+        result = pyeapiasync.eapilibasync.CommandError(9999, 'test', commands=commands,
                                              output=output)
         self.assertIsNotNone(result.trace)

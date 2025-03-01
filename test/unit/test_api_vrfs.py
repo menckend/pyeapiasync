@@ -32,41 +32,36 @@
 import sys
 import os
 import unittest
-
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
-
 from testlib import get_fixture, function
-from testlib import EapiConfigUnitTest
+from testlib import EapiAsyncConfigUnitTest
+import pyeapiasync.api.vrfsasync
 
-import pyeapi.api.vrfs
-
-
-class TestApiVrfs(EapiConfigUnitTest):
-
+class TestApiVrfs(EapiAsyncConfigUnitTest):
     def __init__(self, *args, **kwargs):
         super(TestApiVrfs, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.vrfs.instance(None)
+        self.instance = pyeapiasync.api.vrfsasync.instance(None)
         self.config = open(get_fixture('running_config.vrf')).read()
 
-    def test_get(self):
-        result = self.instance.get('blah')
+    async def test_get(self):
+        result = await self.instance.get('blah')
         vrf = dict(rd='10:10', vrf_name='blah', description='blah desc',
                    ipv4_routing=True, ipv6_routing=False)
         self.assertEqual(vrf, result)
-        result2 = self.instance.get('test')
+        result2 = await self.instance.get('test')
         vrf2 = dict(rd='200:500', vrf_name='test', description='',
                     ipv4_routing=False, ipv6_routing=True)
         self.assertEqual(vrf2, result2)
 
-    def test_get_not_configured(self):
-        self.assertIsNone(self.instance.get('notthere'))
+    async def test_get_not_configured(self):
+        self.assertIsNone(await self.instance.get('notthere'))
 
-    def test_getall(self):
-        result = self.instance.getall()
+    async def test_getall(self):
+        result = await self.instance.getall()
         self.assertIsInstance(result, dict)
         self.assertEqual(len(result), 3)
 
-    def test_vrf_functions(self):
+    async def test_vrf_functions(self):
         for name in ['create', 'delete', 'default']:
             vrf_name = 'testvrf'
             if name == 'create':
@@ -76,23 +71,23 @@ class TestApiVrfs(EapiConfigUnitTest):
             elif name == 'default':
                 cmds = 'default vrf definition %s' % vrf_name
             func = function(name, vrf_name)
-            self.eapi_positive_config_test(func, cmds)
+            await self.eapi_positive_config_test(func, cmds)
 
-    def test_vrf_create_with_rd(self):
+    async def test_vrf_create_with_rd(self):
         vrf_name = 'testvrfrd'
         rd = '10:10'
         cmds = ['vrf definition %s' % vrf_name, 'rd %s' % rd]
         func = function('create', vrf_name, rd=rd)
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_set_rd(self):
+    async def test_set_rd(self):
         vrf_name = 'testrdvrf'
         rd = '10:10'
         cmds = ['vrf definition %s' % vrf_name, 'rd %s' % rd]
         func = function('set_rd', vrf_name, rd)
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_set_description(self):
+    async def test_set_description(self):
         for state in ['config', 'negate', 'default']:
             vrf_name = 'testdescvrf'
             if state == 'config':
@@ -100,49 +95,49 @@ class TestApiVrfs(EapiConfigUnitTest):
                 cmds = ['vrf definition %s' % vrf_name,
                         'description %s' % description]
                 func = function('set_description', vrf_name, description)
-                self.eapi_positive_config_test(func, cmds)
+                await self.eapi_positive_config_test(func, cmds)
             elif state == 'negate':
                 cmds = ['vrf definition %s' % vrf_name, 'no description']
                 func = function('set_description', vrf_name, disable=True)
-                self.eapi_positive_config_test(func, cmds)
+                await self.eapi_positive_config_test(func, cmds)
             elif state == 'default':
                 cmds = ['vrf definition %s' % vrf_name, 'default description']
                 func = function('set_description', vrf_name, default=True)
-                self.eapi_positive_config_test(func, cmds)
+                await self.eapi_positive_config_test(func, cmds)
 
-    def test_set_ipv4_routing(self):
+    async def test_set_ipv4_routing(self):
         for state in ['config', 'negate', 'default']:
             vrf_name = 'testipv4vrf'
             if state == 'config':
                 cmds = ['ip routing vrf %s' % vrf_name]
                 func = function('set_ipv4_routing', vrf_name)
-                self.eapi_positive_config_test(func, cmds)
+                await self.eapi_positive_config_test(func, cmds)
             elif state == 'negate':
                 cmds = ['no ip routing vrf %s' % vrf_name]
                 func = function('set_ipv4_routing', vrf_name, disable=True)
-                self.eapi_positive_config_test(func, cmds)
+                await self.eapi_positive_config_test(func, cmds)
             elif state == 'default':
                 cmds = ['default ip routing vrf %s' % vrf_name]
                 func = function('set_ipv4_routing', vrf_name, default=True)
-                self.eapi_positive_config_test(func, cmds)
+                await self.eapi_positive_config_test(func, cmds)
 
-    def test_set_ipv6_routing(self):
+    async def test_set_ipv6_routing(self):
         for state in ['config', 'negate', 'default']:
             vrf_name = 'testipv6vrf'
             if state == 'config':
                 cmds = ['ipv6 unicast-routing vrf %s' % vrf_name]
                 func = function('set_ipv6_routing', vrf_name)
-                self.eapi_positive_config_test(func, cmds)
+                await self.eapi_positive_config_test(func, cmds)
             elif state == 'negate':
                 cmds = ['no ipv6 unicast-routing vrf %s' % vrf_name]
                 func = function('set_ipv6_routing', vrf_name, disable=True)
-                self.eapi_positive_config_test(func, cmds)
+                await self.eapi_positive_config_test(func, cmds)
             elif state == 'default':
                 cmds = ['default ipv6 unicast-routing vrf %s' % vrf_name]
                 func = function('set_ipv6_routing', vrf_name, default=True)
-                self.eapi_positive_config_test(func, cmds)
+                await self.eapi_positive_config_test(func, cmds)
 
-    def test_set_interface(self):
+    async def test_set_interface(self):
         for state in ['config', 'negate', 'default']:
             vrf_name = 'testintvrf'
             interface = 'Ethernet1'
@@ -150,18 +145,17 @@ class TestApiVrfs(EapiConfigUnitTest):
                 cmds = ['interface %s' % interface,
                         'vrf forwarding %s' % vrf_name]
                 func = function('set_interface', vrf_name, interface)
-                self.eapi_positive_config_test(func, cmds)
+                await self.eapi_positive_config_test(func, cmds)
             elif state == 'negate':
                 cmds = ['interface %s' % interface, 'no vrf forwarding']
                 func = function('set_interface', vrf_name, interface,
                                 disable=True)
-                self.eapi_positive_config_test(func, cmds)
+                await self.eapi_positive_config_test(func, cmds)
             elif state == 'default':
                 cmds = ['interface %s' % interface, 'default vrf forwarding']
                 func = function('set_interface', vrf_name, interface,
                                 default=True)
-                self.eapi_positive_config_test(func, cmds)
-
+                await self.eapi_positive_config_test(func, cmds)
 
 if __name__ == '__main__':
     unittest.main()
