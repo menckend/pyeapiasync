@@ -48,8 +48,38 @@ import re
 
 from pyeapiasync.api import EntityCollectionAsync
 from pyeapiasync.utils import ProxyCall
-from pyeapiasync.api.acl import mask_to_prefixlen, VALID_ACLS
-f
+import netaddr
+
+
+VALID_ACLS = frozenset(['standard', 'extended'])
+
+
+def mask_to_prefixlen(mask):
+    """Converts a subnet mask from dotted decimal to bit length
+
+    Args:
+        mask (str): The dotted decimal subnet mask to convert
+
+    Returns:
+        str: The subnet mask as a valid prefix length
+    """
+    mask = mask or '255.255.255.255'
+    return netaddr.IPAddress(mask).netmask_bits()
+
+
+def prefixlen_to_mask(prefixlen):
+    """Converts a prefix length to a dotted decimal subnet mask
+
+    Args:
+        prefixlen (str): The prefix length value to convert
+
+    Returns:
+        str: The subt mask as a dotted decimal string
+    """
+    prefixlen = prefixlen or '32'
+    addr = '0.0.0.0/%s' % prefixlen
+    return str(netaddr.IPNetwork(addr).netmask)
+
 
 class AclsAsync(EntityCollectionAsync):
 
@@ -59,10 +89,10 @@ class AclsAsync(EntityCollectionAsync):
 
     async def get(self, name):
         """Returns an ACL resource object asynchronously
-        
+
         Args:
             name (str): The ACL name to retrieve from the running-config
-            
+
         Returns:
             A Python dictionary object containing the ACL configuration
             or None if the ACL does not exist
@@ -71,7 +101,7 @@ class AclsAsync(EntityCollectionAsync):
 
     async def getall(self):
         """Returns all ACLs in a dict object asynchronously.
-        
+
         Returns:
             A Python dictionary object containing all ACL
             configuration indexed by ACL name::
@@ -93,10 +123,10 @@ class AclsAsync(EntityCollectionAsync):
 
     def __getattr__(self, name):
         """Provides attribute access to the underlying ACL instance methods
-        
+
         Args:
             name (str): The method name to call on the ACL instance
-            
+
         Returns:
             A function wrapper that marshalls the request
         """
@@ -104,15 +134,15 @@ class AclsAsync(EntityCollectionAsync):
 
     async def marshall(self, name, *args, **kwargs):
         """Marshalls calls to instance methods asynchronously
-        
+
         Args:
             name (str): The method name to call on the ACL instance
             *args: The arguments to pass to the method
             **kwargs: The keyword arguments to pass to the method
-            
+
         Returns:
             The result of the method call
-            
+
         Raises:
             AttributeError: If the method does not exist on the instance
         """
@@ -126,13 +156,13 @@ class AclsAsync(EntityCollectionAsync):
 
     async def get_instance(self, name):
         """Returns an instance of the appropriate ACL class asynchronously
-        
+
         This method will determine the ACL type and return the appropriate
         instance.
-        
+
         Args:
             name (str): The name of the ACL to retrieve
-            
+
         Returns:
             A dictionary containing the ACL instance indexed by name
         """
@@ -149,11 +179,11 @@ class AclsAsync(EntityCollectionAsync):
 
     async def create_instance(self, name, acl_type):
         """Creates a new ACL instance asynchronously
-        
+
         Args:
             name (str): The name of the ACL
             acl_type (str): The type of ACL ('standard' or 'extended')
-            
+
         Returns:
             The ACL instance
         """
@@ -165,12 +195,12 @@ class AclsAsync(EntityCollectionAsync):
 
     async def create(self, name, type='standard'):
         """Creates a new ACL in the running configuration asynchronously
-        
+
         Args:
             name (str): The name of the ACL to create
             type (str): The type of ACL to create, either 'standard'
                 or 'extended'
-                
+
         Returns:
             True if the operation was successful otherwise False
         """
@@ -191,10 +221,10 @@ class StandardAclsAsync(EntityCollectionAsync):
 
     async def get(self, name):
         """Returns a standard ACL resource object asynchronously
-        
+
         Args:
             name (str): The ACL name to retrieve from the running-config
-            
+
         Returns:
             A Python dictionary object containing the ACL configuration
             or None if the ACL does not exist
@@ -208,10 +238,10 @@ class StandardAclsAsync(EntityCollectionAsync):
 
     def _parse_entries(self, config):
         """Parses the ACL configuration and returns a dictionary of entries
-        
+
         Args:
             config (str): The ACL configuration block
-            
+
         Returns:
             A dictionary of entries indexed by sequence number
         """
@@ -246,10 +276,10 @@ class StandardAclsAsync(EntityCollectionAsync):
 
     async def create(self, name):
         """Creates a new standard ACL in the running configuration asynchronously
-        
+
         Args:
             name (str): The name of the ACL to create
-                
+
         Returns:
             True if the operation was successful otherwise False
         """
@@ -257,10 +287,10 @@ class StandardAclsAsync(EntityCollectionAsync):
 
     async def delete(self, name):
         """Deletes a standard ACL from the running configuration asynchronously
-        
+
         Args:
             name (str): The name of the ACL to delete
-                
+
         Returns:
             True if the operation was successful otherwise False
         """
@@ -268,10 +298,10 @@ class StandardAclsAsync(EntityCollectionAsync):
 
     async def default(self, name):
         """Defaults a standard ACL in the running configuration asynchronously
-        
+
         Args:
             name (str): The name of the ACL to default
-                
+
         Returns:
             True if the operation was successful otherwise False
         """
@@ -281,7 +311,7 @@ class StandardAclsAsync(EntityCollectionAsync):
     async def update_entry(self, name, seqno, action, addr, prefixlen,
                            log=False):
         """Updates an entry in the standard ACL asynchronously
-        
+
         Args:
             name (str): The name of the ACL
             seqno (str): The sequence number of the entry
@@ -289,7 +319,7 @@ class StandardAclsAsync(EntityCollectionAsync):
             addr (str): The source IP address
             prefixlen (str): The prefix length or subnet mask
             log (bool): Whether to enable logging for this entry
-                
+
         Returns:
             True if the operation was successful otherwise False
         """
@@ -304,7 +334,7 @@ class StandardAclsAsync(EntityCollectionAsync):
     async def add_entry(self, name, action, addr, prefixlen, log=False,
                         seqno=None):
         """Adds an entry to a standard ACL asynchronously
-        
+
         Args:
             name (str): The name of the ACL
             action (str): The action to take, either 'permit' or 'deny'
@@ -312,7 +342,7 @@ class StandardAclsAsync(EntityCollectionAsync):
             prefixlen (str): The prefix length or subnet mask
             log (bool): Whether to enable logging for this entry
             seqno (str): Optional sequence number for the entry
-                
+
         Returns:
             True if the operation was successful otherwise False
         """
@@ -328,11 +358,11 @@ class StandardAclsAsync(EntityCollectionAsync):
 
     async def remove_entry(self, name, seqno):
         """Removes an entry from a standard ACL asynchronously
-        
+
         Args:
             name (str): The name of the ACL
             seqno (str): The sequence number of the entry to remove
-                
+
         Returns:
             True if the operation was successful otherwise False
         """
@@ -358,10 +388,10 @@ class ExtendedAclsAsync(EntityCollectionAsync):
 
     async def get(self, name):
         """Returns an extended ACL resource object asynchronously
-        
+
         Args:
             name (str): The ACL name to retrieve from the running-config
-            
+
         Returns:
             A Python dictionary object containing the ACL configuration
             or None if the ACL does not exist
@@ -375,10 +405,10 @@ class ExtendedAclsAsync(EntityCollectionAsync):
 
     def _parse_entries(self, config):
         """Parses the ACL configuration and returns a dictionary of entries
-        
+
         Args:
             config (str): The ACL configuration block
-            
+
         Returns:
             A dictionary of entries indexed by sequence number
         """
@@ -402,10 +432,10 @@ class ExtendedAclsAsync(EntityCollectionAsync):
 
     async def create(self, name):
         """Creates a new extended ACL in the running configuration asynchronously
-        
+
         Args:
             name (str): The name of the ACL to create
-                
+
         Returns:
             True if the operation was successful otherwise False
         """
@@ -413,10 +443,10 @@ class ExtendedAclsAsync(EntityCollectionAsync):
 
     async def delete(self, name):
         """Deletes an extended ACL from the running configuration asynchronously
-        
+
         Args:
             name (str): The name of the ACL to delete
-                
+
         Returns:
             True if the operation was successful otherwise False
         """
@@ -424,10 +454,10 @@ class ExtendedAclsAsync(EntityCollectionAsync):
 
     async def default(self, name):
         """Defaults an extended ACL in the running configuration asynchronously
-        
+
         Args:
             name (str): The name of the ACL to default
-                
+
         Returns:
             True if the operation was successful otherwise False
         """
@@ -436,7 +466,7 @@ class ExtendedAclsAsync(EntityCollectionAsync):
     async def update_entry(self, name, seqno, action, protocol, srcaddr,
                            srcprefixlen, dstaddr, dstprefixlen, log=False):
         """Updates an entry in the extended ACL asynchronously
-        
+
         Args:
             name (str): The name of the ACL
             seqno (str): The sequence number of the entry
@@ -447,7 +477,7 @@ class ExtendedAclsAsync(EntityCollectionAsync):
             dstaddr (str): The destination IP address
             dstprefixlen (str): The destination prefix length
             log (bool): Whether to enable logging for this entry
-                
+
         Returns:
             True if the operation was successful otherwise False
         """
@@ -464,7 +494,7 @@ class ExtendedAclsAsync(EntityCollectionAsync):
     async def add_entry(self, name, action, protocol, srcaddr, srcprefixlen,
                         dstaddr, dstprefixlen, log=False, seqno=None):
         """Adds an entry to an extended ACL asynchronously
-        
+
         Args:
             name (str): The name of the ACL
             action (str): The action to take, either 'permit' or 'deny'
@@ -475,7 +505,7 @@ class ExtendedAclsAsync(EntityCollectionAsync):
             dstprefixlen (str): The destination prefix length
             log (bool): Whether to enable logging for this entry
             seqno (str): Optional sequence number for the entry
-                
+
         Returns:
             True if the operation was successful otherwise False
         """
@@ -492,11 +522,11 @@ class ExtendedAclsAsync(EntityCollectionAsync):
 
     async def remove_entry(self, name, seqno):
         """Removes an entry from an extended ACL asynchronously
-        
+
         Args:
             name (str): The name of the ACL
             seqno (str): The sequence number of the entry to remove
-                
+
         Returns:
             True if the operation was successful otherwise False
         """
@@ -509,15 +539,15 @@ ACL_CLASS_MAP = {'standard': StandardAclsAsync, 'extended': ExtendedAclsAsync}
 
 def instance(node):
     """Returns an instance of AclsAsync
-    
+
     This method will create and return an instance of the AclsAsync object
     passing the value of node to the object. The instance method is required
     for the resource to be autoloaded by the AsyncNode object
-    
+
     Args:
         node (AsyncNode): The node argument passes an instance of
             AsyncNode to the resource
-            
+
     Returns:
         An instance of AclsAsync
     """

@@ -54,9 +54,31 @@ import re
 
 from pyeapiasync.api import EntityCollectionAsync
 from pyeapiasync.utils import make_iterable
-from pyeapiasync.api.vlans import (
-    VLAN_ID_RE, NAME_RE, STATE_RE, TRUNK_GROUP_RE, isvlan
-)
+
+VLAN_ID_RE = re.compile(r'(?:vlan\s)(?P<value>.*)$', re.M)
+NAME_RE = re.compile(r'(?:name\s)(?P<value>.*)$', re.M)
+STATE_RE = re.compile(r'(?:state\s)(?P<value>.*)$', re.M)
+TRUNK_GROUP_RE = re.compile(r'(?:trunk\sgroup\s)(?P<value>.*)$', re.M)
+
+
+def isvlan(value):
+    """Checks if the argument is a valid VLAN
+
+    A valid VLAN is an integer value in the range of 1 to 4094.  This
+    function will test if the argument falls into the specified range and
+    is considered a valid VLAN
+
+    Args:
+        value: The value to check if is a valid VLAN
+
+    Returns:
+        True if the supplied value is a valid VLAN otherwise False
+    """
+    try:
+        value = int(value)
+        return value in range(1, 4095)
+    except ValueError:
+        return False
 
 
 class VlansAsync(EntityCollectionAsync):
