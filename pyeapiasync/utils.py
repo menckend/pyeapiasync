@@ -35,6 +35,8 @@ import importlib
 import inspect
 import logging
 import logging.handlers
+import asyncio
+from typing import List, Dict, Any, Coroutine, TypeVar, Optional
 
 from collections.abc import Iterable
 from itertools import tee, zip_longest
@@ -304,3 +306,51 @@ def _interpolate_docstr(*tkns):
         user_fn_wrapper.__doc__ = docstr
         return user_fn_wrapper
     return docstr_decorator
+
+
+T = TypeVar('T')
+
+async def run_coroutines_with_limit(
+    coros: List[Coroutine[Any, Any, T]], 
+    limit: int = 10
+) -> List[T]:
+    """
+    Run coroutines with a concurrency limit
+    
+    Args:
+        coros: List of coroutines to run
+        limit: Maximum number of concurrent tasks
+        
+    Returns:
+        List of results in the same order as the input coroutines
+    """
+    semaphore = asyncio.Semaphore(limit)
+    
+    async def run_with_semaphore(coro):
+        async with semaphore:
+            return await coro
+    
+    return await asyncio.gather(*(run_with_semaphore(c) for c in coros))
+
+async def execute_with_timeout(
+    coro: Coroutine[Any, Any, T], 
+    timeout: float, 
+    default: Optional[T] = None
+) -> Optional[T]:
+    """
+    Execute a coroutine with a timeout
+    
+    Args:
+        coro: Coroutine to execute
+        timeout: Timeout in seconds
+        default: Default value to return on timeout
+        
+    Returns:
+        Result of the coroutine or default on timeout
+    """
+    try:
+        return await asyncio.wait_for(coro, timeout=timeout)
+    except asyncio.TimeoutError:
+        return default
+
+print(something)
