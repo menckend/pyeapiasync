@@ -32,7 +32,7 @@
 #
 
 """
-Example script for using the async functionality in pyeapi
+Example script for using the async functionality in pyeapiasync
 """
 
 import asyncio
@@ -62,16 +62,12 @@ async def main():
     """Main function to demonstrate async functionality"""
     # Connect to the device
     try:
-        # You can use connect_to_async to connect using a
-        #   profile from eapi.conf
-        # node = await pyeapi.connect_to_async('veos01')
-
-        # Or connect directly with parameters
+        # Connect directly with parameters
         node = await pyeapiasync.connect_async(
             transport='https',
-            host='localhost',
-            username='admin',
-            password='',
+            host='192.168.122.10',
+            username='test',
+            password='test',
             port=443,
             return_node=True
         )

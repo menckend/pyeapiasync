@@ -38,6 +38,6 @@ __version__ = '0.0.1'
 __author__ = 'menckend'
 
 
-from .clientasync import connect_async, connect_to_async
+from .clientasync import connect_async  # , connect_to_async
 
-__all__ = ['connect_async', 'connect_to_async']
+__all__ = ['connect_async']  # , 'connect_to_async']
