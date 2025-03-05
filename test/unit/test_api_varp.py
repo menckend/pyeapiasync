@@ -40,12 +40,12 @@ import pyeapiasync.api.varpasync
 class TestApiVarp(EapiAsyncConfigUnitTest):
     def __init__(self, *args, **kwargs):
         super(TestApiVarp, self).__init__(*args, **kwargs)
-        self.instance = pyeapiasync.api.varpasync.Varp(None)
+        self.instance = pyeapiasync.api.varpasync.VarpAsync(None)
         self.config = open(get_fixture('running_config.varp')).read()
 
     def test_instance(self):
         result = pyeapiasync.api.varpasync.instance(None)
-        self.assertIsInstance(result, pyeapiasync.api.varpasync.Varp)
+        self.assertIsInstance(result, pyeapiasync.api.varpasync.VarpAsync)
 
     async def test_get(self):
         result = await self.instance.get()
@@ -95,10 +95,10 @@ class TestApiVarp(EapiAsyncConfigUnitTest):
         cmds = 'default ip virtual-router mac-address 00:11:22:33:44:55'
         await self.eapi_positive_config_test(func, cmds)
 
-class TestApiVarpInterfaces(EapiAsyncConfigUnitTest):
+class TestApiVarpInterfacesAsync(EapiAsyncConfigUnitTest):
     def __init__(self, *args, **kwargs):
-        super(TestApiVarpInterfaces, self).__init__(*args, **kwargs)
-        self.instance = pyeapiasync.api.varpasync.VarpInterfaces(None)
+        super(TestApiVarpInterfacesAsync, self).__init__(*args, **kwargs)
+        self.instance = pyeapiasync.api.varpasync.VarpInterfacesAsync(None)
         self.config = open(get_fixture('running_config.varp')).read()
 
     async def test_get_with_no_interface(self):

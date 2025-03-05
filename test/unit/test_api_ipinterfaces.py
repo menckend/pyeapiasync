@@ -39,11 +39,11 @@ from testlib import get_fixture, function, random_int, random_string
 from testlib import EapiAsyncConfigUnitTest
 from pyeapiasync.api.ipinterfacesasync import IpInterfacesAsync
 
-class TestApiIpinterfacesAsync(EapiAsyncConfigUnitTest):
+
+class TestApiIpInterfacesAsync(EapiAsyncConfigUnitTest):
 
     INTERFACES = ['Ethernet1', 'Ethernet1/1', 'Vlan1234', 'Management1',
                   'Port-Channel1']
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance = IpInterfacesAsync.instance(None)
@@ -56,7 +56,7 @@ class TestApiIpinterfacesAsync(EapiAsyncConfigUnitTest):
         # Test interface with secondary ip
         result = await self.instance.get('Loopback2')
         values = dict(name='Loopback2', address='2.2.2.2/32',
-                    secondary=['3.255.255.1/24', '4.255.255.1/24'], mtu=None)
+                      secondary=['3.255.255.1/24', '4.255.255.1/24'], mtu=None)
         self.assertEqual(result, values)
 
     async def test_getall(self):
@@ -111,6 +111,7 @@ class TestApiIpinterfacesAsync(EapiAsyncConfigUnitTest):
             cmds = [f'interface {intf}', 'default mtu']
             func = function('set_mtu', intf, default=True)
             await self.eapi_async_positive_config_test(func, cmds)
+
 
 if __name__ == '__main__':
     unittest.main()

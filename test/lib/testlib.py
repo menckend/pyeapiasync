@@ -36,7 +36,7 @@ import unittest
 
 from unittest.mock import AsyncMock
 from pyeapiasync.utils import CliVariants
-from pyeapiasync.clientasync import Node
+from pyeapiasync.clientasync import AsyncNode
 from collections import namedtuple
 
 Function = namedtuple('Function', 'name args kwargs')
@@ -68,7 +68,7 @@ class EapiAsyncConfigUnitTest(unittest.IsolatedAsyncioTestCase):
         super().__init__(*args, **kwargs)
 
     async def asyncSetUp(self):
-        self.node = Node(None)
+        self.node = AsyncNodeNode(None)
         self.node._version_number = '4.17.1.1'
         self.node._running_config = self.config
 

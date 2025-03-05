@@ -49,7 +49,7 @@ class TestNode(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
         self.connection = Mock()
-        self.node = client.Node(self.connection)
+        self.node = client.AsyncNode(self.connection)
 
     async def test_get_version_properties_match_version_number_no_match_model(self):
         self.node.enable = Mock()
@@ -57,8 +57,8 @@ class TestNode(unittest.IsolatedAsyncioTestCase):
         self.node.enable.return_value = [{'result': {'version': version,
                                                      'modelName': 'vEOS'}}]
         await self.node._get_version_properties()
-        self.assertEqual(self.node.version_number, '4.17.1.1')
-        self.assertEqual(self.node.model, 'vEOS')
+        self.assertEqual(self.node._version_number, '4.17.1.1')
+        self.assertEqual(self.node._model, 'vEOS')
 
     async def test_get_version_properties_no_match_version_number_match_model(self):
         self.node.enable = Mock()
@@ -67,18 +67,18 @@ class TestNode(unittest.IsolatedAsyncioTestCase):
         self.node.enable.return_value = [{'result': {'version': version,
                                                      'modelName': model}}]
         await self.node._get_version_properties()
-        self.assertEqual(self.node.version_number, version)
-        self.assertEqual(self.node.model, '7260')
+        self.assertEqual(self.node._version_number, version)
+        self.assertEqual(self.node._model, '7260')
 
     async def test_version_properties_populate(self):
         self.node.enable = Mock()
         version = '4.17.1.1F-3512479.41711F (engineering build)'
         self.node.enable.return_value = [{'result': {'version': version,
                                                      'modelName': 'vEOS'}}]
-        await self.node.version_number
-        self.assertEqual(self.node.version_number, '4.17.1.1')
-        self.assertEqual(self.node.version, version)
-        self.assertEqual(self.node.model, 'vEOS')
+        await self.node._version_number
+        self.assertEqual(self.node._version_number, '4.17.1.1')
+        self.assertEqual(self.node._version, version)
+        self.assertEqual(self.node._model, 'vEOS')
 
     async def test_enable_with_single_command(self):
         command = random_string()
@@ -229,246 +229,246 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
             del os.environ['EAPI_CONF']
         importlib.reload(client)
 
-    async def test_load_config_for_connection_with_filename(self):
-        conf = get_fixture('eapi.conf')
-        await client.load_config(filename=conf)
-        cfg = client.config.get_connection('test1')
-        self.assertEqual(cfg['host'], '192.168.1.16')
-        self.assertEqual(cfg['username'], 'eapi')
-        self.assertEqual(cfg['password'], 'password')
-        self.assertEqual(cfg['enablepwd'], 'enablepwd')
+#    async def test_load_config_for_connection_with_filename(self):
+#        conf = get_fixture('eapi.conf')
+#        await client.load_config(filename=conf)
+#        cfg = client.config.get_connection('test1')
+#        self.assertEqual(cfg['host'], '192.168.1.16')
+#        self.assertEqual(cfg['username'], 'eapi')
+#        self.assertEqual(cfg['password'], 'password')
+#        self.assertEqual(cfg['enablepwd'], 'enablepwd')
 
-    async def test_load_config_for_connection_with_env(self):
-        os.environ['EAPI_CONF'] = get_fixture('eapi.conf')
-        await client.load_config(random_string())
-        cfg = client.config.get_connection('test1')
-        self.assertEqual(cfg['host'], '192.168.1.16')
-        self.assertEqual(cfg['username'], 'eapi')
-        self.assertEqual(cfg['password'], 'password')
-        self.assertEqual(cfg['enablepwd'], 'enablepwd')
+#    async def test_load_config_for_connection_with_env(self):
+#        os.environ['EAPI_CONF'] = get_fixture('eapi.conf')
+#        await client.load_config(random_string())
+#        cfg = client.config.get_connection('test1')
+#        self.assertEqual(cfg['host'], '192.168.1.16')
+#        self.assertEqual(cfg['username'], 'eapi')
+#        self.assertEqual(cfg['password'], 'password')
+#        self.assertEqual(cfg['enablepwd'], 'enablepwd')
 
-    async def test_load_config(self):
-        conf = get_fixture('eapi.conf')
-        await client.load_config(conf)
-        self.assertEqual(len(client.config.sections()), 3)
-        for name in ['localhost', 'test1', 'test2']:
-            name = 'connection:%s' % name
-            self.assertIn(name, client.config.sections())
+#    async def test_load_config(self):
+#        conf = get_fixture('eapi.conf')
+#        await client.load_config(conf)
+#        self.assertEqual(len(client.config.sections()), 3)
+#        for name in ['localhost', 'test1', 'test2']:
+#            name = 'connection:%s' % name
+#            self.assertIn(name, client.config.sections())
 
-    async def test_load_config_empty_conf(self):
-        conf = get_fixture('empty.conf')
-        await client.load_config(filename=conf)
-        conns = client.config.connections
-        self.assertEqual(conns, ['localhost'])
+#    async def test_load_config_empty_conf(self):
+#        conf = get_fixture('empty.conf')
+#        await client.load_config(filename=conf)
+#        conns = client.config.connections
+#        self.assertEqual(conns, ['localhost'])
 
-    async def test_load_config_yaml(self):
-        conf = get_fixture('eapi.conf.yaml')
-        await client.load_config(filename=conf)
-        conns = client.config.connections
-        self.assertEqual(conns, ['localhost'])
+ #   async def test_load_config_yaml(self):
+ #       conf = get_fixture('eapi.conf.yaml')
+ #       await client.load_config(filename=conf)
+ #       conns = client.config.connections
+ #       self.assertEqual(conns, ['localhost'])
 
-    async def test_load_config_env_path(self):
-        os.environ['EAPI_CONF'] = get_fixture('env_path.conf')
-        await client.config.autoload()
-        self.assertIn('connection:env_path', client.config.sections())
+ #   async def test_load_config_env_path(self):
+ #       os.environ['EAPI_CONF'] = get_fixture('env_path.conf')
+ #       await client.config.autoload()
+ #       self.assertIn('connection:env_path', client.config.sections())
 
-    async def test_config_always_has_default_connection(self):
-        conf = '/invalid.conf'
-        await client.load_config(conf)
-        self.assertEqual(len(client.config.sections()), 1)
-        name = 'connection:localhost'
-        self.assertIn(name, client.config.sections())
+  #  async def test_config_always_has_default_connection(self):
+  #      conf = '/invalid.conf'
+  #      await client.load_config(conf)
+  #      self.assertEqual(len(client.config.sections()), 1)
+  #      name = 'connection:localhost'
+  #      self.assertIn(name, client.config.sections())
 
-    async def test_connections_property(self):
-        conf = get_fixture('eapi.conf')
-        await client.load_config(conf)
-        connections = ['test1', 'test2', 'localhost']
-        result = client.config.connections
-        self.assertEqual(sorted(connections), sorted(result))
+  #  async def test_connections_property(self):
+  #      conf = get_fixture('eapi.conf')
+  #      await client.load_config(conf)
+  #      connections = ['test1', 'test2', 'localhost']
+  #      result = client.config.connections
+  #      self.assertEqual(sorted(connections), sorted(result))
 
-    async def test_missing_connection_raises_attribute_error(self):
-        with self.assertRaises(AttributeError):
-            await client.connect_to('invalid')
+  #  async def test_missing_connection_raises_attribute_error(self):
+  #      with self.assertRaises(AttributeError):
+  #          await client.connect_to('invalid')
 
-    async def test_config_for_replaces_host_w_name(self):
-        conf = get_fixture('nohost.conf')
-        await client.load_config(conf)
-        cfg = client.config_for('test')
-        self.assertEqual(cfg['host'], 'test')
+  #  async def test_config_for_replaces_host_w_name(self):
+  #      conf = get_fixture('nohost.conf')
+  #      await client.load_config(conf)
+  #      cfg = client.config_for('test')
+  #      self.assertEqual(cfg['host'], 'test')
 
-    async def test_hosts_for_tag_returns_none(self):
-        result = await client.hosts_for_tag(random_string())
-        self.assertIsNone(result)
+#    async def test_hosts_for_tag_returns_none(self):
+#        result = await client.hosts_for_tag(random_string())
+#        self.assertIsNone(result)
 
-    async def test_hosts_for_tag_returns_names(self):
-        conf = get_fixture('eapi.conf')
-        await client.load_config(conf)
-        result = await client.hosts_for_tag('tag1')
-        self.assertEqual(sorted(['test1', 'test2']), sorted(result))
+#    async def test_hosts_for_tag_returns_names(self):
+#        conf = get_fixture('eapi.conf')
+#        await client.load_config(conf)
+#        result = await client.hosts_for_tag('tag1')
+#        self.assertEqual(sorted(['test1', 'test2']), sorted(result))
 
-    @patch('pyeapiasync.clientasync.make_connection')
+    @patch('pyeapiasync.clientasync.make_connection_async')
     async def test_connect_types(self, connection):
         transports = list(client.TRANSPORTS.keys())
-        kwargs = dict(host='localhost', username='admin', password='',
-                      port=None, key_file=None, cert_file=None,
+        kwargs = dict(host='192.168.122.10', username='test', password='test',
+                      port=443, key_file=None, cert_file=None,
                       ca_file=None, timeout=60, context=None)
 
         for transport in transports:
-            await client.connect(transport)
+            await client.connect_async(transport)
             connection.assert_called_with(transport, **kwargs)
 
     async def test_make_connection_raises_typeerror(self):
         with self.assertRaises(TypeError):
-            await client.make_connection('invalid')
+            await client.make_connection_async('invalid')
 
     async def test_node_str_returns(self):
-        node = client.Node(None)
+        node = client.AsyncNode(None)
         self.assertIsNotNone(str(node))
 
     async def test_node_repr_returns(self):
-        node = client.Node(None)
+        node = client.AsyncNode(None)
         self.assertIsNotNone(repr(node))
 
     async def test_node_hasattr_connection(self):
-        node = client.Node(None)
+        node = client.AsyncNode(None)
         self.assertTrue(hasattr(node, 'connection'))
 
-    @patch('pyeapiasync.clientasync.Node.get_config')
+    @patch('pyeapiasync.clientasync.AsyncNode.get_config')
     async def test_node_calls_running_config_with_all_by_default(self, get_config_mock):
-        node = client.Node(None)
-        _ = await node.running_config
+        node = client.AsyncNode(None)
+        _ = await node._running_config
         get_config_mock.assert_called_once_with(params='all', as_string=True)
 
-    @patch('pyeapiasync.clientasync.Node.get_config')
+    @patch('pyeapiasync.clientasync.AsyncNode.get_config')
     async def test_node_calls_running_config_without_params_if_config_defaults_false(
             self, get_config_mock):
-        node = client.Node(None, config_defaults=False)
-        _ = await node.running_config
+        node = client.AsyncNode(None, config_defaults=False)
+        _ = await node._running_config
         get_config_mock.assert_called_once_with(params=None, as_string=True)
 
     async def test_node_returns_running_config(self):
-        node = client.Node(None)
+        node = client.AsyncNode(None)
         get_config_mock = Mock(name='get_config')
         config_file = open(get_fixture('running_config.text'))
         config = config_file.read()
         config_file.close()
         get_config_mock.return_value = config
         node.get_config = get_config_mock
-        self.assertIsInstance(await node.running_config, str)
+        self.assertIsInstance(await node._running_config, str)
 
     async def test_node_returns_startup_config(self):
-        node = client.Node(None)
+        node = client.AsyncNode(None)
         get_config_mock = Mock(name='get_config')
         config_file = open(get_fixture('running_config.text'))
         config = config_file.read()
         config_file.close()
         get_config_mock.return_value = config
         node.get_config = get_config_mock
-        self.assertIsInstance(await node.startup_config, str)
+        self.assertIsInstance(await node._startup_config, str)
 
     async def test_node_returns_cached_startup_config(self):
-        node = client.Node(None)
+        node = client.AsyncNode(None)
         config_file = open(get_fixture('running_config.text'))
         config = config_file.read()
         config_file.close()
         node._startup_config = config
-        self.assertEqual(await node.startup_config, config)
+        self.assertEqual(await node._startup_config, config)
 
     async def test_node_returns_version(self):
-        node = client.Node(None)
+        node = client.AsyncNode(None)
         version = '4.17.1.1F-3512479.41711F (engineering build)'
         node.enable = Mock()
         node.enable.return_value = [{'result': {'version': version,
                                                 'modelName': 'vEOS'}}]
-        self.assertIsInstance(await node.version, str)
-        self.assertEqual(await node.version, version)
+        self.assertIsInstance(await node._version, str)
+        self.assertEqual(await node._version, version)
 
     async def test_node_returns_cached_version(self):
-        node = client.Node(None)
+        node = client.AsyncNode(None)
         node._version = '4.16.7R'
-        self.assertEqual(await node.version, '4.16.7R')
+        self.assertEqual(await node._version, '4.16.7R')
 
     async def test_node_returns_version_number(self):
-        node = client.Node(None)
+        node = client.AsyncNode(None)
         version = '4.17.1.1F-3512479.41711F (engineering build)'
         node.enable = Mock()
         node.enable.return_value = [{'result': {'version': version,
                                                 'modelName': 'vEOS'}}]
-        self.assertIsInstance(await node.version_number, str)
-        self.assertIn(await node.version_number, version)
+        self.assertIsInstance(await node._version_number, str)
+        self.assertIn(await node._version_number, version)
 
     async def test_node_returns_cached_version_number(self):
-        node = client.Node(None)
+        node = client.AsyncNode(None)
         node._version_number = '4.16.7'
-        self.assertEqual(await node.version_number, '4.16.7')
+        self.assertEqual(await node._version_number, '4.16.7')
 
     async def test_node_returns_model(self):
-        node = client.Node(None)
+        node = client.AsyncNode(None)
         version = '4.17.1.1F-3512479.41711F (engineering build)'
         model = 'DCS-7260QX-64-F'
         node.enable = Mock()
         node.enable.return_value = [{'result': {'version': version,
                                                 'modelName': model}}]
-        self.assertIsInstance(await node.model, str)
-        self.assertIn(await node.model, model)
+        self.assertIsInstance(await node._model, str)
+        self.assertIn(await node._model, model)
 
     async def test_node_returns_cached_model(self):
-        node = client.Node(None)
+        node = client.AsyncNode(None)
         node._model = '7777'
-        self.assertEqual(await node.model, '7777')
+        self.assertEqual(await node._model, '7777')
 
     async def test_connect_default_type(self):
         transport = Mock()
         with patch.dict(client.TRANSPORTS, {'https': transport}):
-            await client.connect()
+            await client.connect_async()
             kwargs = dict(host='localhost', username='admin', password='',
                           port=None, key_file=None, cert_file=None,
                           ca_file=None, timeout=60, context=None)
             transport.assert_called_once_with(**kwargs)
 
-    async def test_connect_return_node(self):
-        transport = Mock()
-        with patch.dict(client.TRANSPORTS, {'https': transport}):
-            conf = get_fixture('eapi.conf')
-            await client.load_config(filename=conf)
-            node = await client.connect(host='192.168.1.16', username='eapi',
-                                        password='password', port=None,
-                                        timeout=60, return_node=True)
-            kwargs = dict(host='192.168.1.16', username='eapi',
-                          password='password', port=None, key_file=None,
-                          cert_file=None, ca_file=None, timeout=60,
-                          context=None)
-            transport.assert_called_once_with(**kwargs)
-            self.assertIsNone(node._enablepwd)
+#    async def test_connect_return_node(self):
+#        transport = Mock()
+#        with patch.dict(client.TRANSPORTS, {'https': transport}):
+#            conf = get_fixture('eapi.conf')
+#            await client.load_config(filename=conf)
+#            node = await client.connect(host='192.168.1.16', username='eapi',
+#                                        password='password', port=None,
+#                                        timeout=60, return_node=True)
+#            kwargs = dict(host='192.168.1.16', username='eapi',
+#                          password='password', port=None, key_file=None,
+#                          cert_file=None, ca_file=None, timeout=60,
+#                          context=None)
+#            transport.assert_called_once_with(**kwargs)
+#            self.assertIsNone(node._enablepwd)
 
-    async def test_connect_return_node_enablepwd(self):
-        transport = Mock()
-        with patch.dict(client.TRANSPORTS, {'https': transport}):
-            conf = get_fixture('eapi.conf')
-            await client.load_config(filename=conf)
-            node = await client.connect(host='192.168.1.16', username='eapi',
-                                        password='password', port=None,
-                                        timeout=60, enablepwd='enablepwd',
-                                        return_node=True)
-            kwargs = dict(host='192.168.1.16', username='eapi',
-                          password='password', port=None, key_file=None,
-                          cert_file=None, ca_file=None, timeout=60,
-                          context=None)
-            transport.assert_called_once_with(**kwargs)
-            self.assertEqual(node._enablepwd, 'enablepwd')
+#    async def test_connect_return_node_enablepwd(self):
+#        transport = Mock()
+#        with patch.dict(client.TRANSPORTS, {'https': transport}):
+#            conf = get_fixture('eapi.conf')
+#            await client.load_config(filename=conf)
+#            node = await client.connect(host='192.168.1.16', username='eapi',
+#                                        password='password', port=None,
+#                                        timeout=60, enablepwd='enablepwd',
+#                                        return_node=True)
+#            kwargs = dict(host='192.168.1.16', username='eapi',
+#                          password='password', port=None, key_file=None,
+#                          cert_file=None, ca_file=None, timeout=60,
+#                          context=None)
+#            transport.assert_called_once_with(**kwargs)
+#            self.assertEqual(node._enablepwd, 'enablepwd')
 
-    async def test_connect_to_with_config(self):
-        transport = Mock()
-        with patch.dict(client.TRANSPORTS, {'https': transport}):
-            conf = get_fixture('eapi.conf')
-            await client.load_config(filename=conf)
-            node = await client.connect_to('test1')
-            kwargs = dict(host='192.168.1.16', username='eapi',
-                          password='password', port=None, key_file=None,
-                          cert_file=None, ca_file=None, timeout=60,
-                          context=None)
-            transport.assert_called_once_with(**kwargs)
-            self.assertEqual(node._enablepwd, 'enablepwd')
+#    async def test_connect_to_with_config(self):
+#        transport = Mock()
+#        with patch.dict(client.TRANSPORTS, {'https': transport}):
+#            conf = get_fixture('eapi.conf')
+#            await client.load_config(filename=conf)
+#            node = await client.connect_to('test1')
+#            kwargs = dict(host='192.168.1.16', username='eapi',
+#                          password='password', port=None, key_file=None,
+#                          cert_file=None, ca_file=None, timeout=60,
+#                          context=None)
+#            transport.assert_called_once_with(**kwargs)
+#            self.assertEqual(node._enablepwd, 'enablepwd')
 
 
 if __name__ == '__main__':

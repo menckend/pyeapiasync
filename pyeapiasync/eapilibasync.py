@@ -735,3 +735,26 @@ class CommandError(EapiError):
             trace.append({'executed_commands': self.commands[0:index]})
 
         return trace
+
+
+class ConnectionError(EapiError):
+    """Base exception raised for connection errors
+
+    Connection errors are raised when a connection object is unable to
+    connect to the node.  Typically these errors can result from using
+    the wrong transport type or not providing valid credentials.
+
+    Args:
+        commands (array): The list of commands there were sent to the
+            node that when the exception was raised
+        connection_type (string): The string identifier for the connection
+            object that generate the error
+        message (string): The exception error message
+        response (string): The message generate from the response packet
+
+    """
+    def __init__(self, connection_type, message, commands=None):
+        self.message = message
+        self.connection_type = connection_type
+        self.commands = commands
+        super(ConnectionError, self).__init__(message)

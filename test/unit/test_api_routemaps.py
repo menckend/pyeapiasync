@@ -45,12 +45,12 @@ class TestApiRoutemaps(EapiAsyncConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.instance = pyeapiasync.api.routemapsasync.Routemaps(None)
+        self.instance = pyeapiasync.api.routemapsasync.RoutemapsAsync(None)
         self.config = open(get_fixture('running_config.routemaps')).read()
 
     def test_instance(self):
-        result = pyeapi.api.routemaps.instance(None)
-        self.assertIsInstance(result, pyeapi.api.routemaps.Routemaps)
+        result = pyeapiasync.api.routemaps.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.routemaps.Routemaps)
 
     async def test_get(self):
         result = await self.instance.get('TEST')

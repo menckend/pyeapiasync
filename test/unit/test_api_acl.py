@@ -36,7 +36,7 @@ import unittest
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import get_fixture, function
-from testlib import EapiConfigUnitTest
+from testlib import EapiAsyncConfigUnitTest
 
 import pyeapiasync.api.aclasync as aclasync
 
@@ -51,7 +51,7 @@ class TestApiAclFunctions(unittest.TestCase):
         self.assertEqual(result, '255.255.255.0')
 
 
-class TestApiAcls(EapiConfigUnitTest):
+class TestApiAcls(EapiAsyncConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiAcls, self).__init__(*args, **kwargs)
@@ -123,7 +123,7 @@ class TestApiAcls(EapiConfigUnitTest):
             self.instance.nonmethod('test', '10')
 
 
-class TestApiStandardAcls(EapiConfigUnitTest):
+class TestApiStandardAcls(EapiAsyncConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiStandardAcls, self).__init__(*args, **kwargs)
@@ -191,7 +191,7 @@ class TestApiStandardAcls(EapiConfigUnitTest):
         self.eapi_positive_config_test(func, cmds)
 
 
-class TestApiExtendedAcls(EapiConfigUnitTest):
+class TestApiExtendedAcls(EapiAsyncConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiExtendedAcls, self).__init__(*args, **kwargs)

@@ -32,16 +32,15 @@
 import sys
 import os
 import unittest
+import pyeapiasync.api.bgpasync as bgp
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import get_fixture, function
-from testlib import EapiConfigUnitTest
-
-import pyeapiasync.api.bgpasync as bgp
+from testlib import EapiAsyncConfigUnitTest
 
 
-class TestApiBgp(EapiConfigUnitTest):
+class TestApiBgp(EapiAsyncConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiBgp, self).__init__(*args, **kwargs)
@@ -176,11 +175,11 @@ class TestApiBgp(EapiConfigUnitTest):
             await self.eapi_positive_config_test(func, cmds)
 
 
-class TestApiBgpNeighbor(EapiConfigUnitTest):
+class TestApiBgpNeighbor(EapiAsyncConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiBgpNeighbor, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.bgp.BgpNeighbors(None)
+        self.instance = bgp.BgpNeighborsAsync(None)
         self.config = open(get_fixture('running_config.bgp')).read()
 
     def test_getall(self):

@@ -195,18 +195,18 @@ class NtpAsync(EntityAsync):
         return await self.configure(cmd)
 
 
-def instance(node):
-    """Returns an instance of NtpAsync
+    def instance(node):
+        """Returns an instance of NtpAsync
 
-    This method will create and return an instance of the NtpAsync object
-    passing the value of node to the object. The instance method is required
-    for the resource to be autoloaded by the AsyncNode object
+        This method will create and return an instance of the NtpAsync object
+        passing the value of node to the object. The instance method is required
+        for the resource to be autoloaded by the AsyncNode object
 
-    Args:
-        node (AsyncNode): The node argument passes an instance of
-            AsyncNode to the resource
+        Args:
+            node (AsyncNode): The node argument passes an instance of
+                AsyncNode to the resource
 
-    Returns:
-        An instance of NtpAsync
-    """
-    return NtpAsync(node)
+        Returns:
+            An instance of NtpAsync
+        """
+        return NtpAsync(node)

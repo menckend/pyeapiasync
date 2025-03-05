@@ -36,15 +36,15 @@ import unittest
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import get_fixture, random_string, function
-from testlib import EapiConfigUnitTest
+from testlib import EapiAsyncConfigUnitTest
 
-import pyeapi.api.system
+import pyeapiasync.api.systemasync
 
-class TestApiSystem(EapiConfigUnitTest):
+class TestApiSystem(EapiAsyncConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiSystem, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.system.instance(None)
+        self.instance = pyeapiasync.api.systemasync.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
 
     def test_get(self):

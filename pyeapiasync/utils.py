@@ -92,7 +92,7 @@ def load_module(name):
 
     Args:
         name (str): Specifies the full name of the module.  For instance
-            pyeapi.api.vlans
+            pyeapiasync.api.vlans
 
     Returns:
         The module that has been imported or retrieved from the sys modules

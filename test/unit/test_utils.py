@@ -38,7 +38,7 @@ class TestUtils(unittest.IsolatedAsyncioTestCase):
             utils.make_iterable(object())
 
     async def test_import_module(self):
-        result = utils.import_module('pyeapiasync.api.vlans')
+        result = utils.import_module('pyeapiasync.api.vlansasync')
         self.assertIsNotNone(result)
 
     async def test_import_module_raises_import_error(self):

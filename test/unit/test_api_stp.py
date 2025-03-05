@@ -36,31 +36,31 @@ import unittest
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import get_fixture, random_string, function
-from testlib import EapiConfigUnitTest
+from testlib import EapiAsyncConfigUnitTest
 
-import pyeapi.api.stp
+import pyeapiasync.api.stpasync
 
 def get_running_config():
     return get_fixture('running_config.text')
 
-class TestApiStp(EapiConfigUnitTest):
+class TestApiStp(EapiAsyncConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiStp, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.stp.Stp(None)
+        self.instance = pyeapiasync.api.stpasync.StpAsync(None)
         self.config = open(get_running_config()).read()
 
     def test_instance(self):
-        result = pyeapi.api.stp.instance(None)
-        self.assertIsInstance(result, pyeapi.api.stp.Stp)
+        result = pyeapiasync.api.stpasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.stpasync.Stp)
 
     def test_interfaces(self):
         result = self.instance.interfaces
-        self.assertIsInstance(result, pyeapi.api.stp.StpInterfaces)
+        self.assertIsInstance(result, pyeapiasync.api.stpasync.StpInterfaces)
 
     def test_instances(self):
         result = self.instance.instances
-        self.assertIsInstance(result, pyeapi.api.stp.StpInstances)
+        self.assertIsInstance(result, pyeapiasync.api.stpasync.StpInstances)
 
     def test_set_mode_with_value(self):
         for value in ['mstp', 'none']:
@@ -83,13 +83,13 @@ class TestApiStp(EapiConfigUnitTest):
         func = function('set_mode', value)
         self.eapi_exception_config_test(func, ValueError)
 
-class TestApiStpInterfaces(EapiConfigUnitTest):
+class TestApiStpInterfaces(EapiAsyncConfigUnitTest):
 
     INTERFACES = ['Ethernet1', 'Ethernet1/1', 'Port-Channel1']
 
     def __init__(self, *args, **kwargs):
         super(TestApiStpInterfaces, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.stp.StpInterfaces(None)
+        self.instance = pyeapiasync.api.stpasync.StpInterfacesAsync(None)
         self.config = open(get_running_config()).read()
 
     def test_getall(self):

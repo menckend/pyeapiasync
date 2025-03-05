@@ -77,7 +77,7 @@ async def main():
     try:
         # You can use connect_to_async to connect using a profile
         #   from eapi.conf
-        # node = await pyeapi.connect_to_async('veos01')
+        # node = await pyeapiasync.connect_to_async('veos01')
 
         # Or connect directly with parameters
         node = await pyeapiasync.connect_async(

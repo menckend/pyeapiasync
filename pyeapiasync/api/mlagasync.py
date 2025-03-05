@@ -297,18 +297,18 @@ class MlagAsync(EntityAsync):
         return await self.configure_interface(name, cmd)
 
 
-def instance(node):
-    """Returns an instance of MlagAsync
+    def instance(node):
+        """Returns an instance of MlagAsync
 
-    This method will create and return an instance of the MlagAsync object
-    passing the value of node to the object. The instance method is required
-    for the resource to be autoloaded by the AsyncNode object
+        This method will create and return an instance of the MlagAsync object
+        passing the value of node to the object. The instance method is required
+        for the resource to be autoloaded by the AsyncNode object
 
-    Args:
-        node (AsyncNode): The node argument passes an instance of
-            AsyncNode to the resource
+        Args:
+            node (AsyncNode): The node argument passes an instance of
+                AsyncNode to the resource
 
-    Returns:
-        An instance of MlagAsync
-    """
-    return MlagAsync(node)
+        Returns:
+            An instance of MlagAsync
+        """
+        return MlagAsync(node)

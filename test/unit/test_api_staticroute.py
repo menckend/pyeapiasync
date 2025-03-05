@@ -37,9 +37,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from random import choice
 from testlib import get_fixture, function, random_int, random_string
-from testlib import EapiConfigUnitTest
+from testlib import EapiAsyncConfigUnitTest
 
-import pyeapi.api.staticroute
+import pyeapiasync.api.staticrouteasync
 
 IP_DESTS = ['11.111.11.0/24', '222.22.222.0/24', '33.34.35.0/24']
 NEXT_HOPS = [('Ethernet1', '3.3.3.3'), ('Ethernet2', '2.2.2.2'),
@@ -47,16 +47,16 @@ NEXT_HOPS = [('Ethernet1', '3.3.3.3'), ('Ethernet2', '2.2.2.2'),
 DISTANCES = TAGS = ROUTE_NAMES = [None, True]
 
 
-class TestApiStaticroute(EapiConfigUnitTest):
+class TestApiStaticroute(EapiAsyncConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiStaticroute, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.staticroute.StaticRoute(None)
+        self.instance = pyeapiasync.api.staticrouteasync.StaticRouteAsync(None)
         self.config = open(get_fixture('running_config.text')).read()
 
     def test_instance(self):
-        result = pyeapi.api.staticroute.instance(None)
-        self.assertIsInstance(result, pyeapi.api.staticroute.StaticRoute)
+        result = pyeapiasync.api.staticrouteasync.instance(None)
+        self.assertIsInstance(result, pyeapiasync.api.staticroute.StaticRouteAsync)
 
     def test_get(self):
         # Test retrieval of a specific static route entry

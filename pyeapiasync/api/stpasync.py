@@ -70,8 +70,8 @@ class StpAsync(EntityAsync):
         The below example demonstrates how to use the StpAsync class to work
         with both global configuration and interface configuration.
 
-        >>> import pyeapi.resources.stpasync
-        >>> stp = pyeapi.resources.stpasync.instance(node)
+        >>> import pyeapiasync.resources.stpasync
+        >>> stp = pyeapiasync.resources.stpasync.instance(node)
         >>> await stp.set_mode('mstp')
         True
         >>> await stp.interfaces.set_bpduguard('Ethernet1', True)

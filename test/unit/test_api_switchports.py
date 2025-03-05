@@ -37,18 +37,18 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 
 from testlib import get_fixture, random_vlan, function
-from testlib import EapiConfigUnitTest
+from testlib import EapiAsyncConfigUnitTest
 
-import pyeapi.api.switchports
+import pyeapiasync.api.switchportsasync
 
 
-class TestApiSwitchports(EapiConfigUnitTest):
+class TestApiSwitchports(EapiAsyncConfigUnitTest):
 
     INTERFACES = ['Ethernet1', 'Ethernet1/1', 'Port-Channel1']
 
     def __init__(self, *args, **kwargs):
         super(TestApiSwitchports, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.switchports.instance(None)
+        self.instance = pyeapiasync.api.switchportsasync.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
 
     def test_get(self):

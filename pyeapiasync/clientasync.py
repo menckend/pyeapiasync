@@ -41,7 +41,7 @@ from uuid import uuid4
 from functools import lru_cache
 
 from pyeapiasync.utils import make_iterable, CliVariants  # , debug
-# from pyeapi.client import config_for  # ,config
+# from pyeapiasync.client import config_for  # ,config
 
 from pyeapiasync.eapilibasync import (
     HttpLocalEapiAsyncConnection, HttpEapiAsyncConnection,
@@ -116,7 +116,7 @@ async def connect_async(transport=None, host='localhost', username='admin',
         timeout (int): timeout
         context (ssl.SSLContext): ssl object's context. The default is None
         return_node (bool): Returns a Node object if True, otherwise
-            returns an EapiConnection object.
+            returns an EapiAsyncConnection object.
 
     Returns:
         An instance of an EapiAsyncConnection object for the specified
@@ -216,7 +216,7 @@ class AsyncNode(object):
     def api_autoload(self):
         """Autoload API modules
 
-        This method will try to autoload API modules from the 'pyeapi.api'
+        This method will try to autoload API modules from the 'pyeapiasync.api'
         package.  The modules will be loaded as instance attributes based
         on the name of the module.  For instance, the 'vlans' module will
         be loaded as self.api.vlans.
@@ -232,7 +232,7 @@ class AsyncNode(object):
         for _, name, _ in pkgutil.iter_modules(pyeapiasync.api.__path__):
             if name.endswith('async'):
                 try:
-                    module = importlib.import_module('pyeapi.api.%s' % name)
+                    module = importlib.import_module('pyeapiasync.api.%s' % name)
                     self._api[name] = module.instance(self)
                 except ImportError:
                     pass
@@ -334,7 +334,7 @@ class AsyncNode(object):
         This method is used to send configuration commands to the node. It
         will take either a string, list or CliVariants type and prepend the
         necessary commands to put the session into config mode.
-        pyeapi.utils.CliVariants facilitates alternative executions to commands
+        pyeapiasync.utils.CliVariants facilitates alternative executions to commands
         sequence until one variant succeeds or all fail
 
         Args:

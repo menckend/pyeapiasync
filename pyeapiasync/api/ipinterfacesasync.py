@@ -57,7 +57,7 @@ IP_MTU_MAX = 65535
 SWITCHPORT_RE = re.compile(r'no switchport$', re.M)
 
 
-class IpinterfacesAsync(EntityCollectionAsync):
+class IpInterfacesAsync(EntityCollectionAsync):
 
     async def get(self, name):
         """Returns the specific IP interface properties asynchronously
@@ -258,18 +258,18 @@ class IpinterfacesAsync(EntityCollectionAsync):
         return await self.configure(commands)
 
 
-def instance(node):
-    """Returns an instance of IpinterfacesAsync
+    def instance(node):
+        """Returns an instance of IpInterfacesAsync
 
-    This method will create and return an instance of the IpinterfacesAsync
-    object passing the value of node to the instance. This function is
-    required for the resource to be autoloaded by the AsyncNode object
+        This method will create and return an instance of the IpInterfacesAsync
+        object passing the value of node to the instance. This function is
+        required for the resource to be autoloaded by the AsyncNode object
 
-    Args:
-        node (AsyncNode): The node argument passes an instance of
-            AsyncNode to the resource
+        Args:
+            node (AsyncNode): The node argument passes an instance of
+                AsyncNode to the resource
 
-    Returns:
-        An instance of IpinterfacesAsync
-    """
-    return IpinterfacesAsync(node)
+        Returns:
+            An instance of IpInterfacesAsync
+        """
+        return IpInterfacesAsync(node)
