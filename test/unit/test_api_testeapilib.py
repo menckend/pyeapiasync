@@ -45,7 +45,7 @@ class TestEapiAsyncConnection(unittest.IsolatedAsyncioTestCase):
             await instance.execute('test')
 
     async def test_create_socket_connection(self):
-        instance = pyeapiasync.eapilibasync.SocketEapiAsynConnection()
+        instance = pyeapiasync.eapilibasync.SocketEapiAsyncConnection()
         self.assertIsInstance(instance, pyeapiasync.eapilibasync.EapiAsyncConnection)
         self.assertIsNotNone(str(instance.transport))
 

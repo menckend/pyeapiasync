@@ -223,77 +223,64 @@ class AsyncNode(object):
 
         Note:
             This method will attempt to load all modules that end with 'async'
-            in the name.
+            in the name, except for abstractasync.
         """
         import pkgutil
         import importlib
         import pyeapiasync.api
 
         for _, name, _ in pkgutil.iter_modules(pyeapiasync.api.__path__):
-            if name.endswith('async'):
+            if name.endswith('async') and name != 'abstractasync':
                 try:
                     module = importlib.import_module('pyeapiasync.api.%s' % name)
                     self._api[name] = module.instance(self)
-                except ImportError:
+                except (ImportError, AttributeError):
                     pass
 
-    async def get_running_config(self):
-        """Get the running config from the device asynchronously
-
-        Returns:
-            The running configuration as a string
-        """
-        if self._running_config is not None:
-            return self._running_config
-        params = 'all' if self.config_defaults else None
-        self._running_config = await self.get_config(params=params,
-                                                     as_string=True)
+    @property
+    async def running_config(self):
+        """Get the running config from the device asynchronously"""
+        if self._running_config is None:
+            params = 'all' if self.config_defaults else None
+            self._running_config = await self.get_config(params=params, as_string=True)
         return self._running_config
 
-    async def get_startup_config(self):
-        """Get the startup config from the device asynchronously
-
-        Returns:
-            The startup configuration as a string
-        """
-        if self._startup_config is not None:
-            return self._startup_config
-        self._startup_config = await self.get_config('startup-config',
-                                                     as_string=True)
+    @property
+    async def startup_config(self):
+        """Get the startup config from the device asynchronously"""
+        if self._startup_config is None:
+            self._startup_config = await self.get_config('startup-config', as_string=True)
         return self._startup_config
-
-    async def get_version(self):
-        """Get the version from the device asynchronously
-
-        Returns:
-            The version string
-        """
-        if self._version:
-            return self._version
-        await self._get_version_properties()
+        
+    @property
+    async def version(self):
+        """Get the version from the device asynchronously"""
+        if self._version is None:
+            await self._get_version_properties()
         return self._version
+
+    @property
+    async def version_number(self):
+        """Get the version number from the device asynchronously"""
+        if self._version_number is None:
+            await self._get_version_properties()
+        return self._version_number
+
+    @property
+    async def model(self):
+        """Get the model from the device asynchronously"""
+        if self._model is None:
+            await self._get_version_properties()
+        return self._model
 
     async def get_version_number(self):
         """Get the version number from the device asynchronously
-
         Returns:
-            The version number string
+            str: The version number of the device
         """
-        if self._version_number:
-            return self._version_number
-        await self._get_version_properties()
+        if self._version_number is None:
+            await self._get_version_properties()
         return self._version_number
-
-    async def get_model(self):
-        """Get the model from the device asynchronously
-
-        Returns:
-            The model string
-        """
-        if self._model:
-            return self._model
-        await self._get_version_properties()
-        return self._model
 
     async def _get_version_properties(self):
         """Parses version and model information out of 'show version' output
@@ -506,7 +493,7 @@ class AsyncNode(object):
             The configuration section as a string object.
         """
         if config is None:
-            config = await self.get_running_config()
+            config = await self.running_config
 
         chunked = self._chunkify(config)
         r = re.compile(regex)
@@ -730,3 +717,16 @@ class AsyncNode(object):
         self._session_name = None
 
         return response
+
+    async def get_running_config(self, params=None):
+        """Gets the running configuration from the node asynchronously.
+        Args:
+            params (str): The parameters to pass to the running-config call.
+        Returns:
+            The running configuration as a string.
+        """
+        command = 'show running-config'
+        if params:
+            command += ' ' + params
+        response = await self.enable(command, 'text')
+        return response[0]['output']

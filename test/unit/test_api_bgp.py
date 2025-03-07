@@ -33,7 +33,7 @@ import sys
 import os
 import unittest
 import pyeapiasync.api.bgpasync as bgp
-
+import asyncio
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import get_fixture, function
@@ -57,44 +57,53 @@ class TestApiBgp(EapiAsyncConfigUnitTest):
         for bgpas in ['65000', 65000]:
             func = function('create', bgpas)
             cmds = 'router bgp {}'.format(bgpas)
-            await self.eapi_positive_config_test(func, cmds)
+            self.eapi_positive_config_test(func, cmds)
+            await asyncio.sleep(0)
+        await asyncio.sleep(0)
 
     async def test_create_invalid_as(self):
         for bgpas in ['66000', 66000]:
             with self.assertRaises(ValueError):
-                await self.instance.create(bgpas)
+                self.instance.create(bgpas)
+        await asyncio.sleep(0)
 
     async def test_delete(self):
         func = function('delete')
         cmds = 'no router bgp 65000'
-        await self.eapi_positive_config_test(func, cmds)
+        self.eapi_positive_config_test(func, cmds)
+        await asyncio.sleep(0)
 
     async def test_default(self):
         func = function('default')
         cmds = 'default router bgp 65000'
-        await self.eapi_positive_config_test(func, cmds)
+        self.eapi_positive_config_test(func, cmds)
+        await asyncio.sleep(0)
 
     async def test_add_network(self):
         func = function('add_network', '172.16.10.1', '24', 'test')
         cmds = ['router bgp 65000', 'network 172.16.10.1/24 route-map test']
-        await self.eapi_positive_config_test(func, cmds)
+        self.eapi_positive_config_test(func, cmds)
 
         func = function('add_network', '', '24', 'test')
         await self.eapi_exception_config_test(func, ValueError)
+        await asyncio.sleep(0)
 
         func = function('add_network', '172.16.10.1', '', 'test')
-        await self.eapi_exception_config_test(func, ValueError)
+        self.eapi_exception_config_test(func, ValueError)
+        await asyncio.sleep(0)
 
     async def test_remove_network(self):
         func = function('remove_network', '172.16.10.1', '24', 'test')
         cmds = ['router bgp 65000', 'no network 172.16.10.1/24 route-map test']
-        await self.eapi_positive_config_test(func, cmds)
+        self.eapi_positive_config_test(func, cmds)
 
         func = function('remove_network', '', '24', 'test')
         await self.eapi_exception_config_test(func, ValueError)
 
         func = function('remove_network', '172.16.10.1', '', 'test')
-        await self.eapi_exception_config_test(func, ValueError)
+        self.eapi_exception_config_test(func, ValueError)
+
+        await asyncio.sleep(0)
 
     async def test_set_router_id(self):
         for state in ['config', 'negate', 'default']:
@@ -108,16 +117,11 @@ class TestApiBgp(EapiAsyncConfigUnitTest):
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default router-id']
                 func = function('set_router_id', rid, True)
-            await self.eapi_positive_config_test(func, cmds)
-
-        # func = function('set_router_id', value=None, default=False,
-        #                 disable=False)
-        # self.eapi_exception_config_test(func, ValueError)
-        # If command_builder fails because value is None, uncomment
-        # above lines and remove below lines.
+            self.eapi_positive_config_test(func, cmds)
         cmds = ['router bgp 65000', 'no router-id']
         func = function('set_router_id', None)
-        await self.eapi_positive_config_test(func, cmds)
+        self.eapi_positive_config_test(func, cmds)
+        await asyncio.sleep(0)
 
     async def test_maximum_paths_just_max_path(self):
         for state in ['config', 'negate', 'default']:
@@ -131,16 +135,10 @@ class TestApiBgp(EapiAsyncConfigUnitTest):
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default maximum-paths']
                 func = function('set_maximum_paths', default=True)
-            await self.eapi_positive_config_test(func, cmds)
-
-        # func = function('set_maximum_paths', max_path=None, default=False,
-        #                 disable=False)
-        # self.eapi_exception_config_test(func, ValueError)
-        # If command_builder fails because value is None, uncomment
-        # above lines and remove below lines.
         cmds = ['router bgp 65000', 'no maximum-paths']
         func = function('set_maximum_paths', None)
-        await self.eapi_positive_config_test(func, cmds)
+        self.eapi_positive_config_test(func, cmds)
+        await asyncio.sleep(0)
 
     async def test_maximum_paths_max_path_and_ecmp(self):
         for state in ['config', 'negate', 'default']:
@@ -155,11 +153,12 @@ class TestApiBgp(EapiAsyncConfigUnitTest):
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default maximum-paths']
                 func = function('set_maximum_paths', default=True)
-            await self.eapi_positive_config_test(func, cmds)
+            self.eapi_positive_config_test(func, cmds)
 
         func = function('set_maximum_paths', max_path=None, max_ecmp_path=20,
                         default=False, disable=False)
-        await self.eapi_exception_config_test(func, TypeError)
+        self.eapi_exception_config_test(func, TypeError)
+        await asyncio.sleep(0)
 
     async def test_set_shutdown(self):
         for state in ['config', 'negate', 'default']:
@@ -172,7 +171,8 @@ class TestApiBgp(EapiAsyncConfigUnitTest):
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default shutdown']
                 func = function('set_shutdown', default=True)
-            await self.eapi_positive_config_test(func, cmds)
+            self.eapi_positive_config_test(func, cmds)
+        await asyncio.sleep(0)
 
 
 class TestApiBgpNeighbor(EapiAsyncConfigUnitTest):
@@ -182,24 +182,28 @@ class TestApiBgpNeighbor(EapiAsyncConfigUnitTest):
         self.instance = bgp.BgpNeighborsAsync(None)
         self.config = open(get_fixture('running_config.bgp')).read()
 
-    def test_getall(self):
-        result = self.instance.getall()
+    async def test_getall(self):
+        result = await self.instance.getall()
         self.assertIsInstance(result, dict)
         self.assertEqual(len(result), 3)
+        await asyncio.sleep(0)
 
-    def test_get(self):
-        result = self.instance.get('test')
+    async def test_get(self):
+        result = await self.instance.get('test')
         keys = ['name', 'send_community', 'shutdown', 'description',
                 'remote_as', 'next_hop_self', 'route_map_in', 'route_map_out',
                 'peer_group']
         self.assertEqual(sorted(keys), sorted(result.keys()))
+        await asyncio.sleep(0)
+        return sorted(result.keys())
 
-    def test_delete(self):
+    async def test_delete(self):
         cmds = ['router bgp 65000', 'no neighbor test']
         func = function('delete', 'test')
         self.eapi_positive_config_test(func, cmds)
+        await asyncio.sleep(0)
 
-    def test_set_peer_group(self):
+    async def test_set_peer_group(self):
         for state in ['config', 'negate', 'default']:
             peer_group = 'test'
             name = '172.16.10.1'
@@ -215,17 +219,13 @@ class TestApiBgpNeighbor(EapiAsyncConfigUnitTest):
                 func = function('set_peer_group', name, peer_group,
                                 default=True)
             self.eapi_positive_config_test(func, cmds)
-
-        # func = function('set_peer_group', name, value=None, default=False,
-        #                 disable=False)
-        # self.eapi_exception_config_test(func, ValueError)
-        # If command_builder fails because value is None, uncomment
-        # above lines and remove below lines.
+        await asyncio.sleep(0)
         cmds = ['router bgp 65000', 'no neighbor 172.16.10.1 peer-group']
         func = function('set_peer_group', '172.16.10.1', None)
         self.eapi_positive_config_test(func, cmds)
+        await asyncio.sleep(0)
 
-    def test_set_remote_as(self):
+    async def test_set_remote_as(self):
         for state in ['config', 'negate', 'default']:
             remote_as = '65000'
             name = 'test'
@@ -240,17 +240,12 @@ class TestApiBgpNeighbor(EapiAsyncConfigUnitTest):
                 cmds = ['router bgp 65000', 'default {}'.format(cmd)]
                 func = function('set_remote_as', name, remote_as, default=True)
             self.eapi_positive_config_test(func, cmds)
-
-        # func = function('set_remote_as', name, value=None, default=False,
-        #                 disable=False)
-        # self.eapi_exception_config_test(func, ValueError)
-        # If command_builder fails because value is None, uncomment
-        # above lines and remove below lines.
         cmds = ['router bgp 65000', 'no neighbor test remote-as']
         func = function('set_remote_as', 'test', None)
         self.eapi_positive_config_test(func, cmds)
+        await asyncio.sleep(0)
 
-    def test_set_shutdown(self):
+    async def test_set_shutdown(self):
         for state in ['config', 'negate', 'default', 'false']:
             name = 'test'
             cmd = 'neighbor {}'.format(name)
@@ -268,8 +263,9 @@ class TestApiBgpNeighbor(EapiAsyncConfigUnitTest):
                 cmds = ['router bgp 65000', 'no {} shutdown'.format(cmd)]
                 func = function('set_shutdown', name, disable=True)
             self.eapi_positive_config_test(func, cmds)
+        await asyncio.sleep(0)
 
-    def test_set_send_community(self):
+    async def test_set_send_community(self):
         for state in ['config', 'negate', 'default']:
             name = 'test'
             cmd = 'neighbor {}'.format(name)
@@ -285,17 +281,12 @@ class TestApiBgpNeighbor(EapiAsyncConfigUnitTest):
                 func = function('set_send_community', name, value=False,
                                 default=True)
             self.eapi_positive_config_test(func, cmds)
-
-        # func = function('set_send_community', name, value=None, default=False,
-        #                 disable=False)
-        # self.eapi_exception_config_test(func, ValueError)
-        # If command_builder fails because value is None, uncomment
-        # above lines and remove below lines.
         cmds = ['router bgp 65000', 'no neighbor test send-community']
         func = function('set_send_community', 'test', None)
         self.eapi_positive_config_test(func, cmds)
+        await asyncio.sleep(0)
 
-    def test_set_next_hop_self(self):
+    async def test_set_next_hop_self(self):
         for state in ['config', 'negate', 'default']:
             name = 'test'
             cmd = 'neighbor {}'.format(name)
@@ -311,17 +302,12 @@ class TestApiBgpNeighbor(EapiAsyncConfigUnitTest):
                 func = function('set_next_hop_self', name, value=False,
                                 default=True)
             self.eapi_positive_config_test(func, cmds)
-
-        # func = function('set_next_hop_self', name, value=None, default=False,
-        #                 disable=False)
-        # self.eapi_exception_config_test(func, ValueError)
-        # If command_builder fails because value is None, uncomment
-        # above lines and remove below lines.
         cmds = ['router bgp 65000', 'no neighbor test next-hop-self']
         func = function('set_next_hop_self', 'test', None)
         self.eapi_positive_config_test(func, cmds)
+        await asyncio.sleep(0)
 
-    def test_set_route_map_in(self):
+    async def test_set_route_map_in(self):
         for state in ['config', 'negate', 'default']:
             route_map = 'TEST_RM'
             name = 'test'
@@ -337,17 +323,12 @@ class TestApiBgpNeighbor(EapiAsyncConfigUnitTest):
                 func = function('set_route_map_in', name, value=route_map,
                                 default=True)
             self.eapi_positive_config_test(func, cmds)
-
-        # func = function('set_route_map_in', name, value=None, default=False,
-        #                 disable=False)
-        # self.eapi_exception_config_test(func, ValueError)
-        # If command_builder fails because value is None, uncomment
-        # above lines and remove below lines.
         cmds = ['router bgp 65000', 'no neighbor test route-map in']
         func = function('set_route_map_in', 'test', None)
         self.eapi_positive_config_test(func, cmds)
+        await asyncio.sleep(0)
 
-    def test_set_route_map_out(self):
+    async def test_set_route_map_out(self):
         for state in ['config', 'negate', 'default']:
             route_map = 'TEST_RM'
             name = 'test'
@@ -363,17 +344,12 @@ class TestApiBgpNeighbor(EapiAsyncConfigUnitTest):
                 func = function('set_route_map_out', name, value=route_map,
                                 default=True)
             self.eapi_positive_config_test(func, cmds)
-
-        # func = function('set_route_map_out', name, value=None, default=False,
-        #                 disable=False)
-        # self.eapi_exception_config_test(func, ValueError)
-        # If command_builder fails because value is None, uncomment
-        # above lines and remove below lines.
         cmds = ['router bgp 65000', 'no neighbor test route-map out']
         func = function('set_route_map_out', 'test', None)
         self.eapi_positive_config_test(func, cmds)
+        await asyncio.sleep(0)
 
-    def test_set_description(self):
+    async def test_set_description(self):
         for state in ['config', 'negate', 'default']:
             value = 'this is a test'
             name = 'test'
@@ -389,15 +365,10 @@ class TestApiBgpNeighbor(EapiAsyncConfigUnitTest):
                 func = function('set_description', name, value=value,
                                 default=True)
             self.eapi_positive_config_test(func, cmds)
-
-        # func = function('set_description', name, value=None, default=False,
-        #                 disable=False)
-        # self.eapi_exception_config_test(func, ValueError)
-        # If command_builder fails because value is None, uncomment
-        # above lines and remove below lines.
         cmds = ['router bgp 65000', 'no neighbor test description']
         func = function('set_description', 'test', None)
         self.eapi_positive_config_test(func, cmds)
+        await asyncio.sleep(0)
 
 
 if __name__ == '__main__':

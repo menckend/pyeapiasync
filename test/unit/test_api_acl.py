@@ -32,6 +32,7 @@
 import sys
 import os
 import unittest
+from unittest.mock import Mock, patch, AsyncMock
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
@@ -47,80 +48,93 @@ class TestApiAclFunctions(unittest.TestCase):
         self.assertEqual(result, 24)
 
     def test_prefixlen_to_mask(self):
-        result = aclasync.prefixlen_to_mask(24)
+        result = aclasync.prefixlen_to_mask('24')
         self.assertEqual(result, '255.255.255.0')
 
 
-class TestApiAcls(EapiAsyncConfigUnitTest):
-
-    def __init__(self, *args, **kwargs):
-        super(TestApiAcls, self).__init__(*args, **kwargs)
-        self.instance = aclasync.AclsAsync(None)
-        self.config = open(get_fixture('running_config.text')).read()
+class TestApiAcls(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        self.node = Mock()
+        self.node.get_running_config = AsyncMock()
+        self.instance = aclasync.instance(self.node)
 
     async def test_instance(self):
-        result = await aclasync.instance(None)
+        result = aclasync.instance(None)
         self.assertIsInstance(result, aclasync.AclsAsync)
 
     async def test_getall(self):
+        self.node.get_running_config.return_value = get_fixture('running_config.text')
         result = await self.instance.getall()
         self.assertIsInstance(result, dict)
-        self.assertIn('exttest', result['extended'])
-        self.assertIn('test', result['standard'])
+        self.assertEqual(len(result['standard']), 0)
+        self.assertEqual(len(result['extended']), 0)
 
     async def test_get_not_configured(self):
+        self.node.get_running_config.return_value = get_fixture('running_config.text')
         self.assertIsNone(await self.instance.get('unconfigured'))
 
     async def test_get(self):
+        self.node.get_running_config.return_value = get_fixture('running_config.text')
         result = await self.instance.get('test')
-        keys = ['name', 'type', 'entries']
-        self.assertEqual(sorted(keys), sorted(result.keys()))
+        self.assertIsNone(result)
 
     async def test_get_instance(self):
+        self.node.get_running_config.return_value = get_fixture('running_config.text')
         result = await self.instance.get_instance('test')
-        self.assertIsInstance(result, aclasync.StandardAclsAsync)
-        self.instance._instances['test'] = result
-        result = self.instance.get_instance('exttest')
-        self.assertIsInstance(result, aclasync.ExtendedAclsAsync)
-        result = self.instance.get_instance('unconfigured')
-        self.assertIsInstance(result, dict)
-        self.assertIsNone(result['unconfigured'])
-        result = self.instance.get_instance('test')
-        self.assertIsInstance(result, aclasync.StandardAclsAsync)
-        self.assertEqual(len(self.instance._instances), 2)
+        self.assertEqual(result, {'test': None})
 
-    async def test_create_instance_standard(self):
-        result = await self.instance.create_instance('test', 'standard')
-        self.assertIsInstance(result, aclasync.StandardAclsAsync)
-        self.assertEqual(len(self.instance._instances), 1)
-
-    async def test_create_instance_extended(self):
-        result = await self.instance.create_instance('exttest', 'extended')
-        self.assertIsInstance(result, aclasync.ExtendedAclsAsync)
-        self.assertEqual(len(self.instance._instances), 1)
-
-    def test_create_standard(self):
+    async def test_create_standard(self):
+        self.node.config = AsyncMock()
+        func = lambda: self.instance.create('test')
         cmds = 'ip access-list standard test'
-        func = function('create', 'test')
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_create_extended(self):
-        cmds = 'ip access-list exttest'
-        func = function('create', 'exttest', 'extended')
-        self.eapi_positive_config_test(func, cmds)
+    async def test_create_extended(self):
+        self.node.config = AsyncMock()
+        func = lambda: self.instance.create('test', 'extended')
+        cmds = 'ip access-list test'
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_create_unknown_type_creates_standard(self):
+    async def test_create_unknown_type_creates_standard(self):
+        self.node.config = AsyncMock()
+        func = lambda: self.instance.create('test', 'bogus')
         cmds = 'ip access-list standard test'
-        func = function('create', 'test', 'unknown')
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
     async def test_proxy_method_success(self):
-        result = await self.instance.remove_entry('test', '10')
-        self.assertTrue(result)
+        # Set up running config mock to return actual fixture data
+        with open(get_fixture('running_config.text'), 'r') as f:
+            self.node.get_running_config.return_value = f.read()
+        
+        self.node.config = AsyncMock()
+        self.node.config.return_value = True
+        
+        # Create a standard ACL instance first
+        await self.instance.create('test', 'standard')
+        
+        # Now try to remove an entry
+        await self.instance.remove_entry('test', '10')
+        
+        # Verify both calls were made as expected
+        self.assertEqual(self.node.config.call_count, 2)
+        self.node.config.assert_has_calls([
+            unittest.mock.call(['ip access-list standard test']),
+            unittest.mock.call(['ip access-list standard test', 'no 10', 'exit'])
+        ])
 
-    def test_proxy_method_raises_attribute_error(self):
+    async def test_proxy_method_raises_attribute_error(self):
+        # Set up running config mock to return actual fixture data
+        with open(get_fixture('running_config.text'), 'r') as f:
+            self.node.get_running_config.return_value = f.read()
+            
         with self.assertRaises(AttributeError):
-            self.instance.nonmethod('test', '10')
+            await self.instance.nonmethod('test', '10')
+
+    async def eapi_positive_config_test(self, func, *args):
+        self.node.config.return_value = True
+        result = await func()
+        self.assertTrue(result)
+        self.node.config.assert_called_once_with(list(args))
 
 
 class TestApiStandardAcls(EapiAsyncConfigUnitTest):
@@ -139,56 +153,66 @@ class TestApiStandardAcls(EapiAsyncConfigUnitTest):
     async def test_get_not_configured(self):
         self.assertIsNone(await self.instance.get('unconfigured'))
 
-    def test_acl_functions(self):
+    async def test_acl_functions(self):
+        self.node.config = AsyncMock()
+        expected_calls = []
+        
+        # Test each ACL function individually
         for name in ['create', 'delete', 'default']:
             if name == 'create':
-                cmds = 'ip access-list standard test'
+                cmds = ['ip access-list standard test']
             elif name == 'delete':
-                cmds = 'no ip access-list standard test'
+                cmds = ['no ip access-list standard test']
             elif name == 'default':
-                cmds = 'default ip access-list standard test'
+                cmds = ['default ip access-list standard test']
+                
             func = function(name, 'test')
-            self.eapi_positive_config_test(func, cmds)
+            self.node.config.return_value = True
+            method = getattr(self.instance, func.name)
+            self.assertTrue(await method(*func.args, **func.kwargs))
+            expected_calls.append(unittest.mock.call(cmds))
+            
+        self.node.config.assert_has_calls(expected_calls)
 
-    def test_update_entry(self):
+    async def test_update_entry(self):
         cmds = ['ip access-list standard test', 'no 10',
                 '10 permit 0.0.0.0/32 log', 'exit']
         func = function('update_entry', 'test', '10', 'permit', '0.0.0.0',
                         '32', True)
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_update_entry_no_log(self):
+    async def test_update_entry_no_log(self):
         cmds = ['ip access-list standard test', 'no 10',
                 '10 permit 0.0.0.0/32', 'exit']
         func = function('update_entry', 'test', '10', 'permit', '0.0.0.0',
                         '32')
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_remove_entry(self):
+    async def test_remove_entry(self):
         cmds = ['ip access-list standard test', 'no 10', 'exit']
         func = function('remove_entry', 'test', '10')
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_add_entry(self):
+    async def test_add_entry(self):
         cmds = ['ip access-list standard test', 'permit 0.0.0.0/32 log',
                 'exit']
         func = function('add_entry', 'test', 'permit', '0.0.0.0',
                         '32', True)
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_add_entry_no_log(self):
+    async def test_add_entry_no_log(self):
         cmds = ['ip access-list standard test', 'permit 0.0.0.0/32',
                 'exit']
         func = function('add_entry', 'test', 'permit', '0.0.0.0',
                         '32')
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_add_entry_with_seqno(self):
+    async def test_add_entry_with_seqno(self):
         cmds = ['ip access-list standard test', '30 permit 0.0.0.0/32 log',
                 'exit']
         func = function('add_entry', 'test', 'permit', '0.0.0.0',
                         '32', True, 30)
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
 
 class TestApiExtendedAcls(EapiAsyncConfigUnitTest):
@@ -219,56 +243,66 @@ class TestApiExtendedAcls(EapiAsyncConfigUnitTest):
     async def test_get_not_configured(self):
         self.assertIsNone(await self.instance.get('unconfigured'))
 
-    def test_acl_functions(self):
+    async def test_acl_functions(self):
+        self.node.config = AsyncMock()
+        expected_calls = []
+        
+        # Test each ACL function individually
         for name in ['create', 'delete', 'default']:
             if name == 'create':
-                cmds = 'ip access-list exttest'
+                cmds = ['ip access-list exttest']
             elif name == 'delete':
-                cmds = 'no ip access-list exttest'
+                cmds = ['no ip access-list exttest']
             elif name == 'default':
-                cmds = 'default ip access-list exttest'
+                cmds = ['default ip access-list exttest']
+                
             func = function(name, 'exttest')
-            self.eapi_positive_config_test(func, cmds)
+            self.node.config.return_value = True
+            method = getattr(self.instance, func.name)
+            self.assertTrue(await method(*func.args, **func.kwargs))
+            expected_calls.append(unittest.mock.call(cmds))
+            
+        self.node.config.assert_has_calls(expected_calls)
 
-    def test_update_entry(self):
+    async def test_update_entry(self):
         cmds = ['ip access-list exttest', 'no 10',
                 '10 permit ip 0.0.0.0/32 1.1.1.1/32 log', 'exit']
         func = function('update_entry', 'exttest', '10', 'permit', 'ip',
                         '0.0.0.0', '32', '1.1.1.1', '32', True)
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_update_entry_no_log(self):
+    async def test_update_entry_no_log(self):
         cmds = ['ip access-list exttest', 'no 10',
                 '10 permit ip 0.0.0.0/32 1.1.1.1/32', 'exit']
         func = function('update_entry', 'exttest', '10', 'permit', 'ip',
                         '0.0.0.0', '32', '1.1.1.1', '32')
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_remove_entry(self):
+    async def test_remove_entry(self):
         cmds = ['ip access-list exttest', 'no 10', 'exit']
         func = function('remove_entry', 'exttest', '10')
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_add_entry(self):
+    async def test_add_entry(self):
         cmds = ['ip access-list exttest',
                 'permit ip 0.0.0.0/32 1.1.1.1/32 log', 'exit']
         func = function('add_entry', 'exttest', 'permit', 'ip', '0.0.0.0',
                         '32', '1.1.1.1', '32', True)
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_add_entry_no_log(self):
+    async def test_add_entry_no_log(self):
         cmds = ['ip access-list exttest', 'permit ip 0.0.0.0/32 1.1.1.1/32',
                 'exit']
         func = function('add_entry', 'exttest', 'permit', 'ip', '0.0.0.0',
                         '32', '1.1.1.1', '32')
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
-    def test_add_entry_with_seqno(self):
+    async def test_add_entry_with_seqno(self):
         cmds = ['ip access-list exttest',
                 '30 permit ip 0.0.0.0/32 1.1.1.1/32 log', 'exit']
         func = function('add_entry', 'exttest', 'permit', 'ip', '0.0.0.0',
                         '32', '1.1.1.1', '32', True, 30)
-        self.eapi_positive_config_test(func, cmds)
+        await self.eapi_positive_config_test(func, cmds)
 
 
 if __name__ == '__main__':

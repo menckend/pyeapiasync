@@ -37,12 +37,12 @@ implementation for sending and receiving calls over eAPI using asyncio and
 aiohttp.
 """
 
-# import socket
+import socket
 import base64
 import logging
 import ssl
 import re
-# import asyncio
+import asyncio
 import aiohttp
 
 try:
@@ -272,7 +272,12 @@ class EapiAsyncConnection(object):
 
         return code, msg, err, out
 
+    async def _initialize_session(self):
+        if self._session is None:
+            self._session = aiohttp.ClientSession()
+
     async def send(self, data):
+        await self._initialize_session()
         """Sends the eAPI request to the destination node asynchronously
 
         This method is responsible for sending an eAPI request to the
@@ -314,8 +319,7 @@ class EapiAsyncConnection(object):
 
                 if response.status == 401:
                     raise ConnectionError(str(self),
-                                          f'{response.reason}. ' +
-                                          '{response_content}')
+                                       f'{response.reason}. {response_content}')
 
                 decoded = json.loads(response_content)
                 _LOGGER.debug('eapi_response: %s' % decoded)
@@ -335,6 +339,11 @@ class EapiAsyncConnection(object):
                 return decoded
 
         except aiohttp.ClientError as exc:
+            _LOGGER.exception(exc)
+            self.socket_error = exc
+            self.error = exc
+            raise ConnectionError(str(self), 'unable to connect to eAPI')
+        except OSError as exc:
             _LOGGER.exception(exc)
             self.socket_error = exc
             self.error = exc
@@ -557,7 +566,6 @@ class SocketEapiAsyncConnection(EapiAsyncConnection):
     async def _connect(self):
         """Establish a connection to the Unix socket"""
         if not self._connected:
-            import asyncio
             self.reader, self.writer = await asyncio.open_unix_connection(
                 path=self.path)
             self._connected = True
@@ -723,17 +731,24 @@ class CommandError(EapiError):
         return self.get_trace()
 
     def get_trace(self):
-        trace = list()
+        """Returns the trace of commands and their outputs leading up to the error"""
+        if not self.output:
+            return None
+
+        trace = []
         index = None
 
         for index, out in enumerate(self.output):
-            trace.append(out)
-            if out.get('errors') or out.get('traceback'):
-                break
+            if isinstance(out, dict):
+                trace.append(out)
+                if out.get('errors') or out.get('traceback'):
+                    break
+            else:
+                trace.append({'output': out})
 
-        if index:
+        if index is not None and self.commands:
             trace.append({'executed_commands': self.commands[0:index]})
-
+        
         return trace
 
 

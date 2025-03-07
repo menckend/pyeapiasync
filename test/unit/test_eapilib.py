@@ -1,7 +1,8 @@
 import unittest
 import json
+import aiohttp
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock
 
 import pyeapiasync.eapilibasync as eapilib
 
@@ -10,14 +11,14 @@ class TestEapiAsyncConnection(unittest.IsolatedAsyncioTestCase):
 
     async def test_execute_valid_response(self):
         response_dict = dict(jsonrpc='2.0', result=[], id=id(self))
-        mock_send = Mock(name='send')
-        mock_send.return_value = json.dumps(response_dict)
+        mock_send = AsyncMock(name='send')
+        mock_send.return_value = response_dict
 
         instance = eapilib.EapiAsyncConnection()
         instance.send = mock_send
 
         result = await instance.execute(['command'])
-        self.assertEqual(json.loads(result), response_dict)
+        self.assertEqual(result, response_dict)
 
     async def test_execute_raises_type_error(self):
         instance = eapilib.EapiAsyncConnection()
@@ -49,11 +50,26 @@ class TestEapiAsyncConnection(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(instance, eapilib.EapiAsyncConnection)
         self.assertIsNotNone(str(instance.transport))
 
-    @patch('pyeapiasync.eapilibasync.socket')
-    async def test_socket_connection_create(self, mock_socket):
-        instance = eapilib.SocketConnection('/path/to/sock')
-        await instance.connect()
-        mock_socket.socket.return_value.connect.assert_called_with('/path/to/sock')
+    @patch('pyeapiasync.eapilibasync.asyncio.open_unix_connection')
+    async def test_socket_connection_create(self, mock_open_unix):
+        # Create mock reader and writer
+        mock_reader = AsyncMock()
+        mock_writer = AsyncMock()
+        
+        # Mock the connection
+        mock_open_unix.return_value = (mock_reader, mock_writer)
+        
+        # Create instance and test connection
+        instance = eapilib.SocketEapiAsyncConnection('/path/to/sock')
+        await instance._connect()
+        
+        # Verify connection was attempted with correct path
+        mock_open_unix.assert_called_once_with(path='/path/to/sock')
+        
+        # Verify connection state
+        self.assertTrue(instance._connected)
+        self.assertEqual(instance.reader, mock_reader)
+        self.assertEqual(instance.writer, mock_writer)
 
     async def test_create_http_local_connection(self):
         instance = eapilib.HttpLocalEapiAsyncConnection()
@@ -74,95 +90,106 @@ class TestEapiAsyncConnection(unittest.IsolatedAsyncioTestCase):
         response_dict = dict(jsonrpc='2.0', result=[{}], id=id(self))
         response_json = json.dumps(response_dict)
 
-        mock_transport = Mock(name='transport')
-        mockcfg = {'getresponse.return_value.read.return_value': response_json}
-        mock_transport.configure_mock(**mockcfg)
+        mock_session = Mock()
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.text.return_value = response_json
+        mock_session.post.return_value = AsyncMock(__aenter__=AsyncMock(return_value=mock_response))
 
         instance = eapilib.EapiAsyncConnection()
-        instance.transport = mock_transport
-        await instance.send('test')
-        # HTTP requests to be processed by EAPI should always go to
-        # the /command-api endpoint regardless of using TCP/IP or unix-socket
-        # for the transport. Unix-socket implementation maps localhost to the
-        # unix-socket - /var/run/command-api.sock
-        mock_transport.putrequest.assert_called_once_with('POST',
-                                                          '/command-api')
-        self.assertTrue(mock_transport.close.called)
+        instance.url = "http://localhost/command-api"
+        instance._session = mock_session
+        instance.ssl_context = None
+        
+        result = await instance.send('test')
+        self.assertEqual(result, response_dict)
 
     async def test_send_with_authentication(self):
         response_dict = dict(jsonrpc='2.0', result=[{}], id=id(self))
         response_json = json.dumps(response_dict)
 
-        mock_transport = Mock(name='transport')
-        mockcfg = {'getresponse.return_value.read.return_value': response_json}
-        mock_transport.configure_mock(**mockcfg)
+        mock_session = Mock()
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.text.return_value = response_json
+        mock_session.post.return_value = AsyncMock(__aenter__=AsyncMock(return_value=mock_response))
 
         instance = eapilib.EapiAsyncConnection()
+        instance.url = "http://localhost/command-api"
+        instance._session = mock_session
+        instance.ssl_context = None
         instance.authentication('username', 'password')
-        instance.transport = mock_transport
-        await instance.send('test')
-
-        self.assertTrue(mock_transport.close.called)
+        
+        result = await instance.send('test')
+        self.assertEqual(result, response_dict)
 
     async def test_send_unauthorized_user(self):
-        error_string = ('Unauthorized. Unable to authenticate user: Bad'
-                        ' username/password combination')
-        response_str = ('Unable to authenticate user: Bad username/password'
-                        ' combination')
-        mock_transport = Mock(name='transport')
-        mockcfg = {'getresponse.return_value.read.return_value': response_str,
-                   'getresponse.return_value.status': 401,
-                   'getresponse.return_value.reason': 'Unauthorized'}
-        mock_transport.configure_mock(**mockcfg)
+        response_str = 'Unable to authenticate user: Bad username/password combination'
+        error_string = f'Unauthorized. {response_str}'
+
+        mock_session = Mock()
+        mock_response = AsyncMock()
+        mock_response.status = 401
+        mock_response.reason = 'Unauthorized'
+        mock_response.text.return_value = response_str
+        mock_session.post.return_value = AsyncMock(__aenter__=AsyncMock(return_value=mock_response))
 
         instance = eapilib.EapiAsyncConnection()
+        instance.url = "http://localhost/command-api"
+        instance._session = mock_session
+        instance.ssl_context = None
         instance.authentication('username', 'password')
-        instance.transport = mock_transport
-        try:
+        
+        with self.assertRaises(eapilib.ConnectionError) as cm:
             await instance.send('test')
-        except eapilib.ConnectionError as err:
-            self.assertEqual(err.message, error_string)
+        self.assertEqual(cm.exception.message, error_string)
 
     async def test_send_raises_connection_error(self):
-        mock_transport = Mock(name='transport')
-        mockcfg = {'getresponse.return_value.read.side_effect': ValueError}
-        mock_transport.configure_mock(**mockcfg)
+        mock_session = Mock()
+        mock_session.post.side_effect = aiohttp.ClientError()
 
         instance = eapilib.EapiAsyncConnection()
-        instance.transport = mock_transport
-        try:
+        instance.url = "http://localhost/command-api"
+        instance._session = mock_session
+        instance.ssl_context = None
+
+        with self.assertRaises(eapilib.ConnectionError) as cm:
             await instance.send('test')
-        except eapilib.ConnectionError as err:
-            self.assertEqual(err.message, 'unable to connect to eAPI')
+        self.assertEqual(cm.exception.message, 'unable to connect to eAPI')
 
     async def test_send_raises_connection_socket_error(self):
-        mock_transport = Mock(name='transport')
-        mockcfg = {'getresponse.return_value.read.side_effect':
-                   OSError('timeout')}
-        mock_transport.configure_mock(**mockcfg)
+        mock_session = Mock()
+        mock_session.post.side_effect = OSError('timeout')
 
         instance = eapilib.EapiAsyncConnection()
-        instance.transport = mock_transport
-        try:
+        instance.url = "http://localhost/command-api"
+        instance._session = mock_session
+        instance.ssl_context = None
+
+        with self.assertRaises(eapilib.ConnectionError) as cm:
             await instance.send('test')
-        except eapilib.ConnectionError as err:
-            error_msg = 'Socket error during eAPI connection: timeout'
-            self.assertEqual(err.message, error_msg)
+        error_msg = 'Socket error during eAPI connection: timeout'
+        self.assertEqual(cm.exception.message, error_msg)
 
     async def test_send_raises_command_error(self):
         error = dict(code=9999, message='test', data=[{'errors': ['test']}])
         response_dict = dict(jsonrpc='2.0', error=error, id=id(self))
         response_json = json.dumps(response_dict)
 
-        mock_transport = Mock(name='transport')
-        mockcfg = {'getresponse.return_value.read.return_value': response_json}
-        mock_transport.configure_mock(**mockcfg)
+        mock_session = Mock()
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.text.return_value = response_json
+        mock_session.post.return_value = AsyncMock(__aenter__=AsyncMock(return_value=mock_response))
 
         instance = eapilib.EapiAsyncConnection()
-        instance.transport = mock_transport
+        instance.url = "http://localhost/command-api"
+        instance._session = mock_session
+        instance.ssl_context = None
 
-        with self.assertRaises(eapilib.CommandError):
+        with self.assertRaises(eapilib.CommandError) as cm:
             await instance.send('test')
+        self.assertEqual(cm.exception.error_code, 9999)
 
     async def test_send_raises_autocomplete_command_error(self):
         message = "runCmds() got an unexpected keyword argument 'autoComplete'"
@@ -170,40 +197,41 @@ class TestEapiAsyncConnection(unittest.IsolatedAsyncioTestCase):
         response_dict = dict(jsonrpc='2.0', error=error, id=id(self))
         response_json = json.dumps(response_dict)
 
-        mock_transport = Mock(name='transport')
-        mockcfg = {'getresponse.return_value.read.return_value': response_json}
-        mock_transport.configure_mock(**mockcfg)
+        mock_session = Mock()
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.text.return_value = response_json
+        mock_session.post.return_value = AsyncMock(__aenter__=AsyncMock(return_value=mock_response))
 
         instance = eapilib.EapiAsyncConnection()
-        instance.transport = mock_transport
+        instance.url = "http://localhost/command-api"
+        instance._session = mock_session
+        instance.ssl_context = None
 
-        try:
+        with self.assertRaises(eapilib.CommandError) as cm:
             await instance.send('test')
-        except eapilib.CommandError as error:
-            match = ("autoComplete parameter is not supported in this version"
-                     " of EOS.")
-            self.assertIn(match, error.message)
+        self.assertIn('autoComplete parameter is not supported', cm.exception.message)
 
     async def test_send_raises_expandaliases_command_error(self):
-        message = "runCmds() got an unexpected keyword argument" \
-                  " 'expandAliases'"
+        message = "runCmds() got an unexpected keyword argument 'expandAliases'"
         error = dict(code=9999, message=message, data=[{'errors': ['test']}])
         response_dict = dict(jsonrpc='2.0', error=error, id=id(self))
         response_json = json.dumps(response_dict)
 
-        mock_transport = Mock(name='transport')
-        mockcfg = {'getresponse.return_value.read.return_value': response_json}
-        mock_transport.configure_mock(**mockcfg)
+        mock_session = Mock()
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.text.return_value = response_json
+        mock_session.post.return_value = AsyncMock(__aenter__=AsyncMock(return_value=mock_response))
 
         instance = eapilib.EapiAsyncConnection()
-        instance.transport = mock_transport
+        instance.url = "http://localhost/command-api"
+        instance._session = mock_session
+        instance.ssl_context = None
 
-        try:
+        with self.assertRaises(eapilib.CommandError) as cm:
             await instance.send('test')
-        except eapilib.CommandError as error:
-            match = ("expandAliases parameter is not supported in this version"
-                     " of EOS.")
-            self.assertIn(match, error.message)
+        self.assertIn('expandAliases parameter is not supported', cm.exception.message)
 
     async def test_request_adds_autocomplete(self):
         instance = eapilib.EapiAsyncConnection()

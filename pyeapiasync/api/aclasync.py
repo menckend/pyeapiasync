@@ -147,10 +147,13 @@ class AclsAsync(EntityCollectionAsync):
             AttributeError: If the method does not exist on the instance
         """
         acl_name = args[0]
-        acl_instance = await self.get_instance(acl_name)
+        acl_dict = await self.get_instance(acl_name)
+        acl_instance = acl_dict[acl_name]
+        if acl_instance is None:
+            raise AttributeError("ACL '%s' does not exist" % acl_name)
         if not hasattr(acl_instance, name):
             raise AttributeError("'%s' object has no attribute '%s'" %
-                                 (acl_instance, name))
+                                (type(acl_instance).__name__, name))
         method = getattr(acl_instance, name)
         return await method(*args, **kwargs)
 
@@ -185,12 +188,14 @@ class AclsAsync(EntityCollectionAsync):
             acl_type (str): The type of ACL ('standard' or 'extended')
 
         Returns:
-            The ACL instance
+            A dictionary containing the ACL instance indexed by name
         """
         if acl_type not in VALID_ACLS:
             acl_type = 'standard'
-        acl_instance = ACL_CLASS_MAP.get(acl_type)
-        self._instances[name] = acl_instance(self.node)
+            
+        acl_class = ACL_CLASS_MAP.get(acl_type)
+        acl = acl_class(self.node)
+        self._instances[name] = {name: acl}
         return self._instances[name]
 
     async def create(self, name, type='standard'):
@@ -204,8 +209,15 @@ class AclsAsync(EntityCollectionAsync):
         Returns:
             True if the operation was successful otherwise False
         """
-        acl_instance = await self.create_instance(name, type)
-        return await acl_instance.create(name)
+        if type not in VALID_ACLS:
+            type = 'standard'
+
+        if type == 'standard':
+            cmd = ['ip access-list standard %s' % name]
+        else:
+            cmd = ['ip access-list %s' % name]
+
+        return await self.configure(cmd)
 
 
 class StandardAclsAsync(EntityCollectionAsync):
@@ -283,7 +295,7 @@ class StandardAclsAsync(EntityCollectionAsync):
         Returns:
             True if the operation was successful otherwise False
         """
-        return await self.configure('ip access-list standard %s' % name)
+        return await self.configure(['ip access-list standard %s' % name])
 
     async def delete(self, name):
         """Deletes a standard ACL from the running configuration asynchronously
@@ -294,7 +306,7 @@ class StandardAclsAsync(EntityCollectionAsync):
         Returns:
             True if the operation was successful otherwise False
         """
-        return await self.configure('no ip access-list standard %s' % name)
+        return await self.configure(['no ip access-list standard %s' % name])
 
     async def default(self, name):
         """Defaults a standard ACL in the running configuration asynchronously
@@ -305,8 +317,7 @@ class StandardAclsAsync(EntityCollectionAsync):
         Returns:
             True if the operation was successful otherwise False
         """
-        return await self.configure('default ip access-list standard %s'
-                                    % name)
+        return await self.configure(['default ip access-list standard %s' % name])
 
     async def update_entry(self, name, seqno, action, addr, prefixlen,
                            log=False):
@@ -329,6 +340,7 @@ class StandardAclsAsync(EntityCollectionAsync):
         if log:
             entry += ' log'
         cmds.append(entry)
+        cmds.append('exit')
         return await self.configure(cmds)
 
     async def add_entry(self, name, action, addr, prefixlen, log=False,
@@ -439,7 +451,7 @@ class ExtendedAclsAsync(EntityCollectionAsync):
         Returns:
             True if the operation was successful otherwise False
         """
-        return await self.configure('ip access-list %s' % name)
+        return await self.configure(['ip access-list %s' % name])
 
     async def delete(self, name):
         """Deletes an extended ACL from the running configuration asynchronously
@@ -450,7 +462,7 @@ class ExtendedAclsAsync(EntityCollectionAsync):
         Returns:
             True if the operation was successful otherwise False
         """
-        return await self.configure('no ip access-list %s' % name)
+        return await self.configure(['no ip access-list %s' % name])
 
     async def default(self, name):
         """Defaults an extended ACL in the running configuration asynchronously
@@ -461,7 +473,7 @@ class ExtendedAclsAsync(EntityCollectionAsync):
         Returns:
             True if the operation was successful otherwise False
         """
-        return await self.configure('default ip access-list %s' % name)
+        return await self.configure(['default ip access-list %s' % name])
 
     async def update_entry(self, name, seqno, action, protocol, srcaddr,
                            srcprefixlen, dstaddr, dstprefixlen, log=False):
