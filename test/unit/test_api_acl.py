@@ -32,14 +32,12 @@
 import sys
 import os
 import unittest
-from unittest.mock import Mock, patch, AsyncMock
-
+import asyncio
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
-
-from testlib import get_fixture, function
+from testlib import get_fixture, function, async_function
 from testlib import EapiAsyncConfigUnitTest
-
 import pyeapiasync.api.aclasync as aclasync
+from unittest.mock import AsyncMock
 
 class TestApiAclFunctions(unittest.TestCase):
 
@@ -54,7 +52,7 @@ class TestApiAclFunctions(unittest.TestCase):
 
 class TestApiAcls(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
-        self.node = Mock()
+        self.node = AsyncMock()
         self.node.get_running_config = AsyncMock()
         self.instance = aclasync.instance(self.node)
 
@@ -135,7 +133,7 @@ class TestApiAcls(unittest.IsolatedAsyncioTestCase):
         result = await func()
         self.assertTrue(result)
         self.node.config.assert_called_once_with(list(args))
-
+        await asyncio.sleep(0)
 
 class TestApiStandardAcls(EapiAsyncConfigUnitTest):
 
@@ -149,9 +147,11 @@ class TestApiStandardAcls(EapiAsyncConfigUnitTest):
         keys = ['name', 'type', 'entries']
         self.assertEqual(sorted(keys), sorted(result.keys()))
         self.assertEqual(result['type'], 'standard')
+        await asyncio.sleep(0)
 
     async def test_get_not_configured(self):
         self.assertIsNone(await self.instance.get('unconfigured'))
+        await asyncio.sleep(0)
 
     async def test_acl_functions(self):
         self.node.config = AsyncMock()
@@ -180,6 +180,7 @@ class TestApiStandardAcls(EapiAsyncConfigUnitTest):
         func = function('update_entry', 'test', '10', 'permit', '0.0.0.0',
                         '32', True)
         await self.eapi_positive_config_test(func, cmds)
+       # await asyncio.sleep(0)
 
     async def test_update_entry_no_log(self):
         cmds = ['ip access-list standard test', 'no 10',
@@ -239,9 +240,11 @@ class TestApiExtendedAcls(EapiAsyncConfigUnitTest):
                      other='urg ttl eq 24 fragments tracked log',
                      srclen='24', srcport='neq irc')
         self.assertEqual(entry, result['entries']['70'])
+        await asyncio.sleep(0)
 
     async def test_get_not_configured(self):
         self.assertIsNone(await self.instance.get('unconfigured'))
+        await asyncio.sleep(0)
 
     async def test_acl_functions(self):
         self.node.config = AsyncMock()
@@ -263,6 +266,7 @@ class TestApiExtendedAcls(EapiAsyncConfigUnitTest):
             expected_calls.append(unittest.mock.call(cmds))
             
         self.node.config.assert_has_calls(expected_calls)
+        await asyncio.sleep(0)
 
     async def test_update_entry(self):
         cmds = ['ip access-list exttest', 'no 10',

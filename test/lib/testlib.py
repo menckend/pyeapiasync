@@ -69,6 +69,10 @@ Function = namedtuple('Function', 'name args kwargs')
 def function(name, *args, **kwargs):
     return Function(name, args, kwargs)
 
+async def async_function(name, *args, **kwargs):
+    await asyncio.sleep(0)
+    return Function(name, args, kwargs)
+
 
 class EapiAsyncConfigUnitTest(unittest.async_case.IsolatedAsyncioTestCase):
     def __init__(self, *args, **kwargs):
@@ -88,38 +92,11 @@ class EapiAsyncConfigUnitTest(unittest.async_case.IsolatedAsyncioTestCase):
         self.instance.node = self.node
         await asyncio.sleep(0)
 
-#    async def eapi_config_test(self, func, cmds=None):
-#        func, fargs, fkwargs = func
-#        func = getattr(self.instance, func)
-
-#        await asyncio.sleep(0)
-#        if cmds is not None:
-#            lcmds = len([cmds]) if isinstance(cmds, str) else len(cmds)
-#            self.mock_config.return_value = [{} for i in range(0, lcmds)]
-
-#        result = func(*fargs, **fkwargs)
-
-#        if cmds is not None:
-            # if config was called with CliVariants, then create all possible
-            # cli combinations with CliVariants and see if cmds is one of them
-#            called_args = list(self.node.config.call_args)[0][0]
-#            variants = [x for x in called_args if isinstance(x, CliVariants)]
-#            if not variants:
-#                self.node.config.assert_called_with(cmds)
-#                await asyncio.sleep(0)
-#                return result
-            # process all variants
-#            cli_variants = CliVariants.expand(called_args)
-#            self.assertIn(cmds, cli_variants)
-#        else:
-#            self.assertEqual(self.node.config.call_count, 0)
-#        await asyncio.sleep(0)
-#        return result
 
     async def eapi_config_test(self, func, cmds=None, *args, **kwargs):
         func, fargs, fkwargs = func
         func = getattr(self.instance, func)
-
+        await asyncio.sleep(1)
         if cmds is not None:
             lcmds = len([cmds]) if isinstance(cmds, str) else len(cmds)
             self.mock_config.return_value = [{} for i in range(0, lcmds)]
@@ -139,39 +116,28 @@ class EapiAsyncConfigUnitTest(unittest.async_case.IsolatedAsyncioTestCase):
             self.assertIn( cmds, cli_variants )
         else:
             self.assertEqual(self.node.config.call_count, 0)
-
-        return result
-
-
-
-
-
-
-
-
-#    async def eapi_positive_config_test(self, func, cmds=None):
-#        self.mock_config.return_value = True
-#        result = self.eapi_config_test(func, cmds)
-#        self.assertTrue(result)
-#        eapi_config_test
-
+#        return result
 
     async def eapi_positive_config_test(self, func, cmds=None, *args, **kwargs):
+        await asyncio.sleep(0)
         result = self.eapi_config_test(func, cmds, *args, **kwargs)
         self.assertTrue(result)
-        await asyncio.sleep(0)  
+#        return result  
 
 
-    def eapi_negative_config_test(self, func, cmds=None):
+    async def eapi_negative_config_test(self, func, cmds=None):
         self.mock_config.return_value = False
         result = self.eapi_config_test(func, cmds)
         self.assertFalse(result)
+        await asyncio.sleep(0)
 
-    def eapi_exception_config_test(self, func, exc):
+    async def eapi_exception_config_test(self, func, exc):
         with self.assertRaises(exc):
             self.eapi_config_test(func)
+        await asyncio.sleep(0)
 
-    def eapi_positive_config_with_input_test(self, func, cmds=None):
+    async def eapi_positive_config_with_input_test(self, func, cmds=None):
         self.mock_config.return_value = True
-        result = self.eapi_config_test(func, cmds)
+        result = await self.eapi_config_test(func, cmds)
         self.assertTrue(result)
+        await asyncio.sleep(0)
